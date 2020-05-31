@@ -108,34 +108,53 @@ plushALL	 清除所有库的key
 
 
 
-### SQL语句
-
-| 操作               | 语句                                                         |
-| ------------------ | :----------------------------------------------------------- |
-| 表关联更新         | update u set u.money= u.money+10 <br />from user u <br />inner join dept d on d.id = u.deptId and deptName = '开发' |
-| 表关联删除         | delete u <br />from user u<br/>inner join dept d on d.id = u.deptId and deptName = '开发' |
-| 表关联插入         | insert into user_new(id,name) <br />select  id,name  from user |
-| 创建新表并赋予数据 | select id,name <br />into user_new from user                 |
-
-
-
 ### 索引面试题
 
 参考: [索引面试题](https://www.cnblogs.com/Brambling/p/6754993.html)
 
 
 
-### ROW_NUMBER() OVER()函数用法详解 （分组排序 例子多）
+### SQL Server 常用SQL
+
+```sql
+-- 联表更新
+update u set u.money= u.money+10
+from user u
+inner join dept d on d.id = u.deptId 
+where d.deptName = '开发'
+
+-- 联表删除
+delete u 
+from user u
+inner join dept d on d.id = u.deptId
+where d.deptName = '开发'
+
+-- 联表插入
+insert into user_new(id,name)
+select id,name 
+from user
+
+-- 复制表数据创建新表
+select id,name 
+into user_new 
+from user
+```
+
+
+
+### ROW_NUMBER() OVER()
 
 参考：[ROW_NUMBER() OVER()函数用法详解](https://blog.csdn.net/qq_25221835/article/details/82762416)
 
 ```sql
 -- 根据dept_id分组
-select name,dept_id,salary,row_number() over (partition by dept_id order by salary desc) rank
+select 
+    name,
+    dept_id,
+    salary,
+    row_number() over (partition by dept_id order by salary desc) rank
 from user t
 ```
-
-
 
 
 
@@ -498,26 +517,6 @@ END;
 
 
 
-### Oracle 使用SQL备份与恢复
-
-```sql
-1.1 完全备份
-exp demo/demo@orcl buffer=1024 file=d：\back.dmp full=y
-
-1.2 完全还原
-imp demo/demo@orcl file=d:\back.dmp full=y ignore=y log=D:\implog.txt
-
-2.1 导出指定表
-exp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
-
-2.2 导入指定表
-imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
-```
-
-详情：https://blog.csdn.net/yztezhl/article/details/80451046
-
-
-
 ### SQL Server 留下的坑
 
 ```
@@ -590,6 +589,54 @@ select * from t order by id
 offset (4-1) * 10 rows
 fetch next @pageSize rows only;
 ```
+
+
+
+### MySQL 常用SQL
+
+```sql
+-- 联表更新
+UPDATE `ana` a 
+INNER JOIN `user` b ON a.user_id = b.id
+SET a.comment_num = 66
+WHERE b.user_nick_name = '采先生i'
+
+
+-- 联表删除
+DELETE a
+FROM `ana` a
+INNER JOIN `user` b ON a.user_id = b.id
+WHERE b.user_nick_name = '采先生i'
+
+-- 联表插入
+INSERT INTO ana_new(id,title)
+SELECT id,title
+FROM ana
+
+-- 复制表数据创建新表
+CREATE TABLE ana_back 
+SELECT * FROM ana
+```
+
+
+
+### Oracle 使用SQL备份与恢复
+
+```sql
+1.1 完全备份
+exp demo/demo@orcl buffer=1024 file=d：\back.dmp full=y
+
+1.2 完全还原
+imp demo/demo@orcl file=d:\back.dmp full=y ignore=y log=D:\implog.txt
+
+2.1 导出指定表
+exp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
+
+2.2 导入指定表
+imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
+```
+
+详情：https://blog.csdn.net/yztezhl/article/details/80451046
 
 
 
@@ -720,6 +767,28 @@ source /etc/profile
 
 
 ## Windows
+
+
+
+### IDEA修改java文件后 不用重启Tomcat服务便可自动更新
+
+参考：[IDEA修改java文件后 不用重启Tomcat服务便可自动更新](https://blog.csdn.net/u010865136/article/details/80392212)
+
+
+
+### CRM与ERP
+
+参考：[CRM与ERP](http://baijiahao.baidu.com/s?id=1653409772927548267&wfr=spider&for=pc)
+
+
+
+### VO、DTO、DO、PO的概念
+
+参考：[VO、DTO、DO、PO的概念](https://blog.51cto.com/14442094/2432008?source=dra)
+
+```
+entity是实体类  vo展示类  to入参类  
+```
 
 
 
@@ -962,7 +1031,7 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
 ### Spring面试题
 
-参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)
+参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)  [Spring Bean作用域](https://blog.csdn.net/qq_41083009/article/details/90743719)
 
 
 
@@ -1363,6 +1432,22 @@ been installed
 
 
 
+### Maven配置文件激活Spring Boot配置文件
+
+参考：[Maven配置文件激活Spring Boot配置文件](http://dolszewski.com/spring/spring-boot-properties-per-maven-profile/)
+
+
+
+### Maven跳过测试环节打包
+
+```cmd
+mvn clean package -Dmaven.test.skip=true
+
+# mvn clean package -Dmaven.test.skip=true -P prod
+```
+
+
+
 ### Maven定义规范
 
 ```
@@ -1438,14 +1523,6 @@ public class DemoApplication extends SpringBootServletInitializer {
         SpringApplication.run(DemoApplication.class, args);
     }
 }
-```
-
-
-
-### Maven跳过测试环节打包
-
-```cmd
-mvn clean package -Dmaven.test.skip=true
 ```
 
 
@@ -3673,6 +3750,10 @@ Docker 本身是一个容器运行载体或称之为管理引擎。我们把应�
 
 ### Spring Security
 
+参考：[认证流程]( https://blog.csdn.net/yuanlaijike/article/details/84703690)  [配置方式](https://blog.csdn.net/houysx/article/details/80380831)  [配置方式]( https://blog.csdn.net/fellhair/article/details/91410281 )  [补充](https://www.cnblogs.com/yingbing/p/4552932.html    ) 
+
+​	
+
 Spring Security主要包含两个部分：用户认证和用户授权，本质上是Filter过滤器，对请求进行过滤
 
 ![](image\spring-security.png)
@@ -4223,7 +4304,144 @@ SpringCloud Alibaba 最终技术搭配方案
 
 
 
+### SOA
+
 ```
-1.
+SOA只是一种架构设计模式，而SOAP、REST、RPC就是根据这种设计模式构建出来的规范，
+其中SOAP通俗理解就是http+xml的形式，
+REST就是http+json的形式，
+RPC是基于socket的形式。
+上文提到的CXF就是典型的SOAP/REST框架，dubbo就是典型的RPC框架，而SpringCloud就是遵守REST规范的生态系统。
 ```
+
+
+
+### RPC
+
+```
+RPC【Remote Procedure Call】是指远程过程调用，是一种进程间通信方式，他是一种技术的思想，而不是规范。它允许程序调用另一个地址空间（通常是共享网络的另一台机器上）的过程或函数，而不用程序员显式编码这个远程调用的细节。即程序员无论是调用本地的还是远程的函数，本质上编写的调用代码基本相同。
+
+RPC两个核心模块：通讯，序列化
+```
+
+![1588055070462](\image\RPC流程.png)
+
+![1588055177701](\image\RPC核心流程.png)
+
+
+
+
+
+
+
+### Dubbo
+
+```
+Apache Dubbo是一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。
+阿里2014年停更，后来与当当网的版本DubboX整合，在2018年开源给了apache
+
+特性
+1.面向接口代理的高性能RPC调用
+2.服务自动注册与发现
+3.智能负载均衡
+4.高度可扩展
+5.运行期间流量调度(多版本)
+6.可视化的服务治理与运维
+```
+
+<img src="\image\Dubbo基本概念.png" alt=" " style="zoom:60%;" />
+
+> 基本概念
+
+```
+服务提供者(Provider): 暴露服务的服务提供方，服务提供者在启动时，向注册中心注册自己提供的服务。
+
+服务消费者(Consumer): 调用远程服务的服务消费方，服务消费者在启动时，向注册中心订阅自己所需的服务，服务消费者，从提供者地址列表中，基于软负载均衡算法，选一台提供者进行调用，如果调用失败，再选另一台调用。
+
+注册中心(Registry): 注册中心返回服务提供者地址列表给消费者，如果有变更，注册中心将基于长连接推送变更数据给消费者
+
+监控中心(Monitor): 服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心
+```
+
+
+
+> 调用关系
+
+```
+1.服务容器负责启动，加载，运行服务提供者。
+2.服务提供者在启动时，向注册中心注册自己提供的服务。
+3.服务消费者在启动时，向注册中心订阅自己所需的服务。
+4.注册中心返回服务提供者地址列表给消费者，如果有变更，注册中心将基于长连接推送变更数据给消费者。
+5.服务消费者，从提供者地址列表中，基于软负载均衡算法，选一台提供者进行调用，如果调用失败，再选另一台调用。
+6.服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心。
+```
+
+
+
+> zookeeper宕机与dubbo直连
+
+```
+zookeeper注册中心宕机，还可以消费dubbo暴露的服务。
+
+1.监控中心宕掉不影响使用，只是丢失部分采样数据
+2.数据库宕掉后，注册中心仍能通过缓存提供服务列表查询，但不能注册新服务
+3.注册中心对等集群，任意一台宕掉后，将自动切换到另一台
+4.注册中心全部宕掉后，服务提供者和服务消费者仍能通过本地缓存通讯
+5.服务提供者无状态，任意一台宕掉后，不影响使用
+6.服务提供者全部宕掉后，服务消费者应用将无法使用，并无限次重连等待服务提供者恢复
+
+
+没有注册中心的dubbo直连
+
+@Reference(url="127.0.0.1:20882")
+UserSerice userSerice;
+```
+
+
+
+> 集群下dubbo负载均衡配置
+
+```
+Random LoadBalance
+随机，按权重设置随机概率。
+在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。
+
+RoundRobin LoadBalance
+轮循，按公约后的权重设置轮循比率。
+存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。
+
+LeastActive LoadBalance
+最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差。
+使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大。
+
+ConsistentHash LoadBalance
+一致性 Hash，相同参数的请求总是发到同一提供者。
+当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。算法参见：http://en.wikipedia.org/wiki/Consistent_hashing
+缺省只对第一个参数 Hash，如果要修改，请配置 <dubbo:parameter key="hash.arguments" value="0,1" />
+缺省用 160 份虚拟节点，如果要修改，请配置 <dubbo:parameter key="hash.nodes" value="320" />
+```
+
+
+
+### WebSocket 
+
+参考：[WebSocket](http://www.ruanyifeng.com/blog/2017/05/websocket.html) [WebSocket](https://www.runoob.com/html/html5-websocket.html)
+
+```
+HTTP 协议有一个缺陷：通信只能由客户端发起。
+
+WebSocket它的最大特点就是，服务器可以主动向客户端推送信息，客户端也可以主动向服务器发送信息，是真正的双向平等对话，属于服务器推送技术的一种。
+```
+
+
+
+
+
+### Mycat分库分表
+
+
+
+
+
+
 
