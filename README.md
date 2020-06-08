@@ -3695,6 +3695,8 @@ wx.chooseWXPay({
 
 
 
+#### Docker简介
+
 > 三大要素：镜像 容器 仓库
 
 
@@ -3756,12 +3758,14 @@ Docker 本身是一个容器运行载体或称之为管理引擎。我们把应�
 ```
 1.Docker有着比虚拟机更少的抽象层，由于Docker不需要Hypervisor实现硬件资源虚拟化，运行在Docker容器上的程序直接使用的都是实际物理机的硬件资源，因此在Cpu、内存利用率上Docker将会在效率上有明显优势。
 
-2.Docker利用的是宿主机的内核，而不需要Guest OS(操作系统)，因此，当新建一个容器时，Docker不需要和虚拟机一样重新加载一个操作系统，避免了引导、加载操作系统内核这个比较费时费资源的过程，当新建一个虚拟机时，虚拟机软件需要加载Guest OS，这个新建过程是分钟级别的，而Docker由于直接利用宿主机的操作系统则省略了这个过程，因此新建一个Docker容器只需要几秒钟。
+2.Docker利用的是宿主机的内核，而不需要Guest OS(虚拟机安装的操作系统)，因此，当新建一个容器时，Docker不需要和虚拟机一样重新加载一个操作系统，避免了引导、加载操作系统内核这个比较费时费资源的过程，当新建一个虚拟机时，虚拟机软件需要加载Guest OS，这个新建过程是分钟级别的，而Docker由于直接利用宿主机的操作系统则省略了这个过程，因此新建一个Docker容器只需要几秒钟。
 ```
 
 <img src="image\Docker与虚拟机比较.png" style="zoom: 67%;" />
 
 
+
+#### Docker常用命令
 
 > Docker 镜像命令
 
@@ -3776,7 +3780,6 @@ docker images	列出本地主机上的镜像
 	--no-trunc :显示完整的镜像信息
 	说明：REPOSITORY镜像名、TAG标签、IMAGE_ID唯一、CREATED创建时间、VIRTUAL SIZE镜像大小
 	同一仓库源可以有多个TAG，代表这个仓库源的不同个版本，我们使用REPOSITORY:TAG来定义不同的镜像。如果你不指定一个镜像的版本标答，例如你只体用ubuntu.docker将默认体用ubuntu:latest镜像
-	
 	
 	
 docker search xxx 查询某个镜像
@@ -3799,7 +3802,9 @@ docker rmi xxx 删除某个镜像/镜像ID
 	-f $(docker images -qa) 删除所有镜像
 	docker rmi -f hello-world 强制删除某个镜像
 	docker rmi hello-world 等价于 docker rmi hello-world:latest
-	
+
+
+docker commit -m=“提交的描述信息” -a=“作者” 容器ID 要创建的目标镜像名:[标签名]
 ```
 
 
@@ -3821,7 +3826,8 @@ docker run [OPTIONS] xxx IMAGE [COMMAND] 启动交互式容器
             ip::containerPort
             hostPort:containerPort
             containerPort
-     docker run -it centos	启动centos并分配终端       
+     docker run -it centos	启动centos并分配终端      
+     docker run -it -p 8080:8080 tomcat
 
 docker ps 查看当前正在进行的docker进程
 	-a :列出当前所有正在运行的容器+历史上运行过的
@@ -3830,6 +3836,9 @@ docker ps 查看当前正在进行的docker进程
     -q :静默模式，只显示容器编号。
     --no-trunc :不截断输出。
 
+
+docker restart 容器ID  返回容器信息以JSON字符串方式
+
 在容器中
     exit 容器停止退出
     Ctrl+P+Q 容器不停止退出
@@ -3837,8 +3846,6 @@ docker ps 查看当前正在进行的docker进程
 docker start 容器ID
 
 docker stop 容器ID
-
-docker restart 容器ID
 
 docker kill 容器ID 强制关闭容器
 
@@ -3876,7 +3883,7 @@ docker inspect 容器ID 查看容器内部细节
 
 
 进入正在运行的容器并以命令行交互
-	docker exec -it 容器ID bashShell 	在外部执行docker容器的命令
+	docker exec -it 容器ID bashShell 	在外部执行docker容器的命令 [/bin/bash运行docker终端]
 			
 	docker attach 容器ID	重新进入
     
@@ -3889,46 +3896,136 @@ docker cp 容器ID:容器内路径 目的主机路径
 
 
 
-> Docker常用命令
+#### Docker镜像
+
+> UnionFS(联合文件系统)
 
 ```
-attach    Attach to a running container                 # 当前 shell 下 attach 连接指定运行镜像
-build     Build an image from a Dockerfile              # 通过 Dockerfile 定制镜像
-commit    Create a new image from a container changes   # 提交当前容器为新的镜像
-cp        Copy files/folders from the containers filesystem to the host path   #从容器中拷贝指定文件或者目录到宿主机中
-create    Create a new container                        # 创建一个新的容器，同 run，但不启动容器
-diff      Inspect changes on a container's filesystem   # 查看 docker 容器变化
-events    Get real time events from the server          # 从 docker 服务获取容器实时事件
-exec      Run a command in an existing container        # 在已存在的容器上运行命令
-export    Stream the contents of a container as a tar archive   # 导出容器的内容流作为一个 tar 归档文件[对应 import ]
-history   Show the history of an image                  # 展示一个镜像形成历史
-images    List images                                   # 列出系统当前镜像
-import    Create a new filesystem image from the contents of a tarball # 从tar包中的内容创建一个新的文件系统映像[对应export]
-info      Display system-wide information               # 显示系统相关信息
-inspect   Return low-level information on a container   # 查看容器详细信息
-kill      Kill a running container                      # kill 指定 docker 容器
-load      Load an image from a tar archive              # 从一个 tar 包中加载一个镜像[对应 save]
-login     Register or Login to the docker registry server    # 注册或者登陆一个 docker 源服务器
-logout    Log out from a Docker registry server          # 从当前 Docker registry 退出
-logs      Fetch the logs of a container                 # 输出当前容器日志信息
-port      Lookup the public-facing port which is NAT-ed to PRIVATE_PORT    # 查看映射端口对应的容器内部源端口
-pause     Pause all processes within a container        # 暂停容器
-ps        List containers                               # 列出容器列表
-pull      Pull an image or a repository from the docker registry server   # 从docker镜像源服务器拉取指定镜像或者库镜像
-push      Push an image or a repository to the docker registry server    # 推送指定镜像或者库镜像至docker源服务器
-restart   Restart a running container                   # 重启运行的容器
-rm        Remove one or more containers                 # 移除一个或者多个容器
-rmi       Remove one or more images             # 移除一个或多个镜像[无容器使用该镜像才可删除，否则需删除相关容器才可继续或 -f 强制删除]
-run       Run a command in a new container              # 创建一个新的容器并运行一个命令
-save      Save an image to a tar archive                # 保存一个镜像为一个 tar 包[对应 load]
-search    Search for an image on the Docker Hub         # 在 docker hub 中搜索镜像
-start     Start a stopped containers                    # 启动容器
-stop      Stop a running containers                     # 停止容器
-tag       Tag an image into a repository                # 给源中镜像打标签
-top       Lookup the running processes of a container   # 查看容器中运行的进程信息
-unpause   Unpause a paused container                    # 取消暂停容器
-version   Show the docker version information           # 查看 docker 版本号
-wait      Block until a container stops, then print its exit code   # 截取容器停止时的退出状态值
+UnionFS（联合文件系统）：Union文件系统（UnionFS）是一种分层、轻量级并且高性能的文件系统，它支持对文件系统的修改作为一次提交来一层层的叠加，同时可以将不同目录挂载到同一个虚拟文件系统下(unite several directories into a single virtual filesystem)。Union 文件系统是 Docker 镜像的基础。镜像可以通过分层来进行继承，基于基础镜像（没有父镜像），可以制作各种具体的应用镜像。
+ 
+特性：一次同时加载多个文件系统，但从外面看起来，只能看到一个文件系统，联合加载会把各层文件系统叠加起来，这样最终的文件系统会包含所有底层的文件和目录
+```
+
+
+
+> Docker镜像加载原理
+
+```
+ 
+ Docker镜像加载原理：
+
+docker的镜像实际上由一层一层的文件系统组成，这种层级的文件系统UnionFS。
+bootfs(boot file system)主要包含bootloader和kernel, bootloader主要是引导加载kernel, Linux刚启动时会加载bootfs文件系统，在Docker镜像的最底层是bootfs。这一层与我们典型的Linux/Unix系统是一样的，包含boot加载器和内核。当boot加载完成之后整个内核就都在内存中了，此时内存的使用权已由bootfs转交给内核，此时系统也会卸载bootfs。
+ 
+rootfs (root file system) ，在bootfs之上。包含的就是典型 Linux 系统中的 /dev, /proc, /bin, /etc 等标准目录和文件。rootfs就是各种不同的操作系统发行版，比如Ubuntu，Centos等等。 
+平时我们安装进虚拟机的CentOS都是好几个G，为什么docker这里才200M？？
+
+对于一个精简的OS，rootfs可以很小，只需要包括最基本的命令、工具和程序库就可以了，因为底层直接用Host的kernel，自己只需要提供 rootfs 就行了。由此可见对于不同的linux发行版, bootfs基本是一致的, rootfs会有差别, 因此不同的发行版可以公用bootfs。
+
+以我们的pull为例，在下载的过程中我们可以看到docker的镜像好像是在一层一层的在下载
+```
+
+
+
+> 为什么 Docker 镜像要采用这种分层结构呢
+
+```
+最大的一个好处就是 - 共享资源
+ 
+比如：有多个镜像都从相同的 base 镜像构建而来，那么宿主机只需在磁盘上保存一份base镜像，
+同时内存中也只需加载一份 base 镜像，就可以为所有容器服务了。而且镜像的每一层都可以被共享。
+
+Docker镜像都是只读的
+当容器启动时，一个新的可写层被加载到镜像的顶部(例如图下的tomcat)。
+这一层通常被称作“容器层”，“容器层”之下的都叫“镜像层”。
+```
+
+![](image\镜像分层.png)
+
+
+
+#### Docker容器数据券
+
+```
+容器的持久化
+
+docker run -it -v /宿主机绝对路径目录:/容器内目录 镜像名 	容器宿主共享数据
+docker run -it -v /宿主机绝对路径目录:/容器内目录:ro 镜像名	携带权限
+docker run -it -v /cps_hose:/cps_contain centos:6.8
+
+数据卷容器 容器间传递共享(--volumes-from 父容器ID)
+命名的容器挂载数据卷，其它容器通过挂载这个(父容器)实现数据共享，挂载数据卷的容器，称之为数据卷容器
+docker run -it --name dc02 --volumes-from dc01 zzyy/centos
+
+容器之间配置信息的传递，数据卷的生命周期一直持续到没有容器使用它为止
+```
+
+
+
+#### DockerFile解析
+
+> DockerFile构建过程解析
+
+```
+DockerFile是用来构建Docker镜像的构建文件，是由一系列命令和参数构成的脚本。
+
+构建三步骤：DockerFile →(build)→ Docker镜像 →(run)→ Docker容器
+
+从应用软件的角度来看，Dockerfile、Docker镜像与Docker容器分别代表软件的三个不同阶段，
+*  Dockerfile是软件的原材料
+*  Docker镜像是软件的交付品
+*  Docker容器则可以认为是软件的运行态。
+Dockerfile面向开发，Docker镜像成为交付标准，Docker容器则涉及部署与运维，三者缺一不可，合力充当Docker体系的基石。
+```
+
+
+
+> DockerFile体系结构(保留字指令)
+
+```
+FROM		基础镜像，当前新镜像是基于哪个镜像的
+MAINTAINER	镜像维护者的姓名和邮箱地址
+RUN			容器构建时需要运行的命令
+EXPOSE		当前容器对外暴露出的端口
+WORKDIR		指定在创建容器后，终端默认登陆的进来工作目录，一个落脚点
+ENV			用来在构建镜像过程中设置环境变量
+ADD			将宿主机目录下的文件拷贝进镜像且ADD命令会自动处理URL和解压tar压缩包
+COPY		类似ADD，拷贝文件和目录到镜像中。 <源路径> 的文件/新一层的镜像内 <目标路径> 位置
+VOLUME		容器数据卷，用于数据保存和持久化工作
+
+CMD			指定一个容器启动时要运行的命令
+			Dockerfile 中可以有多个 CMD 指令，但只有最后一个生效，CMD 会被docker run之后的参数替换
+
+ENTRYPOINT 	指定一个容器启动时要运行的命令
+			ENTRYPOINT 的目的和 CMD 一样，都是在指定容器启动程序及参数
+			
+ONBUILD		当构建一个被继承的Dockerfile时运行命令，父镜像在被子继承后父镜像的onbuild被触发
+```
+
+
+
+>自定义镜像mycentos
+
+```
+
+1.编写DockerFile文件
+-------------------------------
+FROM centosMAINTAINER zzyy<zzyy167@126.com>
+ENV MYPATH /usr/localWORKDIR $MYPATH
+RUN yum -y install vimRUN yum -y install net-tools
+EXPOSE 80
+CMD echo $MYPATHCMD echo "success--------------ok"CMD /bin/bash 
+-------------------------------
+
+2.构建出新镜像
+docker build -t 新镜像名字:TAG .
+
+3.运行
+docker run -it 新镜像名字:TAG 
+
+4.列出镜像变更历史
+docker history 镜像名
+
 ```
 
 
