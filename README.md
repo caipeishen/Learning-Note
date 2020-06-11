@@ -64,6 +64,12 @@ Alt+ left/right 切换代码视图
 
 ## 数据库
 
+### 事务特性和隔离级别
+
+参考：[事务特性和隔离级别](https://www.cnblogs.com/lztkdr/p/Transaction.html)  [资料补充](https://blog.csdn.net/qq_33290787/article/details/51924963)  [如何理解一致性 推到出如何理解隔离性](https://blog.csdn.net/qq_37997523/article/details/83188003)
+
+
+
 ### SQL	ACID
 
 ```
@@ -71,6 +77,9 @@ A	原子性
 C 	一致性
 I 	隔离性
 D 	持久性
+
+原子性关注状态，要么全部成功，要么全部失败，不存在部分成功的状态。
+而一致性关注数据的可见性，中间状态的数据对外部不可见，只有最初状态和最终状态的数据对外可见
 ```
 
 
@@ -4007,7 +4016,6 @@ ONBUILD		当构建一个被继承的Dockerfile时运行命令，父镜像在被�
 >自定义镜像mycentos
 
 ```
-
 1.编写DockerFile文件
 -------------------------------
 FROM centosMAINTAINER zzyy<zzyy167@126.com>
@@ -4018,7 +4026,7 @@ CMD echo $MYPATHCMD echo "success--------------ok"CMD /bin/bash 
 -------------------------------
 
 2.构建出新镜像
-docker build -t 新镜像名字:TAG .
+docker build -f myDockerfile -t 新镜像名字:TAG .
 
 3.运行
 docker run -it 新镜像名字:TAG 
@@ -4026,7 +4034,71 @@ docker run -it 新镜像名字:TAG
 4.列出镜像变更历史
 docker history 镜像名
 
+# tomcat启动容器
+docker run -d -p 8888:8080 --name my_tomcat 
+-v /myDocker/tomcat/test:/usr/local/apache-tomcat-9.0.8/webapps/test 
+-v /myDocker/tomcat/logs/:/usr/local/apache-tomcat-9.0.8/logs/ --privileged=true
+
+
+docker run -p 12345:3306 
+--name mysql 
+-v /myDocker/mysql/conf:/etc/mysql/conf.d 
+-v /myDocker/mysql/logs:/logs 
+-v /myDocker/mysql/data:/var/lib/mysql 
+-e MYSQL_ROOT_PASSWORD=123456 
+-d mysql:5.7
+
+
+-p 12345:3306：将主机的12345端口映射到docker容器的3306端口。
+--name mysql：运行服务名字
+-v /zzyyuse/mysql/conf:/etc/mysql/conf.d ：将主机/zzyyuse/mysql录下的conf/my.cnf 挂载到容器的 /etc/mysql/conf.d
+-v /zzyyuse/mysql/logs:/logs：将主机/zzyyuse/mysql目录下的 logs 目录挂载到容器的 /logs。
+-v /zzyyuse/mysql/data:/var/lib/mysql ：将主机/zzyyuse/mysql目录下的data目录挂载到容器的 /var/lib/mysql 
+-e MYSQL_ROOT_PASSWORD=a9530.A.：初始化 root 用户的密码。
+-d mysql:5.6 : 后台程序运行mysql5.6
+ 
+ docker exec -it MySQL运行成功后的容器ID     /bin/bash
 ```
+
+
+
+> MyTomcat的DockerFile
+
+```
+FROM         centos
+MAINTAINER   Cai Peishen<peishen.cai@foxmail.com>
+
+#把宿主机当前上下文的Cps.txt拷贝到容器/usr/local/路径下
+COPY Cps.txt /usr/local/Cps.txt
+
+#把java与tomcat添加到容器中
+ADD jdk-8u171-linux-x64.tar.gz /usr/local/
+ADD apache-tomcat-9.0.8.tar.gz /usr/local/
+
+#安装vim编辑器
+RUN yum -y install vim
+
+#设置工作访问时候的WORKDIR路径，登录落脚点
+ENV MYPATH /usr/local
+WORKDIR $MYPATH
+
+#配置java与tomcat环境变量
+ENV JAVA_HOME /usr/local/jdk1.8.0_171
+ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV CATALINA_HOME /usr/local/apache-tomcat-9.0.8
+ENV CATALINA_BASE /usr/local/apache-tomcat-9.0.8
+ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
+
+#容器运行时监听的端口
+EXPOSE 8080
+
+#启动时运行tomcat
+# ENTRYPOINT ["/usr/local/apache-tomcat-9.0.8/bin/startup.sh"]
+# CMD ["/usr/local/apache-tomcat-9.0.8/bin/catalina.sh","run"]
+CMD /usr/local/apache-tomcat-9.0.8/bin/startup.sh && tail -F /usr/local/apache-tomcat-9.0.8/bin/logs/catalina.out
+```
+
+
 
 
 
