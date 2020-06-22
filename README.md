@@ -669,10 +669,12 @@ imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
 
 ```linux
 chmod 777 xx #授权
-tar -zxvf 文件名 #解压/压缩
+tar -zxvf 文件名 #解压
+tar -cvf 123.tar file1 file2 #压缩
 ps -ef | grep tomcat
 ps -ef | grep java
-lsof -i :8080
+lsof -i :8080 #查看某个端口
+lsof -c :java #列出某个程序所打开的文件信息
 kill -9 进程号
 vi	编辑(dd删除文本当前行)
 
@@ -776,6 +778,12 @@ source /etc/profile
 
 
 ## Windows
+
+
+
+### Git
+
+参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)
 
 
 
@@ -2765,6 +2773,10 @@ token：按照一定规则生成字符串，字符串可以包含用户信息
 3.创建前端拦截器，判断cookie里面是否有token字符串，如果有把token字符串放入header(请求头中)
 4.根据token值，调用接口根据token获取用户信息，为了首页显示，把返回用户信息放入cookie中
 5.首页面显示用户信息，从cookie中获取
+
+jwt生成的token每次请求要携带上,后台解析token就能获取到帐号信息
+能很好解决分布式系统中常见的session不同步失效的问题,内容可以自己定义
+我们用jwt里时存的是基本信息,JSON格式,只存了用户ID、用户名、昵称
 ```
 
 
@@ -4688,7 +4700,7 @@ RPC两个核心模块：通讯，序列化
 
 
 
-### Dubbo
+### Dubbo + Zookeeper
 
 ```
 Apache Dubbo是一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。
