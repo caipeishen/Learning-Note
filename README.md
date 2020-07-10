@@ -659,6 +659,19 @@ imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
 
 
 
+### 配置防火墙端口
+
+```linux
+vi /etc/sysconfig/iptables         //防火墙配置
+
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT //允许22端口通过
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 3306 -j ACCEPT //允许3306端口通过
+
+service iptables restart        //重启防火墙
+```
+
+
+
 ### NAT和桥接模式
 
 参考：[NAT和桥接模式](https://www.cnblogs.com/huhuxixi/p/11527837.html )
@@ -677,6 +690,7 @@ lsof -i :8080 #查看某个端口
 lsof -c :java #列出某个程序所打开的文件信息
 kill -9 进程号
 vi	编辑(dd删除文本当前行)
+df #查询磁盘的空间使用情况
 
 #查看内存使用情况
 free -m 
@@ -742,7 +756,7 @@ source /etc/profile
 
 ### Linux安装MySQL
 
-参考：[Linux安装MySQL]( https://www.jianshu.com/p/276d59cbc529 )
+参考：[Linux安装MySQL](https://www.jianshu.com/p/276d59cbc529)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)
 
 
 
@@ -991,6 +1005,26 @@ public class SingleTon{
 
 
 
+### 多线程保证集合安全
+
+```java
+//Collections由很多工具类：synchronizedSet、synchronizedList
+Set<Object> set = Collections.synchronizedSet(new HashSet<Object>());
+for (int i = 1; i <= 5; i++) {
+    new Thread(() -> {
+        set.add(UUID.randomUUID().toString().substring(0, 8));
+        System.err.println(set.toString());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }, String.valueOf(i)).start();
+}
+```
+
+
+
 ### 多线程使用
 
 ```java
@@ -1052,6 +1086,12 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
 
 
+### SpringMVC与Struts2对比
+
+参考：[SpringMVC与Struts2区别与比较总结](https://blog.csdn.net/jishuizhipan/article/details/79385190)
+
+
+
 ### SpringMVC面试题
 
 参考：[ SpringMVC面试题](https://blog.csdn.net/a745233700/article/details/80963758?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task)
@@ -1064,9 +1104,15 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
 
 
-### SpringBoot+SpringCloud面试题整理
+### SpringBoot+SpringCloud
 
 参考：[SpringBoot+SpringCloud面试题整理](https://blog.csdn.net/qq_40117549/article/details/84944840?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task ) 
+
+
+
+### Servlet、Filter、Listener、Interceptor的区别与联系？
+
+参考:  [Servlet、Filter、Listener、Interceptor的区别与联系?](https://blog.csdn.net/qq_40117549/article/details/84944840?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task ) 
 
 
 
@@ -1366,6 +1412,21 @@ Nginx可以作为一个HTTP服务器进行网站的发布处理，另外Nginx可
 
 
 
+### 集合对象去重
+
+```java
+List<String> dataList = list.stream().distinct().collect(Collectors.toList());
+
+//根据id去重
+personList=
+    personList.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(
+                // 利用 TreeSet 的排序去重构造函数来达到去重元素的目的
+                // 根据firstName去重
+                () -> new TreeSet<>(Comparator.comparing(Person::getName))), ArrayList::new));
+```
+
+
+
 ### Tomcat优化
 
 参考：[Tomcat优化](https://www.cnblogs.com/xuwc/p/8523681.html)
@@ -1468,17 +1529,11 @@ mvn clean package -Dmaven.test.skip=true
 ### Maven定义规范
 
 ```
-groupId：定义当前Maven项目隶属的实际项目，例如org.sonatype.nexus，此id前半部分org.sonatype代表此项目隶属的组织或公司，后部分代表项目的名称，如果此项目多模块话开发的话就子模块可以分为org.sonatype.nexus.plugins和org.sonatype.nexus.utils等。特别注意的是groupId不应该对应项目隶属的组织或公司，也就是说groupId不能只有org.sonatype而没有nexus。
+	GroupId和ArtifactId被统称为“坐标”是为了保证项目唯一性而提出的，如果你要把你项目弄到maven本地仓库去，你想要找到你的项目就必须根据这两个id去查找。
 
-例如：我建立一个项目，此项目是此后所有项目的一个总的平台，那么groupId应该是org.jsoft.projectName，projectName是平台的名称，org.jsoft是代表我个人的组织，如果以我所在的浪潮集团来说的话就应该是com.inspur.syncdata。
-
-artifactId：是构件ID，该元素定义实际项目中的一个Maven项目或者是子模块，如上面官方约定中所说，构建名称必须小写字母，没有其他的特殊字符，推荐使用“实际项目名称－模块名称”的方式定义，例如：spirng-mvn、spring-core等。
-
-推荐格式：使用实际项目名称作为artifactId的前缀，紧接着为模块名称
-
-举例：nexus-indexer、spring-mvc、hibernate-c3po……这些id都是以实际项目名称作为前缀，然后接着一个中划线，再紧跟项目的模块名称，默认情况下maven会在artifactId添加version作为最后生成的名称。例如：spirng-mvn-2.0.0.jar
-
-version：版本号，不要使用日期作为版本，推荐例如这样的命名：2.0、2.0.1、1.3.1，如果为快照版本（SNAPSHOT），那么会自动在版本号后面加上快照的标识。
+　　GroupId一般分为多个段，这里我只说两段，第一段为域，第二段为公司名称。域又分为org、com、cn等等许多，其中org为非营利组织，com为商业组织。举个apache公司的tomcat项目例子：这个项目的GroupId是org.apache，它的域是org（因为tomcat是非营利项目），公司名称是apache，ArtifactId是tomcat。
+　　
+　　比如我创建一个项目，我一般会将GroupId设置为cn.mht，cn表示域为中国，mht是我个人姓名缩写，ArtifactId设置为testProj，表示你这个项目的名称是testProj，依照这个设置，在你创建Maven工程后，新建包的时候，包结构最好是cn.zr.testProj打头的，如果有个StudentDao[Dao层的]，它的全路径就是cn.zr.testProj.dao.StudentDao
 ```
 
 
@@ -1634,16 +1689,6 @@ date类型在判断非空时，这种写法会引发异常：invalid comparison:
 </if> 
 ```
 
-### MyBatis Could not set parameters for mapping
-
-参考：[MyBatisCould not set parameters for mapping](https://blog.csdn.net/Z__Sheng/article/details/90171283 )
-
-```
-两种解决方案：
-01: 删除注释的sql语句 
-02： 用 <!- -需要注释的内容–> 注释即可，注释中间不能有空格
-```
-
 
 
 ### Ajax传输JSON数据
@@ -1672,6 +1717,17 @@ public void export(@RequestBody JSONObject data){
 ```
 
 
+
+### Jackson FastJson
+
+参考：[性能差异](https://blog.csdn.net/u013433821/article/details/82905222)
+
+```
+Jackson相比json-lib框架，Jackson所依赖的jar包较少，简单易用并且性能也要相对高些。而且Jackson社区相对比较活跃，更新速度也比较快。SpringBoot默认的json解析
+
+Fastjson是一个Java语言编写的高性能的JSON处理器,由阿里巴巴公司开发。无依赖，不需要例外额外的jar，能够直接跑在JDK上。FastJson采用独创的算法，将parse的速度提升到极致，超过所有json库。
+FastJson在复杂类型的Bean转换Json上会出现一些问题，可能会出现引用的类型，导致Json转换出错，需要制定引用。有的版本存在高危漏洞，不建议生产使用
+```
 
 
 
@@ -1847,7 +1903,9 @@ private List<CategoryEntity> getChildrens(CategoryEntity root,List<CategoryEntit
 
 
 
-### Git提交
+### Git
+
+参考：[如何理解集中式与分布式](https://blog.csdn.net/weixin_42476601/article/details/82290902)   [Git vs SVN 与Git命令](https://www.cnblogs.com/qcloud1001/archive/2018/10/31/9884576.html)
 
 .git目录中的config文件
 
@@ -1953,7 +2011,7 @@ export function getDateDiff(dateStr){
 
 ### RabbitMQ
 
-参考：[RabbitMQ](https://blog.csdn.net/hellozpc/article/details/81436980#8SpringbootRabbitMQ_1273) [Rabbit面试](https://blog.csdn.net/weixin_43496689/article/details/103159268)
+参考：[RabbitMQ](https://blog.csdn.net/hellozpc/article/details/81436980#8SpringbootRabbitMQ_1273) [Rabbit面试](https://blog.csdn.net/weixin_43496689/article/details/103159268)  [Rabbit详解](https://www.cnblogs.com/williamjie/p/9481774.html)  [springboot + rabbitmq发送邮件案例](https://www.jianshu.com/p/dca01aad6bc8)  [RabbitMQ专业](http://www.iocoder.cn/Spring-Boot/RabbitMQ/)
 
 
 
@@ -1968,6 +2026,22 @@ Direct Exchange 路由模式：默认类型，根据路由键（Routing Key）�
 Topic Exchange 通配符模式：通过对消息的路由键（Routing Key）和绑定到交换机的队列，将消息路由给队列。符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
 Fanout Exchange 发布/订阅：将消息路由给绑定到它身上的所有队列，而不理会绑定的路由键（Routing Key）。
 Headers Exchange 直连交换机：发送消息时匹配 Header 而非 Routing Key，性能很差，几乎不用。
+```
+
+
+
+>prefetch与消息投递
+
+```
+prefetch与消息投递
+prefetch允许为每个consumer指定最大的unacked messages数目。简单来说就是用来指定一个consumer一次可以从Rabbit中获取多少条message并缓存在client中(RabbitMQ提供的各种语言的client library)。一旦缓冲区满了，Rabbit将会停止投递新的message到该consumer中直到它发出ack。
+
+假设prefetch值设为10，共有两个consumer。意味着每个consumer每次会从queue中预抓取 10 条消息到本地缓存着等待消费。同时该channel的unacked数变为20。而Rabbit投递的顺序是，先为consumer1投递满10个message，再往consumer2投递10个message。如果这时有新message需要投递，先判断channel的unacked数是否等于20，如果是则不会将消息投递到consumer中，message继续呆在queue中。之后其中consumer对一条消息进行ack，unacked此时等于19，Rabbit就判断哪个consumer的unacked少于10，就投递到哪个consumer中。
+
+总的来说，consumer负责不断处理消息，不断ack，然后只要unacked数少于prefetch * consumer数目，broker就不断将消息投递过去。
+
+channel = connection.createChannel();
+channel.basicQos(prefetch);
 ```
 
 
@@ -2276,6 +2350,8 @@ this.lr.peopleData.push(...newUser)
 
 
 ### 单点登录
+
+参考：[单点登录](https://ke.qq.com/course/295318?taid=1976011373969814)
 
 > 什么是单点登录?
 
@@ -2715,14 +2791,19 @@ fun2();
 
 ### OAuth2
 
+参考：[如何理解OAuth2](http://www.ruanyifeng.com/blog/2019/04/oauth_design.html)  [OAuth 2.0 的四种方式](http://www.ruanyifeng.com/blog/2019/04/oauth-grant-types.html)
+
 > OAuth2针对特定问题的一种解决方案(JWT是实现)，按照一定规则生成字符串，字符串包含用户信息
 
 ```
+1.授权码
+2.隐藏式
+3.密码式
+4.凭证式
+
 主要解决两个问题
-
-1.开放系统间的授权
-
-2.分布式访问问题
+	1.开放系统间的授权	
+	2.分布式访问问题
 ```
 
 
@@ -2765,7 +2846,7 @@ token：按照一定规则生成字符串，字符串可以包含用户信息
 
 ### JWT实现Token验证
 
-参考：[JWT](https://www.jianshu.com/p/e88d3f8151db)   [JWT常见问题](https://blog.csdn.net/u013089490/article/details/84443667)  [JWT面试](https://blog.csdn.net/MINGJU2020/article/details/103039418?depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1&utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1)
+参考：[JWT](https://www.jianshu.com/p/e88d3f8151db)   [JWT常见问题](https://blog.csdn.net/u013089490/article/details/84443667)  [JWT面试](https://blog.csdn.net/MINGJU2020/article/details/103039418?depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1&utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1)  Token理解
 
 ```
 1.调用登录接口返回token
@@ -4805,7 +4886,20 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 ### Mycat分库分表
 
+> 为什么使用Mycat  ->  流程图类似Nginx
 
+```
+1.Java与数据库紧耦合
+2.高访问量高并发对数据库压力
+3.读写请求数据不一致
+
+
+1.读写分离
+2.数据分片(数据库分布式)
+	垂直拆分:分库
+	水平拆分:分表
+3.多数据源整合
+```
 
 
 
