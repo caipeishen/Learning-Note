@@ -1239,6 +1239,52 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
 参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)  [Spring Bean作用域](https://blog.csdn.net/qq_41083009/article/details/90743719)
 
+>IOC基本原理
+
+```java
+1、IOC 思想基于 IOC 容器完成，IOC 容器底层就是对象工厂
+2、Spring 提供 IOC 容器实现两种方式：（两个接口）
+	1).BeanFactory：IOC 容器基本实现，是 Spring 内部的使用接口，不提供开发人员进行使用
+	* 加载配置文件时候不会创建对象，在获取对象（使用）才去创建对象
+	
+	2).ApplicationContext：BeanFactory 接口的子接口，提供更多更强大的功能，一般由开发人员进行使用
+	* 加载配置文件时候就会把在配置文件对象进行创建
+	
+	虽然第一种方式比较好，但我们通常是Web项目，在项目启动时加载时全部加载，后期访问更快，费时费力放在启动
+	
+String classValue = class属性;//xml解析得到
+Class class = Class.forName(className);//通过反射创建对象
+User user = (User)class.newInstance();//创建实例
+```
+
+
+
+> IOC 操作 Bean 管理（bean 生命周期）
+
+```xml
+1、生命周期
+	1).从对象创建到对象销毁的过程
+	
+2、bean 生命周期
+    1).通过构造器创建bean实例（无参数构造）
+    2).为bean的属性设置值和对其他bean引用（调用set方法）
+    3).把bean实例传递给bean 后置处理器方法 -> postProcessBeforeInitialization
+    4).调用bean的初始化的方法（需要进行配置初始化的方法）
+    5).把bean实例传递给bean 后置处理器方法 -> postProcessAfterInitialization
+    6).bean可以使用了（对象获取到了）
+    7).当容器关闭时候，调用bean的销毁的方法（需要进行配置销毁的方法）
+
+<bean id="myUser" 
+      class="cn.cps.User" 
+      init-method="myInitMethod"
+      destroy-method="myDestroyMethod"
+ ></bean>
+
+
+后置处理器方法需要实现BeanPostProcess接口,也需要把后置处理器注入容器中
+重写两个方法postProcessBeforeInitialization、postProcessAfterInitialization
+```
+
 
 
 ### SpringMVC与Struts2对比
