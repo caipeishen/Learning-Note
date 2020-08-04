@@ -1281,9 +1281,59 @@ User user = (User)class.newInstance();//创建实例
  ></bean>
 
 
-后置处理器方法需要实现BeanPostProcess接口,也需要把后置处理器注入容器中
+后置处理器方法需要实现BeanPostProcess接口,也需要把后置处理器实现类注入容器中
 重写两个方法postProcessBeforeInitialization、postProcessAfterInitialization
 ```
+
+
+
+> AOP基本原理
+
+```java
+1、AOP底层使用动态代理
+    1).有两种情况动态代理，使用 JDK 动态代理，创建接口实现类代理对象，增强类的方法
+    	//创建接口实现类代理对象
+ 		Class[] interfaces = {UserDao.class};
+		UserDaoImpl userDao = new UserDaoImpl();
+        UserDao dao = (UserDao)Proxy.newProxyInstance(
+            JDKProxy.class.getClassLoader(),
+            interfaces,
+            new UserDaoProxy(userDao)
+        );
+		//创建代理对象代码
+        class UserDaoProxy implements InvocationHandler {
+         //1 把创建的是谁的代理对象，把谁传递过来
+         //有参数构造传递
+         private Object obj;
+         public UserDaoProxy(Object obj) {
+             this.obj = obj;
+         }
+         //增强的逻辑
+         @Override
+         public Object invoke(Object proxy, Method method, Object[] args){
+             //方法之前
+             System.out.println(
+                 "方法之前执行"+method.getName()
+                 +":传递的参数..."
+                 + Arrays.toString(args)
+             );
+             //被增强的方法执行
+             Object res = method.invoke(obj, args);
+             //方法之后
+             System.out.println("方法之后执行...."+obj);
+             return res;
+          }
+    2).没有接口情况，使用 CGLIB 动态代理，创建子类的代理对象，增强类的方法
+        自定义当前类的代理对象 继承被代理类，重写该的方法，在该方法中调用父类的方法，执行自己的增强逻辑
+```
+
+
+
+![](image\动态代理有接口情况原理.png)
+
+
+
+![](image\动态代理没有接口情况原理.png)
 
 
 
