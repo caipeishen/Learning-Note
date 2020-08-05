@@ -1141,7 +1141,7 @@ public class SingleTon{
 
 ### 观察者与监听器
 
-参考：[java监听器实现与原理](https://www.cnblogs.com/againn/p/9512013.html)  [观察者和监听器的区别](https://blog.csdn.net/lovexiaotaozi/article/details/102579880)
+参考：[java监听器实现与原理](https://www.cnblogs.com/againn/p/9512013.html)  [观察者和监听器的区别](https://blog.csdn.net/lovexiaotaozi/article/details/102579880)   [Spring监听模式实例](https://www.cnblogs.com/dubhlinn/p/10725636.html)
 
 ```
 重点：理解事件与事件源的关系
@@ -1237,9 +1237,9 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
 ### Spring面试题
 
-参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)  [Spring Bean作用域](https://blog.csdn.net/qq_41083009/article/details/90743719)
+参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)  [Spring Bean作用域](https://blog.csdn.net/qq_41083009/article/details/90743719)  [Spring源码分析](https://blog.csdn.net/nuomizhende45/article/details/81158383)  [Spring 中的观察者模式](https://www.cnblogs.com/jmcui/p/11054756.html)
 
->IOC基本原理
+#### IOC基本原理
 
 ```java
 1、IOC 思想基于 IOC 容器完成，IOC 容器底层就是对象工厂
@@ -1259,7 +1259,7 @@ User user = (User)class.newInstance();//创建实例
 
 
 
-> IOC 操作 Bean 管理（bean 生命周期）
+#### IOC 操作 Bean 管理
 
 ```xml
 1、生命周期
@@ -1287,7 +1287,7 @@ User user = (User)class.newInstance();//创建实例
 
 
 
-> AOP基本原理
+#### AOP基本原理
 
 ```java
 1、AOP底层使用动态代理
@@ -1337,6 +1337,37 @@ User user = (User)class.newInstance();//创建实例
 
 
 
+#### Spring观察者模式四个角色
+
+```
+一、Spring 中观察者模式的四个角色
+1. 事件（ApplicationEvent）
+ApplicationEvent 是所有事件对象的父类。ApplicationEvent 继承自 jdk 的 EventObject, 所有的事件都需要继承 ApplicationEvent, 并且通过 source 得到事件源。
+
+2. 事件监听（ApplicationListener）
+ApplicationListener 事件监听器，也就是观察者。继承自 jdk 的 EventListener，该类中只有一个方法 onApplicationEvent。当监听的事件发生后该方法会被执行。
+
+3. 事件发布（ApplicationContext）
+ApplicationContext 是 Spring 中的核心容器，在事件监听中 ApplicationContext 可以作为事件的发布者，也就是事件源。因为 ApplicationContext 继承自 ApplicationEventPublisher。在 ApplicationEventPublisher 中定义了事件发布的方法 — publishEvent(Object event)
+
+4. 事件管理（ApplicationEventMulticaster）
+ApplicationEventMulticaster 用于事件监听器的注册和事件的广播。监听器的注册就是通过它来实现的，它的作用是把 Applicationcontext 发布的 Event 广播给它的监听器列表
+```
+
+
+
+#### Spring中实现观察者模式
+
+```
+1.自定义需要发布的事件类，需要继承 ApplicationEvent 类或 PayloadApplicationEvent (该类也仅仅是对 ApplicationEvent 的一层封装)
+
+2.使用 @EventListener 来监听事件或者实现 ApplicationListener 接口。
+
+3.使用 ApplicationEventPublisher 来发布自定义事件（@Autowired注入即可）
+```
+
+
+
 ### SpringMVC与Struts2对比
 
 参考：[SpringMVC与Struts2区别与比较总结](https://blog.csdn.net/jishuizhipan/article/details/79385190)
@@ -1351,13 +1382,13 @@ User user = (User)class.newInstance();//创建实例
 
 ### SpringBoot源码解析
 
-参考：[SpringBoot面试题](https://blog.csdn.net/yuzongtao/article/details/84295732)  [SpringBoot注解解析](https://www.cnblogs.com/123-shen/p/SpringBoot.html)  [SpringBoot源码解析](https://blog.csdn.net/woshilijiuyi/article/details/82219585)
+参考：[SpringBoot面试题](https://blog.csdn.net/yuzongtao/article/details/84295732)  [SpringBoot注解解析](https://www.cnblogs.com/123-shen/p/SpringBoot.html)  [SpringBoot源码解析](https://www.cnblogs.com/hello-shf/category/1456313.html)
 
 ```
 三大核心：快速整合第三方框架、无xml注解化配置、使用java语言内嵌tomcat
 ```
 
-> 自定义starter
+#### 自定义starter
 
 ```java
 //SpringBoot启动类
@@ -1392,7 +1423,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 
 
 
-> SpringBoot启动流程
+#### SpringBoot启动流程
 
 ```
 核心流程
@@ -1407,41 +1438,72 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
             b.SERVLET：使用java代码创建Web容器启动
             c.REACTIVE：响应式启动(Spring5新特性)
 	1.2.setInitializers
-		META-INF/spring.factories获取对应的ApplicationContextInitializer并创建对象装配到集合中
-		ApplicationContextInitializer是spring组件spring-context组件中的一个接口，主要是spring 		   ioc容器刷新之前的一个回调接口，用于处于自定义逻辑。
+		通过getSpringFactoriesInstances方法，在META-INF/spring.factories中，获取对应的
+		ApplicationContextInitializer并创建对象装配到集合中，用于在spring容器刷新之前初始化Spring 
+		ConfigurableApplicationContext的回调接口。
+		换句话说，在容器刷新之前(prepareContext刷新容器之前方法，refreshContext刷新容器方法)，
+		调用该类的initialize方法，并将ConfigurableApplicationContext类的实例传递过来。
 	1.3.setListeners
-		META-INF/spring.factroies获取对应的ApplicationListener并创建实例对象装配到集合中
-		监听器会贯穿springBoot整个生命周期
+		通过getSpringFactoriesInstances方法，在META-INF/spring.factories中，获取对应的
+		ApplicationListener并创建对象装配到集合中，ApplicationListener是spring的事件监听器，
+		典型的观察者模式，通过 ApplicationEvent 类和 ApplicationListener 接口，
+		可以实现对spring容器全生命周期的监听，当然也可以自定义监听事件
+	1.4.deduceMainApplicationClass 根据调用栈，循环判断方法名是否等于main，推断出main方法的类名
 
 2.调用SpringApplication run 方法实现启动
+    第一步：获取并启动监听器
+    第二步：构造应用上下文环境
+    第三步：初始化应用上下文
+    第四步：刷新应用上下文前的准备阶段
+    第五步：刷新应用上下文
+    第六步：刷新应用上下文后的扩展接口
+
 	2.1.StopWatch stopWatch = new StopWatch();
 		记录我们SpringBoot启动时间
-	2.2.getRunListeners(args);读取我们的META-INF/spring.factories得到监听器
-		通过JAVA反射，使用构造方法生成实例，同时也会将监听器存入SimpleApplicationEventMulticaster
-	2.3.listeners.starting();
-		循环调用监听starting方法启用
+	2.2.getRunListeners
+		读取META-INF/spring.factories得到监听器，通过JAVA反射，使用构造方法生成实例，
+		EventPublishingRunListener监听器是Spring容器的启动监听器
+	2.3.listeners.starting
+		循环调用监听starting方法启用,现在只会有一个监听器(EventPublishingRunListener)
 	2.4.ConfigurableEnvironment 
 					environment = prepareEnvironment(listeners,applicationAArguments);
-		将系统变量和环境变量，加入到其父类定义的对象MutablePropertySources中，接下来解析配置文件就行
-		1.this.getOrCreateEnvironment();获取相应的环境对象
-			environment已经被设置了servlet类型，所以创建的是环境对象是StandardServletEnvironment
-		2.listeners.environmentPrepared(environment);把得到的配置文件读取并加载到SpringBoot容器
-            ConfigFileApplicationListener类该监听器非常核心，主要用来处理项目配置
-            默认获取classpath:/,classpath:/config,file:./file:./conifg项目中的为application的
+        构造应用上下文环境: 
+            计算机的环境 
+            Java环境
+            Spring的运行环境(--spring.profiles.active=prod) 
+            Spring项目的配置(在SpringBoot中就是那个熟悉的application.properties/yml)等等
+		1.getOrCreateEnvironment获取相应的环境对象
+			webApplicationType上文设置成了servlet，所以创建环境对象是StandardServletEnvironment
+		2.configureEnvironment
+			封装成SimpleCommandLinePropertySource并加入到了environment中并激活相应的配置文件
+		2.listeners.environmentPrepared(environment);
+			启动相应的监听器，其中重要的ConfigFileApplicationListener就是加载项目配置文件的监听器。
+			默认获取classpath:/,classpath:/config,file:./file:./conifg项目中的为application的
             properties、xml、yml、yaml文件. 举例：location:classpath:/appcalition.properties
-        至此，项目的变量配置已全部加载完毕
+        至此，项目的变量配置已全部加载完毕,查看environment属性，配置文件的配置信息已经可以看到
 	2.6.Banner printedBanner = printBanner(environment);
 		打印SpringBootBanner图
 	2.7.context = this.createApplicationContext();
 		根据webApplicationType进行判断，创建SpringBoot上下文对象
 	2.8.prepareContext(context, environment, listeners, applicationArguments,
 					printedBanner);
-        主要是在容器刷新之前的准备动作。将启动类注入容器，为后续开启自动化配置奠定基础
-        1.load(context, sources.toArray(new Object[0]));
-        加载启动指定类（重点）启动类加载spring容器beanDefinitionMap中
-        为后续springBoot 自动化配置奠定基础，springBoot为我们提供的各种注解配置也与此有关
+        主要是在容器刷新之前的准备动作。向各个监听器发送容器已经准备好的事件
     2.9.refreshContext(context);刷新上下文
-    	-> refresh -> onRefresh -> createWebServer -> getWebServer -> Tomcat -> SpringMVC
+    	invokeBeanFactoryPostProcessors(beanFactory);（重点）IoC容器初始化个步骤
+    	　1，第一步：Resource定位
+    	　	会先将主类解析成BeanDefinition，然后解析主类的BeanDefinition获取basePackage的路径，
+    	　	这样就完成了定位的过程
+    	　2，第二步：BeanDefinition的载入
+    	　	所谓的载入就是通过上面的定位得到的basePackage，SpringBoot会将该路径拼接成：
+    	　	classpath*:org/springframework/boot/demo/**/*.class这样的形式，然后一个类会将该路
+    	　	径下所有的.class文件都加载进来，然后遍历判断是不是有@Component注解，如果有的话，就是我们
+    	　	要装载的BeanDefinition
+    	　3、第三个过程：注册BeanDefinition
+    	　	这个注册过程把载入过程中解析得到的BeanDefinition向IoC容器进行注册。通过上文的分析，我们可
+    	　	以看到，在IoC容器中将BeanDefinition注入到一个ConcurrentHashMap中，IoC容器就是通过这个
+    	　	HashMap来持有这些BeanDefinition数据的。比如DefaultListableBeanFactory 中的
+    	　	beanDefinitionMap属性
+    	
     	ServletwebServerFactoryAutoConfiguration 创建Tomcat
     	DispatcherservletAutoConfiguration 创建SpringMVC
     2.10.afterRefresh定义一个空的模板给其他子类重写
@@ -1451,7 +1513,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 
 
 
-> 配置文件值注入
+#### 配置文件值注入
 
 ```java
 /**
