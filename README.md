@@ -1237,7 +1237,7 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
 ### Spring面试题
 
-参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)  [Spring Bean作用域](https://blog.csdn.net/qq_41083009/article/details/90743719)  [Spring源码分析](https://blog.csdn.net/nuomizhende45/article/details/81158383)  [Spring 中的观察者模式](https://www.cnblogs.com/jmcui/p/11054756.html)
+参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)  [Spring Bean作用域](https://blog.csdn.net/qq_41083009/article/details/90743719)  [Spring源码分析](https://blog.csdn.net/nuomizhende45/article/details/81158383)  [Spring 中的观察者模式](https://www.cnblogs.com/dubhlinn/p/10725636.html))
 
 #### IOC基本原理
 
@@ -1337,7 +1337,7 @@ User user = (User)class.newInstance();//创建实例
 
 
 
-#### Spring观察者模式四个角色
+#### Spring观察者模式四个角色 *
 
 ```
 一、Spring 中观察者模式的四个角色
@@ -1347,8 +1347,10 @@ ApplicationEvent 是所有事件对象的父类。ApplicationEvent 继承自 jdk
 2. 事件监听（ApplicationListener）
 ApplicationListener 事件监听器，也就是观察者。继承自 jdk 的 EventListener，该类中只有一个方法 onApplicationEvent。当监听的事件发生后该方法会被执行。
 
-3. 事件发布（ApplicationContext）
-ApplicationContext 是 Spring 中的核心容器，在事件监听中 ApplicationContext 可以作为事件的发布者，也就是事件源。因为 ApplicationContext 继承自 ApplicationEventPublisher。在 ApplicationEventPublisher 中定义了事件发布的方法 — publishEvent(Object event)
+3. 事件发布/事件源（ApplicationContext）
+ApplicationContext 是 Spring 中的核心容器，在事件监听中 ApplicationContext 可以作为事件的发布者，也是事件源，因为 ApplicationContext 继承自 ApplicationEventPublisher。ApplicationContext是事件源是因为在new ClassPathApplication()中，底层调用publishEvent(new ContextRefreshedEvent(this))
+
+在ApplicationEventPublisher 中定义了事件发布的方法 — publishEvent(Object event) ，底层调用ApplicationEventMulticaster
 
 4. 事件管理（ApplicationEventMulticaster）
 ApplicationEventMulticaster 用于事件监听器的注册和事件的广播。监听器的注册就是通过它来实现的，它的作用是把 Applicationcontext 发布的 Event 广播给它的监听器列表
@@ -1382,7 +1384,7 @@ ApplicationEventMulticaster 用于事件监听器的注册和事件的广播。�
 
 ### SpringBoot源码解析
 
-参考：[SpringBoot面试题](https://blog.csdn.net/yuzongtao/article/details/84295732)  [SpringBoot注解解析](https://www.cnblogs.com/123-shen/p/SpringBoot.html)  [SpringBoot源码解析](https://www.cnblogs.com/hello-shf/category/1456313.html)
+参考：[SpringBoot面试题](https://blog.csdn.net/yuzongtao/article/details/84295732)  [SpringBoot注解解析](https://www.cnblogs.com/123-shen/p/SpringBoot.html) 
 
 ```
 三大核心：快速整合第三方框架、无xml注解化配置、使用java语言内嵌tomcat
@@ -1425,6 +1427,8 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 
 #### SpringBoot启动流程
 
+参考： [SpringBoot源码解析](https://www.cnblogs.com/hello-shf/category/1456313.html)  [Spring观察者模式](https://www.cnblogs.com/dubhlinn/p/10725636.html)  [SpringApplicationRunListener](https://www.cnblogs.com/duanxz/p/11243271.html)
+
 ```
 核心流程
 1.创建SpringApplication对象
@@ -1432,6 +1436,11 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 
 具体分析
 1.创建SpringApplication对象SpringBoot容器初始化操作。
+	第一步：获取当前应用启动类型
+    第二步：加载我们自定义的初始化器
+    第三步：加载我们自定义的监听器
+    第四步：推断主入口类
+    
 	1.1.获取当前应用启动类型，ClassUtils.isPresent("类名")判断当前classpath是否有加载所需要的类
 		webApplicationType 分为三种类型：
             a.NONE：不会嵌入web容器启动(普通项目)
@@ -1439,15 +1448,11 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
             c.REACTIVE：响应式启动(Spring5新特性)
 	1.2.setInitializers
 		通过getSpringFactoriesInstances方法，在META-INF/spring.factories中，获取对应的
-		ApplicationContextInitializer并创建对象装配到集合中，用于在spring容器刷新之前初始化Spring 
-		ConfigurableApplicationContext的回调接口。
-		换句话说，在容器刷新之前(prepareContext刷新容器之前方法，refreshContext刷新容器方法)，
-		调用该类的initialize方法，并将ConfigurableApplicationContext类的实例传递过来。
+		ApplicationContextInitializer并创建对象装配到集合中，用于在spring容器刷新之前，
+		调用该对象的initialize回调方法(容器刷新之前方法：prepareContext)
 	1.3.setListeners
 		通过getSpringFactoriesInstances方法，在META-INF/spring.factories中，获取对应的
-		ApplicationListener并创建对象装配到集合中，ApplicationListener是spring的事件监听器，
-		典型的观察者模式，通过 ApplicationEvent 类和 ApplicationListener 接口，
-		可以实现对spring容器全生命周期的监听，当然也可以自定义监听事件
+		ApplicationListener并创建对象装配到集合中，准备好运行时监听器
 	1.4.deduceMainApplicationClass 根据调用栈，循环判断方法名是否等于main，推断出main方法的类名
 
 2.调用SpringApplication run 方法实现启动
@@ -1461,17 +1466,15 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 	2.1.StopWatch stopWatch = new StopWatch();
 		记录我们SpringBoot启动时间
 	2.2.getRunListeners
-		读取META-INF/spring.factories得到监听器，通过JAVA反射，使用构造方法生成实例，
-		EventPublishingRunListener监听器是Spring容器的启动监听器
+		读取META-INF/spring.factories的SpringApplicationRunListener反射机制得到监听器，
+		接口规定了SpringBoot生命周期(例如：starting、environmentPrepared、contextPrepared...)
 	2.3.listeners.starting
-		循环调用监听starting方法启用,现在只会有一个监听器(EventPublishingRunListener)
-	2.4.ConfigurableEnvironment 
-					environment = prepareEnvironment(listeners,applicationAArguments);
-        构造应用上下文环境: 
-            计算机的环境 
-            Java环境
-            Spring的运行环境(--spring.profiles.active=prod) 
-            Spring项目的配置(在SpringBoot中就是那个熟悉的application.properties/yml)等等
+		循环调用监听starting方法(有点像发布消息，通知监听器回调),
+		实际是通过EventMulticaster事件管理器，最终调用ApplicationListener.onApplicationEvent
+	2.4.prepareEnvironment 构造应用上下文环境 
+            像计算机的环境、Java环境、Spring的运行环境(--spring.profiles.active=prod) 
+            以及Spring项目的配置(在SpringBoot中就是那个熟悉的application.properties/yml)等等
+		/**
 		1.getOrCreateEnvironment获取相应的环境对象
 			webApplicationType上文设置成了servlet，所以创建环境对象是StandardServletEnvironment
 		2.configureEnvironment
@@ -1481,14 +1484,18 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 			默认获取classpath:/,classpath:/config,file:./file:./conifg项目中的为application的
             properties、xml、yml、yaml文件. 举例：location:classpath:/appcalition.properties
         至此，项目的变量配置已全部加载完毕,查看environment属性，配置文件的配置信息已经可以看到
+        **/
 	2.6.Banner printedBanner = printBanner(environment);
 		打印SpringBootBanner图
 	2.7.context = this.createApplicationContext();
-		根据webApplicationType进行判断，创建SpringBoot上下文对象
+		根据webApplicationType进行判断，创建SpringBoot上下文对象ConfigurableApplicationContext
 	2.8.prepareContext(context, environment, listeners, applicationArguments,
 					printedBanner);
-        主要是在容器刷新之前的准备动作。向各个监听器发送容器已经准备好的事件
-    2.9.refreshContext(context);刷新上下文
+        主要是在容器刷新之前的准备动作。
+        回调ApplicationContextInitializer的initializer方法
+        回调SpringApplicationRunListener的contextPrepared方法
+        最后一步回调所有的listener.contextPrepared(context);
+    2.9.refreshContext(context);扫描 创建 加载所有组件(配置类、自动装配、创建Tomcat)
     	invokeBeanFactoryPostProcessors(beanFactory);（重点）IoC容器初始化个步骤
     	　1，第一步：Resource定位
     	　	会先将主类解析成BeanDefinition，然后解析主类的BeanDefinition获取basePackage的路径，
@@ -1504,8 +1511,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
     	　	HashMap来持有这些BeanDefinition数据的。比如DefaultListableBeanFactory 中的
     	　	beanDefinitionMap属性
     	
-    	ServletwebServerFactoryAutoConfiguration 创建Tomcat
-    	DispatcherservletAutoConfiguration 创建SpringMVC
     2.10.afterRefresh定义一个空的模板给其他子类重写
     2.11.listeners.started(context);使用广播和回调机制通知监听器SpringBoot容器已经启动成功
     2.12.listeners.running(context);使用广播和回调机制通知监听器SpringBoot容器启动成功
