@@ -1,4 +1,3 @@
-​		
 
 ## Keyboard
 
@@ -38,7 +37,7 @@
 
 
 
-#IDEA快捷键
+### #IDEA快捷键
 
 
 
@@ -53,6 +52,8 @@ Ctrl＋E，可以显示最近编辑的文件列表
 Ctrl＋F12，可以显示当前文件的结构
 
 Ctrl＋Alt＋L 整理代码
+
+Ctrl + Alt + R 整个项目搜索
 
 Alt+ left/right 切换代码视图
 
@@ -645,6 +646,12 @@ SELECT * FROM ana
 
 
 
+>Mysql GROUP_CONCAT获取分组的前几名
+
+参考：[mysql GROUP_CONCAT获取分组的前几名](https://blog.csdn.net/qq_34471305/article/details/83347994)
+
+
+
 ### Oracle 使用SQL备份与恢复
 
 ```sql
@@ -675,9 +682,15 @@ imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
 
 
 
+### NAT和桥接模式
+
+参考：[NAT和桥接模式](https://www.cnblogs.com/huhuxixi/p/11527837.html )
+
+
+
 ### 配置防火墙端口
 
-```linux
+```sh
 #CentOS 6
 vi /etc/sysconfig/iptables         //防火墙配置
 
@@ -696,10 +709,14 @@ firewall-cmd --permanent --add-port=80/tcp
 # 移除端口
 firewall-cmd --permanent --remove-port=8080/tcp
 
-#查看firewall服务状态
+#查看firewalld服务状态
 systemctl status firewalld
-#查看防火墙状态
-firewall-cmd --state 
+#关闭firewalld
+systemctl stop firewalld
+#禁止firewall开机启动
+systemctl disable firewalld 
+#设置firewall开机启动
+systemctl enable firewalld
 
 # 开启
 service firewalld start
@@ -707,30 +724,32 @@ service firewalld start
 service firewalld stop
 # 重启
 service firewalld restart
+
+#创建软链接
+ln -s 源文件 目标文件
 ```
-
-
-
-### NAT和桥接模式
-
-参考：[NAT和桥接模式](https://www.cnblogs.com/huhuxixi/p/11527837.html )
 
 
 
 ### Linux常用命令
 
-```linux
+```sh
 chmod 777 xx #授权
 tar -zxvf 文件名 #解压
 tar -cvf 123.tar file1 file2 #压缩
 ps -ef | grep tomcat
 ps -ef | grep java
-lsof -i :8080 #查看某个端口
-lsof -c java #列出某个程序所打开的文件信息
-kill -9 进程号
-vi	编辑(dd删除文本当前行)
+kill -9 #进程号
+vi 文件名	#编辑(dd删除文本当前行)
 df -h #查询磁盘的空间使用情况
+whereis 文件名 #查找文件
 
+vim 文件名 #编辑文件
+	dd #删除当前行
+	/字符 #高亮显示字符，按n则查看下一个，:noh 取消高亮
+	:set nu #查看行号
+	
+	
 #查看内存使用情况
 free -m 
 
@@ -740,26 +759,20 @@ top
 #显示磁盘空间使用情况
 df --block-size=M
 
-
+#查看详细的进程
+ps 6832
 
 #动态查询
 tail -99f text.txt
-
-#用以显示符合条件的进程情况
-lsof -i
-
-#是一个列出当前系统打开文件的工具，查看端口占用
-lsof -i:端口号
-
-#一个监控TCP/IP网络的非常有用的工具，它可以显示路由表、实际的网络连接以及每个网络接口的状态信息
-netstat
 
 #显示tcp，udp的端口和进程等相关情况
 netstat -tunplp
 netstat -tunplp | grep 端口号
 
-#也可以显示系统端口使用情况
-netstat -anp
+#查看某个端口
+lsof -i :8080 
+#列出某个程序所打开的文件信息
+lsof -c java 
 ```
 
 
@@ -781,11 +794,15 @@ ps -aux | grep "test.sh"
 
 /etc/profile 文件
 
-```Linux
+```sh
+#编辑etc/profile文件
+---------------------------------
 #JAVA的JDK配置
-export JAVA_HOME=/develeop/jdk1.8.0_251
-export PATH=$PATH:$JAVA_HOME/bin
+export JAVA_HOME=/usr/local/java/jdk1.8.0_251
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+#将JDK配置到环境变量中，如果还有其他变量 在其后面使用:隔开
+export PATH=$PATH:$JAVA_HOME/bin
+---------------------------------
 
 #刷新环境变量文件： 刷新环境变量命令
 source /etc/profile
@@ -807,13 +824,79 @@ source /etc/profile
 
 ### Linux安装MySQL
 
-参考：[Linux安装MySQL](https://www.jianshu.com/p/276d59cbc529)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)
+参考：[Linux安装MySQL](https://www.jianshu.com/p/276d59cbc529)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)
 
 
 
 ### Linux安装Redis
 
-参考：[Linux安装Redis](https://www.cnblogs.com/limit1/p/9045183.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)
+参考：[Linux安装Redis](https://www.cnblogs.com/limit1/p/9045183.html)  
+
+> 报错gcc无效命令
+
+```
+yum install -y gcc-c++
+```
+
+> 安装Redis
+
+```sh
+1.获取redis资源
+
+　　wget http://download.redis.io/releases/redis-4.0.8.tar.gz
+
+2.解压
+
+　　tar xzvf redis-4.0.8.tar.gz
+
+3.安装
+
+　　cd redis-4.0.8
+
+　　make
+
+　　cd src
+
+　　make install PREFIX=/usr/local/redis
+
+4.移动配置文件到安装目录下
+
+　　cd ../
+
+　　mkdir /usr/local/redis/etc
+
+　　mv redis.conf /usr/local/redis/etc
+
+ 5.配置redis为后台启动
+
+　　vi /usr/local/redis/etc/redis.conf //将daemonize no 改成daemonize yes
+
+6.将redis加入到开机启动
+
+　　vi /etc/rc.local 
+　　//在里面添加内容：/usr/local/redis/bin/redis-server /usr/local/redis/etc/redis.conf 
+　　(意思就是开机调用这段开启redis的命令)
+
+7.开启redis
+
+　　/usr/local/redis/bin/redis-server /usr/local/redis/etc/redis.conf 
+
+ 
+
+常用命令　　
+
+　　redis-server /usr/local/redis/etc/redis.conf //启动redis
+
+　　pkill redis  //停止redis
+
+　　卸载redis：
+
+　　　　rm -rf /usr/local/redis //删除安装目录
+
+　　　　rm -rf /usr/bin/redis-* //删除所有redis相关命令脚本
+
+　　　　rm -rf /root/download/redis-4.0.4 //删除redis解压文件夹
+```
 
 
 
@@ -856,7 +939,7 @@ source /etc/profile
 
 3. 运行代码，重启MySQL服务
 
-   ```Linux
+   ```sh
    service mysqld/mysql restart
    ```
 
@@ -866,7 +949,7 @@ source /etc/profile
 
 > 主机配置(host79)
 
-```
+```sh
 修改配置文件：vim /etc/my.cnf
 #主服务器唯一ID
 server-id=1
@@ -885,7 +968,7 @@ binlog_format=STATEMENT
 
 > 从机配置(host80)
 
-```
+```sh
 修改配置文件：vim /etc/my.cnf
 #从服务器唯一ID
 server-id=2
@@ -901,7 +984,7 @@ relay-log=mysql-relay
 
 > 在主机上建立帐户并授权 slave
 
-```
+```sh
 #在主机MySQL里执行授权命令
 GRANT REPLICATION SLAVE ON *.* TO 'slave'@'%' IDENTIFIED BY '123123';
 #查询master的状态
@@ -914,7 +997,7 @@ show master status;
 
 > 在从机上配置需要复制的主机
 
-```
+```sh
 #如果之前配置过主从需要停止原有的
 stop slave;
 reset master;
@@ -1550,55 +1633,36 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 
 ### Servlet、Filter、Listener、Interceptor的区别与联系？
 
-参考:  [Servlet、Filter、Listener、Interceptor的区别与联系?](https://blog.csdn.net/qq_40117549/article/details/84944840?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task ) 
+参考:  [Servlet、Filter、Listener、Interceptor的区别与联系?]( https://www.cnblogs.com/newsouls/p/3937732.html ) 
 
 
 
 ### Shiro
 
-参考：[Shiro面试知识点](https://www.jianshu.com/p/e6ca8cd7d823)
+参考：[Shiro面试知识点](https://www.jianshu.com/p/e6ca8cd7d823)   [Shiro工作流程](https://www.cnblogs.com/insaneXs/p/10999384.html)   [30分钟如何学会使用Shiro](https://blog.csdn.net/mxw2552261/article/details/79674871)   [SpringBoot+Shiro+Jwt实现登录认证](https://www.jianshu.com/p/9b6eb3308294)
 
 ```
-Apache Shiro是Java的一个安全(权限)框架
+1.指定配置文件，配置文件中指定authenticator（认证）类型。初始化生成securityManager，初始化securityManager中的authenticator（认证）和realms（源）。securityManager存储为全局变量。
 
-Shiro可以非常容易的开发出足够好的应用,其不仅可以用在JavaSE环境,也可以用在JavaEE环境
+2.创建或获取subject（用于代表当前用户的实体），线程私有变量，存储于threadlocal上。
 
-Shiro可以完成:认证、授权、加密、会话管理、与Web集成、缓存等
-```
+3.subject调用login（UsernamePasswordToken）方法，用于模拟用户登录，UsernamePasswordToken代表用户名和密码的抽象。
 
+4.委派给securityManager处理。
 
+5.securityManager委派给初始化时指定的authenticator（认证）真正处理。
 
-使用MD5盐值加密：
+6.authenticator循环realms，调用realm中的doGetAuthenticationInfo（用于身份验证）进行身份认证。可继承realm，
 
-```java
-1.在doGetAuthenticationInfo 方法返回创建SimpleAuthenticationInfo对象的时候，需要使用SimpleAuthenticionInfo("认证实体信息","密码","盐值","Realm")构造器，realName → getName()
-2.使用ByteSource.Util,byte("盐值") 计算盐值（一般使用ID，唯一标识）
-3.使用New SimpleHash("加密算法","密码","盐值","加密次数");计算盐值加密后的值
-```
+重写doGetAuthenticationInfo方法，在其中编写身份认证的业务逻辑。验证失败需抛异常。
 
+7.若需判断用户的角色或权限，调用subject（代表当前用户的实体）的hasroles等方法。
 
+8.委派给securityManager处理。
 
-认证流程
+9.securityManager委派给Authorizator（授权）处理。
 
-```java
-1.首先收集信息，创建UsernamePasswordToken对象，再由SecurityUtils得到Subject对象，调用它的login方法，同时传参UsernamePasswordToken对象，其会自动委托给SecurityManager
-2.SecurityManager 负责真正的身份验证逻辑，它会委托给 Authenticator 进行身份验证； 
-（Authenticator 才是真正的身份验证者，它会调用认证策略对Realm进行身份验证，同时把token传入Realm，从Realm获取分身验证信息，返回SimpleaAuthenticaionInfo对象，进行逻辑判断）
-3.Authenticator 才是真正的身份验证者，Shiro API 中核心的身份认证入口点，此处可以自定义插入自己的实现；
-4.Authenticator 可能会委托给相应的 AuthenticationStrategy 进行多 Realm 身份验证，默认 ModularRealmAuthenticator 会调用 AuthenticationStrategy 进行多 Realm 身份验证； 
-5.Authenticator 会把相应的 token 传入 Realm，从 Realm 获取 身份验证信息，如果没有返回/抛出异常表示身份验证失败了。此处 可以配置多个Realm，将按照相应的顺序及策略进行访问。
-```
-
-
-
-授权流程
-
-```java
-1.首先调用 Subject.isPermitted*/hasRole* 接口，其会委托给 SecurityManager，而 SecurityManager 接着会委托给 Authorizer
-2.Authorizer是真正的授权者，如果调用如 isPermitted(“user:view”)，其首先会通过PermissionResolver 把字符串转换成相应的 Permission 实例； 
-3.在进行授权之前，其会调用相应的 Realm 获取 Subject 相应的角色/权限用于匹配传入的角色/权限；（授权）
-（返回SimpleAuthorizationInfo对象，Authorizer 会判断Realm的角色/权限是否和传入的匹配，）
-4.Authorizer 会判断Realm的角色/权限是否和传入的匹配，如果有多个Realm，会委托给 ModularRealmAuthorizer进行循环判断，如果匹配如isPermitted*/hasRole*会返回true，否则返回false表示 授权失败。
+10.Authorizator调用realm的doGetAuthorizationInfo方法获取角色和权限，用于比较。
 ```
 
 
@@ -1835,6 +1899,44 @@ Nginx可以作为一个HTTP服务器进行网站的发布处理，另外Nginx可
 ```
 
 
+
+### Lvs + Keeplived + Nginx
+
+> Lvs
+
+```
+LVS是一个开源的软件，可以实现传输层四层负载均衡。LVS是Linux Virtual Server的缩写，意思是Linux虚拟服务器。目前有三种IP负载均衡技术（VS/NAT、VS/TUN和VS/DR）；八种调度算法（rr,wrr,lc,wlc,lblc,lblcr,dh,sh）。
+```
+
+
+
+> Keeplived
+
+```
+LVS可以实现负载均衡，但是不能够进行健康检查，比如一个rs出现故障，LVS 仍然会把请求转发给故障的rs服务器，这样就会导致请求的无效性。keepalive 软件可以进行健康检查，而且能同时实现 LVS 的高可用性，解决 LVS 单点故障的问题，其实 keepalive 就是为 LVS 而生的。
+```
+
+
+
+```
+LVS的负载能力强，因为其工作方式逻辑非常简单，仅进行请求分发，而且工作在网络的第4层，没有流量，所以其效率不需要有过多的忧虑。
+
+LVS基本能支持所有应用，因为工作在第4层，所以LVS可以对几乎所有应用进行负载均衡，包括Web、数据库等。
+
+注意：LVS并不能完全判别节点故障，比如在WLC规则下，如果集群里有一个节点没有配置VIP，将会导致整个集群不能使用。还有一些其他问题，目前尚需进一步测试。
+
+Nginx工作在网路第7层，所以可以对HTTP应用实施分流策略，比如域名、结构等。相比之下，LVS并不具备这样的功能，所以Nginx可使用的场合远多于LVS。并且Nginx对网络的依赖比较小，理论上只要Ping得通，网页访问正常就能连通。LVS比较依赖网络环境。只有使用DR模式且服务器在同一网段内分流，效果才能得到保证。
+
+Nginx可以通过服务器处理网页返回的状态吗、超时等来检测服务器内部的故障，并会把返回错误的请求重新发送到另一个节点。目前LVS和LDirectd 也支持对服务器内部情况的监控，但不能重新发送请求。
+
+比如用户正在上传一个文件，而处理该上传信息的节点刚好出现故障，则Nginx会把上传请求重新发送到另一台服务器，而LVS在这种情况下会直接断掉。Nginx还能支持HTTP和Email（Email功能很少有人使用），LVS所支持的应用在这个电商比Nginx更多。
+
+Nginx同样能承受很高负载并且能稳定运行，由于处理流量受限于机器I/O等配置，所以负载能力相对较差。
+
+Nginx 安装、配置及测试相对来说比较简单，因为有相应的错误日志进行提示。LVS的安装、配置及测试所花的时间比较长，因为LVS对网络以来比较大，很多时候有可能因为网络问题而配置不能成功，出现问题时，解决的难度也相对较大。Nginx本身没有现成的热备方案，所以在单机上运行风险较大，建议KeepAlived配合使用。另外，Nginx可以作为LVS的节点机器使用，充分利用Nginx的功能和性能。当然这种情况也可以直接使用Squid等其他具备分发功能的软件。
+
+具体应用具体分析。如果是比较小型的网站（每日PV小于100万），用户Nginx就完全可以应对，如果机器也不少，可以用DNS轮询。LVS后用的机器较多，在构建大型网站或者提供重要服务且机器较多时，可多加考虑利用LVS。
+```
 
 
 
@@ -4414,16 +4516,76 @@ Docker 本身是一个容器运行载体或称之为管理引擎。我们把应�
 
 
 
+#### Docker安装
+
+> 下载Docker依赖的环境
+
+```sh
+yum -y install yum-utils device-mapper-persistent-data lvm2
+```
+
+> 指定Docker镜像源
+
+```sh
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+```
+
+> 安装Docker
+
+```sh
+#依然采用yum的方式安装
+yum makacache
+yum -y install docker-ce
+```
+
+> 启动Docker并测试
+
+```sh
+安装成功后，需要手动启动，设置为开机自启，并测试一下Docker
+
+#启动Docker服务
+systemctl start docker
+#设置开机自动启动
+systemctl enable docker
+#测试
+docker run hello-world
+```
+
+> Docker中央仓库
+
+```sh
+Docker官方的中央仓库:这个仓库是镜像最全的，但是下载速度较慢。
+https://hub.docker.com/
+
+国内的镜像网站:网易蜂巢，daoCloud等，下载速度快，但是镜像相对不全。
+https://c.163yun.com/hub#/home
+http://hub.daocloud.io/(推荐使用）
+
+在公司内部会采用私服的方式拉取镜像，需要添加配置，如下......
+需要创建/etc/docker/daemon.json，并添加如下内容
+{
+	"registry-mirrors":["https://registry.docker-cn.com"],
+	"insecure-registries":["ip:port"]
+}
+#重启两个服务
+systemctl daemon-reload
+systemctl restart docker
+```
+
+
+
 #### Docker常用命令
 
 > Docker 镜像命令
 
 ```
+systemctl start docker 启动docker
+
 docker --hple	docker常用命令
 docker ps		查看docker进程
 
 docker images	列出本地主机上的镜像
-	-a :列出本地所有的镜像（含中间映像层）
+	-a :列出本地所有的镜像（含中间映像层，含没有运行）
 	-q :只显示镜像ID
 	--digests :显示镜像的摘要信息
 	--no-trunc :显示完整的镜像信息
@@ -4453,6 +4615,7 @@ docker rmi xxx 删除某个镜像/镜像ID
 	docker rmi hello-world 等价于 docker rmi hello-world:latest
 
 
+#从容器创建一个新的镜像
 docker commit -m=“提交的描述信息” -a=“作者” 容器ID 要创建的目标镜像名:[标签名]
 ```
 
@@ -4476,7 +4639,7 @@ docker run [OPTIONS] xxx IMAGE [COMMAND] 启动交互式容器
             hostPort:containerPort
             containerPort
      docker run -it centos	启动centos并分配终端      
-     docker run -it -p 8080:8080 tomcat
+     docker run -it -p 8081:8080 tomcat  将Linux8081映射到docker的8080
 
 docker ps 查看当前正在进行的docker进程
 	-a :列出当前所有正在运行的容器+历史上运行过的
@@ -4494,7 +4657,8 @@ docker restart 容器ID  返回容器信息以JSON字符串方式
 
 docker start 容器ID
 
-docker stop 容器ID
+docker stop 容器ID 停止容器
+docker stop $(docker ps -qa) 停止所有容器
 
 docker kill 容器ID 强制关闭容器
 
@@ -4513,8 +4677,8 @@ docker run -d xxx 启动守护式容器
     很重要的要说明的一点: Docker容器后台运行,就必须有一个前台进程.
     容器运行的命令如果不是那些一直挂起的命令（比如运行top，tail），就是会自动退出的。
 
-    这个是docker的机制问题,比如你的web容器,我们以nginx为例，正常情况下,我们配置启动服务只需要启动响应的service即可。例如
-    service nginx start
+    这个是docker的机制问题,比如你的web容器,我们以nginx为例，正常情况下,我们配置启动服务只需要启动响应的
+    service即可。例如service nginx start
     但是,这样做,nginx为后台进程模式运行,就导致docker前台没有运行的应用,
     这样的容器后台启动后,会立即自杀因为他觉得他没事可做了.
     所以，最佳的解决方案是,将你要运行的程序以前台进程的形式运行
@@ -4533,7 +4697,7 @@ docker inspect 容器ID 查看容器内部细节
 
 进入正在运行的容器并以命令行交互
 	docker exec -it 容器ID bashShell 	在外部执行docker容器的命令 [/bin/bash运行docker终端]
-			
+
 	docker attach 容器ID	重新进入
     
 	exec 是在容器中打开新的终端，并且可以启动新的进程
@@ -4593,10 +4757,43 @@ Docker镜像都是只读的
 
 
 
-#### Docker容器数据券
+#### Docker数据券
 
+> 创建数据券之后，默认会存放在一个目录下 /var/lib/docker/volumes/数据券名/_data
+
+```sh
+docker volume create 数据券名称
 ```
-容器的持久化
+
+> 查看数据券详情
+
+```sh
+docker volume inspect 数据券名称
+```
+
+> 查看全部数据券信息
+
+```sh
+docker volume ls
+```
+
+> 删除数据券
+
+```sh
+docker volume rm 数据券名称
+```
+
+> 容器映射数据券
+
+```sh
+映射有两种方式:
+1.通过路径映射数据卷，直接指定一个路径作为数据卷的存放位置。但是这个路径下是空的。
+#通过数据卷名称映射
+docker run -v数据卷名称:容器内部的路径镜像id
+
+2.通过数据卷名称映射，如果数据卷不存在。Docker会帮你自动创建，会将容器内部自带的文件，存储在默认的存放路径中。
+#通过路径映射数据卷
+docker run -v路径:容器内部的路径镜像id
 
 docker run -it -v /宿主机绝对路径目录:/容器内目录 镜像名 	容器宿主共享数据
 docker run -it -v /宿主机绝对路径目录:/容器内目录:ro 镜像名	携带权限
@@ -4631,7 +4828,7 @@ Dockerfile面向开发，Docker镜像成为交付标准，Docker容器则涉及�
 
 > DockerFile体系结构(保留字指令)
 
-```
+```sh
 FROM		基础镜像，当前新镜像是基于哪个镜像的
 MAINTAINER	镜像维护者的姓名和邮箱地址
 RUN			容器构建时需要运行的命令
@@ -4655,12 +4852,13 @@ ONBUILD		当构建一个被继承的Dockerfile时运行命令，父镜像在被�
 
 >自定义镜像mycentos
 
-```
+```sh
 1.编写DockerFile文件
 -------------------------------
 FROM centosMAINTAINER zzyy<zzyy167@126.com>
 ENV MYPATH /usr/localWORKDIR $MYPATH
-RUN yum -y install vimRUN yum -y install net-tools
+RUN yum -y install vim 
+RUN yum -y install net-tools
 EXPOSE 80
 CMD echo $MYPATHCMD echo "success--------------ok"CMD /bin/bash 
 -------------------------------
@@ -4689,22 +4887,22 @@ docker run -p 12345:3306
 -d mysql:5.7
 
 
--p 12345:3306：将主机的12345端口映射到docker容器的3306端口。
---name mysql：运行服务名字
--v /zzyyuse/mysql/conf:/etc/mysql/conf.d ：将主机/zzyyuse/mysql录下的conf/my.cnf 挂载到容器的 /etc/mysql/conf.d
--v /zzyyuse/mysql/logs:/logs：将主机/zzyyuse/mysql目录下的 logs 目录挂载到容器的 /logs。
--v /zzyyuse/mysql/data:/var/lib/mysql ：将主机/zzyyuse/mysql目录下的data目录挂载到容器的 /var/lib/mysql 
--e MYSQL_ROOT_PASSWORD=a9530.A.：初始化 root 用户的密码。
--d mysql:5.6 : 后台程序运行mysql5.6
+-p 12345:3306 #将主机的12345端口映射到docker容器的3306端口。
+--name mysql #运行服务名字
+-v /zzyyuse/mysql/conf:/etc/mysql/conf.d #将主机/zzyyuse/mysql录下的conf/my.cnf 挂载到容器的 /etc/mysql/conf.d
+-v /zzyyuse/mysql/logs:/logs #将主机/zzyyuse/mysql目录下的 logs 目录挂载到容器的 /logs。
+-v /zzyyuse/mysql/data:/var/lib/mysql #将主机/zzyyuse/mysql目录下的data目录挂载到容器的 /var/lib/mysql 
+-e MYSQL_ROOT_PASSWORD=a9530.A. #初始化 root 用户的密码。
+-d mysql:5.6 #后台程序运行mysql5.6
  
- docker exec -it MySQL运行成功后的容器ID     /bin/bash
+docker exec -it MySQL运行成功后的容器ID/bin/bash
 ```
 
 
 
 > MyTomcat的DockerFile
 
-```
+```sh
 FROM         centos
 MAINTAINER   Cai Peishen<peishen.cai@foxmail.com>
 
@@ -4740,11 +4938,166 @@ CMD /usr/local/apache-tomcat-9.0.8/bin/startup.sh && tail -F /usr/local/apache-t
 
 
 
+#### Docker Compose
+
+> Compose 简介
+
+```
+Compose 是用于定义和运行多容器 Docker 应用程序的工具。通过 Compose，您可以使用 YML 文件来配置应用程序需要的所有服务。然后，使用一个命令，就可以从 YML 文件配置中创建并启动所有服务。
+
+1.使用 Dockerfile 定义应用程序的环境
+2.使用 docker-compose.yml 定义构成应用程序服务，这样它们可以在隔离环境中一起运行
+3.最后，执行 docker-compose up 命令来启动并运行整个应用程序
+```
+
+
+
+> 安装
+
+```sh
+#去github官网搜索docker-compose，下载1.24.1版本的Docker-Compose 也可以直接再Linux中下载
+wget https://github.com/docker/compose/releases/download/1.24.1/docker-compose-Linux-x86_64
+#赋予权限 本身就是可以执行的文件 只是权限不够
+chmod 777 docker-compose-Linux-x86_64
+#放进/usr/local/bin目录下并修改文件名 etc/profile环境变量中会配置该路径 该目录下都是可以直接执行的命令
+mv docker-compose-Linux-x86_64 /usr/local/bin/docker-compose
+#在任意目录下输入
+docker-compose
+```
+
+
+
+> docker-compose.yml的 配置案例如下（配置参数参考下文）： 
+
+```yml
+# yaml 配置实例
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+      - logvolume01:/var/log
+    links:
+      - redis
+  redis:
+    image: redis
+volumes:
+  logvolume01: {}
+```
+
+
+
+> Docker-Compose管理MySQL和Tomcat容器
+
+```yml
+version: '3.1'
+services:
+  mysql: #服务的名称
+    restart: always #代表只要docker启动，那么这个容器就跟着一起启动
+    image: daocloud.io/library/mysql:5.7.4 #指定镜像路径
+    container_name: mysql #指定容器名称
+    ports: 
+      - 3307:3306 #指定端口号的映射 Linux的3307与容器的3306映射起来
+    environment: 
+      MYSQL_ROOT_PASSWORD: a9530.A. #指定MySQL的ROOT用户登录密码
+      TZ: Asia/Shanghai #指定时区
+    volumes: 
+      - /opt/docker/docker_mysql_tomcat/mysql_data:/var/lib/mysql #映射数据卷
+  tomcat:
+    restart: always
+    image: daocloud.io/library/tomcat:8.5.15-jre8
+    container_name: tomcat
+    ports:
+      - 8081:8080
+    environment: 
+      TZ: Asia/Shanghai
+    volumes: 
+      - /opt/docker/docker_mysql_tomcat/tomcat_webapps:/usr/local/tomcat/webapps
+      - /opt/docker/docker_mysql_tomcat/tomcat_logs:/usr/local/tomcat/logs
+```
+
+
+
+>使用docker-compose命令管理容器
+
+```sh
+#在使用docker-compose的命令时，默认会在当前目录下找docker-compose.yml文件
+
+#1.基于docker-compose.yml启动管理的容器
+docker-compose up -d
+
+#2.关闭并删除容器
+docker-compose down
+
+#3.开启|关闭|重启已经存在的由docker-compose维护的容器
+docker-compose start|stop|restart
+
+#4.查看由docker-compose管理的容器
+docker-compose ps
+
+#5.查看日志
+docker-compose logs -f
+```
+
+
+
+> docker-compose配合Dockerfile使用
+
+```sh
+#使用docker-compose.yml文件以及Dockerfile文件在生成自定义镜像的同时启动当前镜像，并且由docker-compose去管理容器
+```
+
+------
+
+```yml
+#编写docker-compose.yml文件
+# yml文件
+version: '3.1'
+services:
+  ssm:
+    restart: always
+    build: #构建自定义镜像
+      context: ./ #指定dockerfile文件的所在路径
+      dockerfile: Dockerfile #指定Dockerfile文件名称
+    image: ssm:1.0.1
+    container_name: ssm
+    ports:
+      - 8082:8080
+    environment:
+      TZ:Asia/Shanghai
+```
+
+------
+
+```dockerfile
+#编写Dockerfile文件
+FROM daocloud.io/library/tomcat:8.5.15-jre8
+COPY ssm /usr/local/tomcat/webapps/ssm
+#这里ssm是一个文件夹，如果是war包，则后面不用加ssm路径，
+#具体查看https://www.cnblogs.com/zdz8207/p/linux-docker-add-copy.html
+```
+
+------
+
+```sh
+#可以直接启动基于docker-compose .ym1以及Dockerfile文件构建的自定义镜像
+docker-compose up -d
+#如果自定义镜像不存在，会帮助我们构建出自定义镜像，如果自定义镜像已经存在，会直接运行这个自定义镜像
+#重新构建的话。
+#重新构建自定义镜像
+docker-compose build
+#运行当前内容，并重新构建
+docker-compose up -d --build
+```
+
 
 
 ### Spring Security
 
-参考：[认证流程](https://blog.csdn.net/yuanlaijike/article/details/84703690)  [配置方式](https://blog.csdn.net/houysx/article/details/80380831)  [配置方式]( https://blog.csdn.net/fellhair/article/details/91410281 )  [补充](https://www.cnblogs.com/yingbing/p/4552932.html    ) 
+参考：[认证流程](https://blog.csdn.net/yuanlaijike/article/details/84703690)  [配置方式](https://blog.csdn.net/houysx/article/details/80380831)  [配置方式](https://blog.csdn.net/fellhair/article/details/91410281)  [补充](https://www.cnblogs.com/yingbing/p/4552932.html    ) 
 
 ​	
 
@@ -5627,3 +5980,102 @@ Mycat 的原理中最重要的一个动词是“拦截”，它拦截了用户�
 ```
 
 
+
+
+
+### ElasticSearch
+
+#### 2.1.介绍
+
+```
+1.ES是一个使用Java语言并且基于Lucene编写的搜索引擎框架，他提供了分布式的全文搜索功能，提供了一个统一的基于RESTful风格的WEB接口，官方客户端也对多种语言都提供了相应的API。
+
+2.Lucene: Lucene本身就是一个搜索引擎的底层。
+
+3.分布式:ES主要是为了突出他的横向扩展能力。
+
+4.全文检索:将一段词语进行分词，并且将分出的单个词语统一的放到一个分词库中，在搜索时，根据关键字去分词库中检索，找到匹配的内容。(倒排索引)
+
+5.RESTful风格的WEB接口︰操作ES很简单，只需要发送一个HTTP请求，并且根据请求方式的不同，携带参数的同，执行相应的功能。
+
+6.应用广泛:Github.com，WIKI,Gold Man用ES每天维护将近10TB的数据。
+```
+
+
+
+#### 2.2.与Solr对比
+
+```
+Solr在查询死数据时，速度相对ES更快一些。但是数据如果是实时改变的，Solr的查询速度会降低很多，ES的查询的效率基本没有变化。
+
+Solr搭建基于需要依赖Zookeeper来帮助管理。ES本身就支持集群的搭建，不需要第三方的介入。
+
+最开始Solr的社区可以说是非常火爆，针对国内的文档并不是很多。在ES出现之后，ES的社区火爆程度直线上升，ES的文档非常健全。
+
+ES对现在云计算和大数据支持的特别好。
+```
+
+
+
+#### 2.3.倒排索引
+
+```
+将存放的数据，以一定的方式进行分词，并且将分词的内容存放到一个单独的分词库中。
+
+当用户去查询数据时，会将用户的查询关键字进行分词。
+
+然后去分词库中匹配内容，最终得到数据的id标识。
+
+根据id标识去存放数据的位置拉取到指定的数据。
+```
+
+
+
+> docker-compose.yml
+
+在docker-compose.yml同目录下执行 `docker-compose up -d`
+
+```yml
+version: "3.1"
+services: 
+  elasticsearch: 
+    image: daocloud.io/library/elasticsearch:6.5.4
+    restart: always
+    container_name: elasticsearch
+    ports:
+     - 9200:9200
+  kibana: 
+    image: daocloud.io/library/kibana:6.5.4
+    restart: always
+    container_name: kibana
+    ports: 
+     - 5601:5601
+    environment: 
+     - elasticsearch_url=http://192.168.199.109:9200
+    depends_on:
+     - elasticsearch
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+***
+
+技 术 无 他 ，唯 有 熟 尔。
+知 其 然		 ，也 知 其 所 以 然。
+踏 实 一 些 ，不 要 着 急， 你 想 要 的 岁 月 都 会 给 你。
+
+***
