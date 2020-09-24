@@ -1322,6 +1322,20 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
 参考：[Spring面试题](https://blog.csdn.net/a745233700/article/details/80959716)  [Spring Bean作用域](https://blog.csdn.net/qq_41083009/article/details/90743719)  [Spring源码分析](https://blog.csdn.net/nuomizhende45/article/details/81158383)  [Spring 中的观察者模式](https://www.cnblogs.com/dubhlinn/p/10725636.html))
 
+
+
+参考： [IOC容器结构](https://www.bilibili.com/video/BV1EE411u7YV?p=26)  [IOC父子容器](https://blog.csdn.net/fhjdzkp/article/details/78687513)
+
+```
+例如：我们事务注解放入了spring-context.xml，它的注解范围在service dao以及entity；如果将开启事务配置放入spring-mvc.xml，事务则无法控制.
+
+又或者，我们共有三个文件spring-context.xml、spring-security.xml、spring-mvc.xml，spring-context.xml引入了spring-security.xml
+如果想启用security注解权限的配置，在controller生效，应放入spring-mvc.xml
+如果想启用security注解权限的配置，在service、dao、entity生效，应放入spring-context.xml或者spring-security.xml
+```
+
+![](image\ServletContext容器.png)
+
 #### IOC基本原理
 
 ```java
@@ -1631,9 +1645,14 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mayikt.config
 
 
 
-### Servlet、Filter、Listener、Interceptor的区别与联系？
+### 彻底搞清拦截器和过滤器的区别
 
-参考:  [Servlet、Filter、Listener、Interceptor的区别与联系?]( https://www.cnblogs.com/newsouls/p/3937732.html ) 
+参考:   [彻底搞清拦截器和过滤器的区别](https://blog.csdn.net/longzhongxiaoniao/article/details/85727725)  [过滤器，拦截器，监听器的区别](https://www.cnblogs.com/lukelook/p/11079113.html)
+
+```
+三者使用场景
+三者功能类似，但各有优势，从过滤器--》拦截器--》切面，拦截规则越来越细致，执行顺序依次是过滤器、拦截器、切面。一般情况下数据被过滤的时机越早对服务的性能影响越小，因此我们在编写相对比较公用的代码时，优先考虑过滤器，然后是拦截器，最后是aop。比如权限校验，一般情况下，所有的请求都需要做登陆校验，此时就应该使用过滤器在最顶层做校验；日志记录，一般日志只会针对部分逻辑做日志记录，而且牵扯到业务逻辑完成前后的日志记录，因此使用过滤器不能细致地划分模块，此时应该考虑拦截器，然而拦截器也是依据URL做规则匹配，因此相对来说不够细致，因此我们会考虑到使用AOP实现，AOP可以针对代码的方法级别做拦截，很适合日志功能。
+```
 
 
 
@@ -1866,6 +1885,12 @@ TCP/IP协议族中最重要的一点就是分层。按层次分别分为：应�
 ### RPC面试题
 
 参考：[RPC面试题](https://www.cnblogs.com/feifeicui/p/10431529.html )
+
+
+
+### HTTPS
+
+参考：[https加密机制](https://blog.csdn.net/iCode_girl/article/details/108541202)   [https原理](http://www.easemob.com/news/3706)
 
 
 
@@ -3356,19 +3381,14 @@ fun2();
 
 ### OAuth2
 
-参考：[如何理解OAuth2](http://www.ruanyifeng.com/blog/2019/04/oauth_design.html)  [OAuth 2.0 的四种方式](http://www.ruanyifeng.com/blog/2019/04/oauth-grant-types.html)
-
-> OAuth2针对特定问题的一种解决方案(JWT是实现)，按照一定规则生成字符串，字符串包含用户信息
+参考：[如何理解OAuth2](http://www.ruanyifeng.com/blog/2019/04/oauth_design.html)  [OAuth 2.0 的四种方式](http://www.ruanyifeng.com/blog/2019/04/oauth-grant-types.html)  
 
 ```
-1.授权码
-2.隐藏式
-3.密码式
-4.凭证式
+JWT，是TOKEN的一种形式，TOKEN说简单了，就是一个秘钥(随机数）。以往的TOKEN，你拿到之后要获取用户信息，需要再去数据库匹配查询，而JWT干脆将用户信息存储在了TOKEN里，你解析就可以获得。所以，两者根本就不是一种东西。
 
-主要解决两个问题
-	1.开放系统间的授权	
-	2.分布式访问问题
+OAUTH2.0是一种授权方式，一种流程规范。比如说你要访问某个论坛，但是你不想重新注册，你想用QQ号登陆！（需要论坛先在QQ开放平台注册），那么你登录的时候，选择QQ，它就会跳转到QQ的登录页面，你登录完，再跳转到论坛。论坛就会获取QQ给的授权信息。我这里只是简单说一下流程，具体会复杂很多。
+
+OAuth2用在使用第三方账号登录的情况(比如使用weibo, qq, github登录某个app)。OAuth2是一个相对复杂的协议, 有4种授权模式, 其中的access code模式在实现时可以使用jwt才生成code, 也可以不用. 它们之间没有必然的联系. 
 ```
 
 
@@ -5119,9 +5139,86 @@ docker-compose up -d --build
 
 ### Spring Security
 
-参考：[Spring Security系列](https://blog.csdn.net/yuanlaijike/category_9283872.html)  [另一个](https://blog.csdn.net/qq_22172133/category_8615344.html)  [配置方式](https://blog.csdn.net/fellhair/article/details/91410281) 
+参考：[Spring Security系列](https://blog.csdn.net/yuanlaijike/category_9283872.html)  [另一个](https://blog.csdn.net/qq_22172133/category_8615344.html)  [配置方式](https://blog.csdn.net/fellhair/article/details/91410281)  [江南一点雨Spring Security](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzI1NDY0MTkzNQ==&action=getalbum&album_id=1319828555819286528&scene=173#wechat_redirect)    [FilterChainProxy](https://my.oschina.net/u/2518341/blog/2874530)
 
 ![](image\spring-security执行流程.jpg)
+
+
+
+#### 添加验证码验证
+
+> 一、自定义过滤器处理验证码
+
+1. 自定义过滤器继承自 GenericFilterBean，并实现其中的 doFilter 方法 
+
+   ```
+   @Component
+   publicclass VerifyCodeFilter extends GenericFilterBean {
+       private String defaultFilterProcessUrl = "/doLogin";
+   
+       @Override
+       public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+               throws IOException, ServletException {
+           HttpServletRequest request = (HttpServletRequest) req;
+           HttpServletResponse response = (HttpServletResponse) res;
+           if ("POST".equalsIgnoreCase(request.getMethod()) && defaultFilterProcessUrl.equals(request.getServletPath())) {
+               // 验证码验证
+               String requestCaptcha = request.getParameter("code");
+               String genCaptcha = (String) request.getSession().getAttribute("index_code");
+               if (StringUtils.isEmpty(requestCaptcha))
+                   thrownew AuthenticationServiceException("验证码不能为空!");
+               if (!genCaptcha.toLowerCase().equals(requestCaptcha.toLowerCase())) {
+                   thrownew AuthenticationServiceException("验证码错误!");
+               }
+           }
+           chain.doFilter(request, response);
+       }
+   }
+   ```
+
+   ```
+   自定义过滤器继承自 GenericFilterBean，并实现其中的 doFilter 方法，在 doFilter 方法中，当请求方法是 POST，并且请求地址是 /doLogin 时，获取参数中的 code 字段值，该字段保存了用户从前端页面传来的验证码，然后获取 session 中保存的验证码，如果用户没有传来验证码，则抛出验证码不能为空异常，如果用户传入了验证码，则判断验证码是否正确，如果不正确则抛出异常，否则执行 chain.doFilter(request, response); 使请求继续向下走。
+   ```
+
+   
+
+2.  在 Spring Security 的配置中，配置过滤器 
+
+   ```java
+   @Configuration
+   publicclass SecurityConfig extends WebSecurityConfigurerAdapter {
+   
+       @Autowired
+       VerifyCodeFilter verifyCodeFilter;
+       ...
+       ...
+       @Override
+       protected void configure(HttpSecurity http) throws Exception {
+           http.addFilterBefore(verifyCodeFilter, UsernamePasswordAuthenticationFilter.class);
+           http.authorizeRequests()
+                   .antMatchers("/admin/**").hasRole("admin")
+                   ...
+                   ...
+                   .permitAll()
+                   .and()
+                   .csrf().disable();
+       }
+   }
+   ```
+
+   ```
+   这里只贴出了部分核心代码，即 http.addFilterBefore(verifyCodeFilter, UsernamePasswordAuthenticationFilter.class); ，如此之后，整个配置就算完成了。
+   ```
+
+   
+
+> 二、自定义过滤器处理验证码
+
+1. 自定义WebAuthenticationDetails 和 自定义 AuthenticationProvider
+
+
+
+#### 认证流程
 
 
 
