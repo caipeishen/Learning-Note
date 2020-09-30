@@ -824,7 +824,14 @@ source /etc/profile
 
 ### Linux安装MySQL
 
-参考：[Linux安装MySQL](https://www.jianshu.com/p/4587e9429702)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)
+参考：[Linux安装MySQL](https://www.jianshu.com/p/4587e9429702)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)   [Windows安装MySQL8](https://www.cnblogs.com/tangyb/p/8971658.html)
+
+```
+2.2修改MySQL8.0的密码的编码方式
+由于MySQL8.0修改了他的编码方式,而Navicat没有这个编码方式的密码,因此,就只能将密码的编码方式修改为原来的编码方式了,不然就登录不了。
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'Abcd@1234';
+FLUSH PRIVILEGES;
+```
 
 
 
