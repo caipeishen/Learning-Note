@@ -1327,7 +1327,9 @@ ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 参考： [IOC容器结构](https://www.bilibili.com/video/BV1EE411u7YV?p=26)  [IOC父子容器](https://blog.csdn.net/fhjdzkp/article/details/78687513)
 
 ```
-例如：我们事务注解放入了spring-context.xml，它的注解范围在service dao以及entity；如果将开启事务配置放入spring-mvc.xml，事务则无法控制.
+例如：
+我们事务注解支持(<tx:annotation-driven/>)放入了spring-context.xml，它的注解范围在service dao以及entity；
+如果将事务注解支持放入spring-mvc.xml，事务注解(@Transaction)放在service上无效.
 
 又或者，我们共有三个文件spring-context.xml、spring-security.xml、spring-mvc.xml，spring-context.xml引入了spring-security.xml
 如果想启用security注解权限的配置，在controller生效，应放入spring-mvc.xml
