@@ -824,7 +824,7 @@ source /etc/profile
 
 ### Linux安装MySQL
 
-参考：[Linux安装MySQL](https://www.jianshu.com/p/276d59cbc529)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)
+参考：[Linux安装MySQL](https://www.jianshu.com/p/4587e9429702)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)
 
 
 
