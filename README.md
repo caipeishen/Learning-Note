@@ -678,7 +678,7 @@ imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
 
 ### CentOS 7安装
 
-参考：[Centos7安装](https://www.cnblogs.com/set-config/p/9040407.html)  [网络配置以及安装图形化界面](https://www.cnblogs.com/zqyw/p/11202560.html)  [没有网络](https://www.cnblogs.com/Vincent-yuan/p/10802023.html)
+参考：[Centos7安装](https://www.cnblogs.com/set-config/p/9040407.html)  [网络配置以及安装图形化界面](https://www.cnblogs.com/zqyw/p/11202560.html)  [没有网络](https://www.cnblogs.com/Vincent-yuan/p/10802023.html)  [网络配置](https://blog.csdn.net/lyf_ldh/article/details/78695357)
 
 
 
@@ -903,6 +903,15 @@ yum install -y gcc-c++
 　　　　rm -rf /usr/bin/redis-* //删除所有redis相关命令脚本
 
 　　　　rm -rf /root/download/redis-4.0.4 //删除redis解压文件夹
+```
+
+
+
+> io.lettuce.core.RedisConnectionException 
+
+```
+1).注释掉 #bin 127.0.0.1 (原因：bind 127.0.0.1生效，只能本机访问redis)
+2).将 protected-mode yes 改为：protected-mode no （原因：把yes改成no，允许外网访问）
 ```
 
 
@@ -2314,6 +2323,22 @@ public void export(@RequestBody JSONObject data){
 
 
 
+### 预检请求
+
+参考：[options预检请求](https://www.jianshu.com/p/f69e38ca6465)
+
+```
+当采用CORS（跨域资源共享）来解决跨域问题时，需要前后端配合。
+在发送CORS请求时，如果是简单请求（具体解释看后面）则直接发送，
+否则浏览器检测到跨域请求，会自动发出一个 options请求来检测本次请求是否被服务器接受。
+
+服务端收到该预检请求后，接受则会返回与CORS相关的响应头，不接受则会没响应，后续的浏览器请求无法发出。
+服务端通过后，浏览器会发送正式的数据请求。
+这样，总共发送了两次请求，一个是预检请求，一个是正式数据请求。这些都可以在浏览器的网络请求中看到。
+```
+
+
+
 ### Jackson FastJson
 
 参考：[性能差异](https://blog.csdn.net/u013433821/article/details/82905222)
@@ -2610,15 +2635,28 @@ export function getDateDiff(dateStr){
 
 ### RabbitMQ
 
-参考：[RabbitMQ](https://blog.csdn.net/hellozpc/article/details/81436980#8SpringbootRabbitMQ_1273) [Rabbit面试](https://blog.csdn.net/weixin_43496689/article/details/103159268)  [Rabbit详解](https://www.cnblogs.com/williamjie/p/9481774.html)  [springboot + rabbitmq发送邮件案例](https://www.jianshu.com/p/dca01aad6bc8)  [RabbitMQ专业](http://www.iocoder.cn/Spring-Boot/RabbitMQ/)
+参考：[RabbitMQ]( https://www.bilibili.com/video/BV1Qv411B7WS?p=1)  [RabbitMQ之消息持久化](https://blog.csdn.net/u013256816/article/details/60875666/)  [死信队列](https://blog.csdn.net/qq_37960603/article/details/104295562) 
+
+```
+市面上比较火爆的几款MQ:
+ActiveMQ，RocketMQ，Kafka，RabbitMQ
+
+语言的支持:ActiveMQ，RocketMQ只支持Java语言，Kafka可以支持多们语言，RabbitMQ支持多种语言。
+效率方面:ActiveMQ，RocketMQ，Kalka效率都是毫秒级别，RabbitMQ是微秒级别的。
+消息丢失，消息重复问题:RabbitMQ针对消息的持久化，和重复问题都有比较成熟的解决方案。
+
+学习成本:RabbitMQ非常简单。
+RabbitMQ是由Rabbit公司去研发和维护的，最终是在Pivotal。
+RabbitMQ严格的遵循AMQP协议，高级消息队列协议，帮助我们在进程之间传递异步消息。
+
+纠正一个错误千锋教育视频中说exchange没有持久化，是有的并且要设置，看RabbitMQ之消息持久化
+```
+
+![](image\RabbitMQ完整架构图.png)
 
 
 
-![](image/Rabbit内部结构图.jpg)
-
-
-
-> RabbitMQ有四种Exchange类型，分别是Direct 、Topic、Fanout 、Headers
+#### Exchange类型
 
 ```
 Direct Exchange 路由模式：默认类型，根据路由键（Routing Key）将消息投递给对应队列。
@@ -2629,18 +2667,317 @@ Headers Exchange 直连交换机：发送消息时匹配 Header 而非 Routing K
 
 
 
->prefetch与消息投递
+#### 消息可靠性
 
 ```
-prefetch与消息投递
-prefetch允许为每个consumer指定最大的unacked messages数目。简单来说就是用来指定一个consumer一次可以从Rabbit中获取多少条message并缓存在client中(RabbitMQ提供的各种语言的client library)。一旦缓冲区满了，Rabbit将会停止投递新的message到该consumer中直到它发出ack。
+1.消费者在消费消息时，如果执行一般，消费者宕机了怎么办?手动ACK。
+2.如果消息已经到达了RabbitMQ，但是RabbitMQ宕机了，消息是不是就丢了?Exchange、消息、Queue有持久化机制。
+3.生产者发送消息时，由于网络问题，导致消息没发送到RabbitMQ? RabbitMQ提供了事务操作，和Confirm(生产者发送消息到exchange)
+4.exchange→queue Return机制(捕捉丢失的消息)
+```
 
-假设prefetch值设为10，共有两个consumer。意味着每个consumer每次会从queue中预抓取 10 条消息到本地缓存着等待消费。同时该channel的unacked数变为20。而Rabbit投递的顺序是，先为consumer1投递满10个message，再往consumer2投递10个message。如果这时有新message需要投递，先判断channel的unacked数是否等于20，如果是则不会将消息投递到consumer中，message继续呆在queue中。之后其中consumer对一条消息进行ack，unacked此时等于19，Rabbit就判断哪个consumer的unacked少于10，就投递到哪个consumer中。
 
-总的来说，consumer负责不断处理消息，不断ack，然后只要unacked数少于prefetch * consumer数目，broker就不断将消息投递过去。
 
-channel = connection.createChannel();
-channel.basicQos(prefetch);
+##### Ack
+
+```
+只需要在消费者端，添加Qos能力以及更改为手动ack即可让消费者，
+根据自己的能力去消费指定的消息，而不是默认情况下由RabbitMQ平均分配了
+生产者不变，正常发布消息到默认的exchange，并指定routing
+```
+
+> 消费者指定Qos和手动ack
+
+```java
+//指定当前消费者，一次消费多少个消息
+channel.basicQos(1);
+//开启监听Queue
+DefaultConsumer consume = new DefaultConsumer(channel){
+    @Override
+    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        Jedis jedis = new Jedis("192.168.199.109",6379);
+        String messageId = properties.getMessageId();
+        //1. setnx到Redis中，默认指定value-0
+        String result = jedis.set(messageId, "0", "NX", "EX", 10);
+        if(result != null && result.equalsIgnoreCase("OK")) {
+            System.out.println("接收到消息：" + new String(body, "UTF-8"));
+            //2. 消费成功，set messageId 1
+            jedis.set(messageId,"1");
+            channel.basicAck(envelope.getDeliveryTag(),false);
+        }else {
+            //3. 如果1中的setnx失败，获取key对应的value，如果是0，return，如果是1
+            String s = jedis.get(messageId);
+            if("1".equalsIgnoreCase(s)){
+                channel.basicAck(envelope.getDeliveryTag(),false);
+            }
+        }
+    }
+};
+//手动ack
+//参数1：queue - 指定消费哪个队列
+//参数2：autoAck - 指定是否自动ACK （true，接收到消息后，会立即告诉RabbitMQ）
+//参数3：consumer - 指定消费回调
+channel.basicConsume("HelloWorld",false,consume);
+```
+
+
+
+>SpringBoot手动Ack
+
+```yml
+//配置文件
+spring:
+  rabbitmq:
+    listener:
+    simple:
+      acknowledge-mode: manual
+```
+
+```java
+//手动ack
+@RabbitListener(queues = "boot-queue")
+public void getMessage(String msg, Channel channel, Message message) throws IOException {
+    System.out.println("接收到消息：" + msg);
+    //手动ack
+    channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+}
+```
+
+
+
+##### Confirm 
+
+```
+解决生产者到RabbitMQ(Exchange)消息丢失
+
+RabbitMQ的事务:事务可以保证消息100%传递，可以通过事务的回漆去记录日志，后面定时再次发送当前消息。
+事务的操作，效率太低，加了事务操作后，比平时的操作效率至少要慢100倍。
+RabbitMQ除了事务，还提供了Confirm的确认机制，这个效率比事务高很多。
+```
+
+
+
+> 1.普通confirm
+
+```java
+//1.开启confirm
+channel.confirmseleCt();
+//2.判断消息发送是否成功
+if(channel.waitForConfirms(）{
+	System.out.println("消息发送成功"):
+}else{
+	System.out.println("发送消息失败"）;
+}
+```
+
+
+
+> 2.批量confirm
+
+```java
+//1.开启confirm
+channel.confirmSelect();
+//2.批量发送消息
+for (int i = a; i<1000; i++）{
+	String msg ="Hello-World!" + i;
+	channel.basicPublish("","HelloWorld" ,null,msg.getBytes());
+}
+//3.确定批量操作是否成功
+channel.waitForConfirmsOrDie(); //当你发送的全部消息，有一个失败的时候，就直接全部失败抛出异常IOException
+```
+
+
+
+> 3.异步confirm
+
+```java
+//1. 发布消息到exchange
+channel.confirmSelect();
+//2.批量发送消息
+for (int i = a; i<1000; i++）{
+	String msg ="Hello-World!" + i;
+	channe1 .basicPublish("","HelloWorld" ,null,msg.getBytes());
+}
+//3.开启异步回调
+channel.addConfirmListener(new ConfirmListener() {
+    @Override
+    public void handleAck(long deliveryTag, boolean multiple) throws IOException {
+        System.out.println("消息发送成功，标识：" + deliveryTag + ",是否是批量" + multiple);
+    }
+
+    @Override
+    public void handleNack(long deliveryTag, boolean multiple) throws IOException {
+        System.out.println("消息发送失败，标识：" + deliveryTag + ",是否是批量" + multiple);
+    }
+});
+```
+
+
+
+
+
+##### Return 机制
+
+```
+解决Exchange到Queue消息丢失
+
+Confirm只能保证消息到达cxchange，无法保证消息可以被exchange分发到指定qucue.
+而且exchange是不能持久化消息的，queue是可以持久化消息。
+采用Return机制来监听消息是否从exchange送到了指定的queue中
+```
+
+
+
+> 开启Return机制，并在发送消息时，指定mandatory为true
+
+```java
+// 开启return机制
+channel.addReturnListener(new ReturnListener() {
+    @Override
+    public void handleReturn(int replyCode, String replyText, String exchange, String routingKey, AMQP.BasicProperties properties, byte[] body) throws IOException {
+       // 当消息没有送达到queue时，才会执行。
+       System.out.println(new String(body,"UTF-8") + "没有送达到Queue中！！");
+    }
+});
+// 在发送消息时，指定mandatory参数为true
+channel.basicPublish("","HelloWorld",true,properties,msg.getBytes());
+```
+
+
+
+> SpringBoot实现Return机制
+
+```yml
+spring:
+  rabbitmq:
+    publisher-confirm-type: simple
+    publisher-returns: true
+```
+
+```java
+//开启Confirm和Return
+
+@Component
+public class PublisherConfirmAndReturnConfig implements RabbitTemplate.ConfirmCallback ,RabbitTemplate.ReturnCallback {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @PostConstruct  // init-method
+    public void initMethod(){
+        rabbitTemplate.setConfirmCallback(this);
+        rabbitTemplate.setReturnCallback(this);
+    }
+
+    @Override
+    public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+        if(ack){
+            System.out.println("消息已经送达到Exchange");
+        }else{
+            System.out.println("消息没有送达到Exchange");
+        }
+    }
+
+    @Override
+    public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
+        System.out.println("消息没有送达到Queue");
+    }
+}
+
+```
+
+
+
+#### 重复消费
+
+```
+为了解决消息重复消费的问题，可以采用Redis，在消费者消费消息之前，现将消息的id放到Redis中,
+id-0(正在执行业务)
+id-1（执行业务成功)
+如果ack失败，在RabbitMQ将消息交给其他的消费者时，
+先获取key,存在，如果为0，则什么都不做，为1，直接ack；不存在设置为0，执行业务，再设置为1，最后ack
+
+极端情况:第一个消费者在执行业务时，出现了死锁，在设置redis时，再给key设置一个生存时间。
+```
+
+
+
+> 生产者，发送消息时，指定messageld
+
+```java
+//生产者，发送消息时，指定messageld
+AMQP.BasicProperties properties = new AMQP.BasicProperties().builder()
+    .deliveryMode(1)     //指定消息书否需要持久化 1 - 需要持久化  2 - 不需要持久化
+    .messageId(UUID.randomUUID().toString())
+    .build();
+String msg = "Hello-World！";
+channel.basicPublish("","HelloWorld",true,properties,msg.getBytes());
+```
+
+> 消费者，在消费消息时，根据具体业务逻辑去操作redis
+
+```java
+//4. 开启监听Queue
+DefaultConsumer consume = new DefaultConsumer(channel){
+    @Override
+    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        Jedis jedis = new Jedis("192.168.199.109",6379);
+        String messageId = properties.getMessageId();
+        //1. setnx到Redis中，默认指定value-0
+        String result = jedis.set(messageId, "0", "NX", "EX", 10);
+        if(result != null && result.equalsIgnoreCase("OK")) {
+            System.out.println("接收到消息：" + new String(body, "UTF-8"));
+            //2. 消费成功，set messageId 1
+            jedis.set(messageId,"1");
+            channel.basicAck(envelope.getDeliveryTag(),false);
+        }else {
+            //3. 如果1中的setnx失败，获取key对应的value，如果是0，return，如果是1
+            String s = jedis.get(messageId);
+            if("1".equalsIgnoreCase(s)){
+                channel.basicAck(envelope.getDeliveryTag(),false);
+            }
+        }
+    }
+};
+channel.basicConsume("HelloWorld",false,consume);
+```
+
+
+
+> SpringBoot实现
+
+```java
+//生产者
+@Test
+void contextLoads() throws IOException {
+    CorrelationData messageId = new CorrelationData(UUID.randomUUID().toString());
+    rabbitTemplate.convertAndSend("boot-topic-exchange","slow.red.dog","红色大狼狗！！",messageId);
+    System.in.read();
+}
+```
+
+```java
+//消费者
+@RabbitListener(queues = "boot-queue")
+public void getMessage(String msg, Channel channel, Message message) throws IOException {
+    //0. 获取MessageId
+    String messageId = message.getMessageProperties().getHeader("spring_returned_message_correlation");
+    //1. 设置key到Redis
+    if(redisTemplate.opsForValue().setIfAbsent(messageId,"0",10, TimeUnit.SECONDS)) {
+        //2. 消费消息
+        System.out.println("接收到消息：" + msg);
+
+        //3. 设置key的value为1
+        redisTemplate.opsForValue().set(messageId,"1",10,TimeUnit.SECONDS);
+        //4.  手动ack
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+    }else {
+        //5. 获取Redis中的value即可 如果是1，手动ack
+        if("1".equalsIgnoreCase(redisTemplate.opsForValue().get(messageId))){
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+        }
+    }
+}
 ```
 
 
@@ -3393,6 +3730,13 @@ fun2();
 参考：[如何理解OAuth2](http://www.ruanyifeng.com/blog/2019/04/oauth_design.html)  [OAuth 2.0 的四种方式](http://www.ruanyifeng.com/blog/2019/04/oauth-grant-types.html)  
 
 ```
+单点登录是用户访问A,用户访问B
+OAuth2是用户访问A，A去访问B
+```
+
+
+
+```
 JWT，是TOKEN的一种形式，TOKEN说简单了，就是一个秘钥(随机数）。以往的TOKEN，你拿到之后要获取用户信息，需要再去数据库匹配查询，而JWT干脆将用户信息存储在了TOKEN里，你解析就可以获得。所以，两者根本就不是一种东西。
 
 OAUTH2.0是一种授权方式，一种流程规范。比如说你要访问某个论坛，但是你不想重新注册，你想用QQ号登陆！（需要论坛先在QQ开放平台注册），那么你登录的时候，选择QQ，它就会跳转到QQ的登录页面，你登录完，再跳转到论坛。论坛就会获取QQ给的授权信息。我这里只是简单说一下流程，具体会复杂很多。
@@ -3440,6 +3784,68 @@ redirecturl: http://guli.shop/api/ucenter/wx/callback
 
 
 
+#### 授权码模式
+
+- ##### 流程
+
+  说明：【A服务客户端】需要用到【B服务资源服务】中的资源
+
+  第一步：【A服务客户端】将用户自动导航到【B服务认证服务】，这一步用户需要提供一个回调地址，以备【B服务认证服务】返回授权码使用。
+
+  第二步：用户点击授权按钮表示让【A服务客户端】使用【B服务资源服务】，这一步需要用户登录B服务，也就是说用户要事先具有B服务的使用权限。
+
+  第三步：【B服务认证服务】生成授权码，授权码将通过第一步提供的回调地址，返回给【A服务客户端】。注意这个授权码并非通行【B服务资源服务】的通行凭证。
+
+  第四步：【A服务认证服务】携带上一步得到的授权码向【B服务认证服务】发送请求，获取通行凭证token。
+
+  第五步：【B服务认证服务】给【A服务认证服务】返回令牌token和更新令牌refresh token。
+
+- ##### 使用场景
+
+  授权码模式是OAuth2中最安全最完善的一种模式，应用场景最广泛，可以实现服务之间的调用，常见的微信，QQ等第三方登录也可采用这种方式实现。
+
+#### 简化模式
+
+- 流程
+
+  说明：简化模式中没有【A服务认证服务】这一部分，全部有【A服务客户端】与B服务交互，整个过程不再有授权码，token直接暴露在浏览器。
+
+  第一步：【A服务客户端】将用户自动导航到【B服务认证服务】，这一步用户需要提供一个回调地址，以备【B服务认证服务】返回token使用，还会携带一个【A服务客户端】的状态标识state。
+
+  第二步：用户点击授权按钮表示让【A服务客户端】使用【B服务资源服务】，这一步需要用户登录B服务，也就是说用户要事先具有B服务的使用权限。
+
+  第三步：【B服务认证服务】生成通行令牌token，token将通过第一步提供的回调地址，返回给【A服务客户端】。
+
+- 使用场景
+
+  适用于A服务没有服务器的情况。比如：纯手机小程序，JavaScript语言实现的网页插件等。
+
+#### 密码模式
+
+- 流程
+
+  第一步：直接告诉【A服务客户端】自己的【B服务认证服务】的用户名和密码
+
+  第二步：【A服务客户端】携带【B服务认证服务】的用户名和密码向【B服务认证服务】发起请求获取token。
+
+  第三步：【B服务认证服务】给【A服务客户端】颁发token。
+
+- 使用场景
+
+  此种模式虽然简单，但是用户将B服务的用户名和密码暴露给了A服务，需要两个服务信任度非常高才能使用。
+
+#### 客户端模式
+
+- 流程
+
+  说明：这种模式其实已经不太属于OAuth2的范畴了。A服务完全脱离用户，以自己的身份去向B服务索取token。换言之，用户无需具备B服务的使用权也可以。完全是A服务与B服务内部的交互，与用户无关了。
+
+  第一步：A服务向B服务索取token。
+
+  第二步：B服务返回token给A服务。
+
+- 使用场景A服务本身需要B服务资源，与用户无关。
+
 
 
 ### SSO单点登陆
@@ -3481,6 +3887,16 @@ token：按照一定规则生成字符串，字符串可以包含用户信息
 ### JWT实现Token验证
 
 参考：[JWT](https://www.jianshu.com/p/e88d3f8151db)   [JWT常见问题](https://blog.csdn.net/u013089490/article/details/84443667)  [JWT面试](https://blog.csdn.net/MINGJU2020/article/details/103039418?depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1&utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1)  Token理解
+
+```
+JWT生成的token由三部分组成：
+头部：主要设置一些规范信息，签名部分的编码格式就在头部中声明。
+载荷：token中存放有效信息的部分，比如用户名，用户角色，过期时间等，但是不要放密码，会泄露！
+签名：将头部与载荷分别采用base64编码后，用“.”相连，再加入盐，最后使用头部声明的编码类型进行编
+码，就得到了签名。
+```
+
+
 
 ```
 1.调用登录接口返回token
@@ -3597,6 +4013,23 @@ public class JwtUtils {
         return (String)claims.get("id");
     }
 }
+```
+
+### 非对称加密RSA介绍 
+
+```
+基本原理：同时生成两把密钥：私钥和公钥，私钥隐秘保存，公钥可以下发给信任客户端 
+
+私钥加密，持有私钥或公钥才可以解密 
+公钥加密，持有私钥才可解密 
+
+优点：安全，难以破解 
+
+缺点：算法比较耗时，为了安全，可以接受 
+
+历史：三位数学家Rivest、Shamir 和 Adleman 设计了一种算法，可以实现非对称加密。这种算法用他们三 
+
+个人的名字缩写：RSA。
 ```
 
 
@@ -5027,7 +5460,7 @@ services:
   web:
     build: .
     ports:
-      - "5000:5000"
+      - 5000:5000
     volumes:
       - .:/code
       - logvolume01:/var/log
@@ -5148,88 +5581,118 @@ docker-compose up -d --build
 
 ### Spring Security
 
-参考：[Spring Security系列](https://blog.csdn.net/yuanlaijike/category_9283872.html)  [另一个](https://blog.csdn.net/qq_22172133/category_8615344.html)  [配置方式](https://blog.csdn.net/fellhair/article/details/91410281)  [江南一点雨Spring Security](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzI1NDY0MTkzNQ==&action=getalbum&album_id=1319828555819286528&scene=173#wechat_redirect)    [FilterChainProxy](https://my.oschina.net/u/2518341/blog/2874530)
+参考：[Spring Security系列](https://blog.csdn.net/yuanlaijike/category_9283872.html) [黑马教程](https://www.bilibili.com/video/BV1EE411u7YV?p=2)  [配置方式](https://blog.csdn.net/fellhair/article/details/91410281) 
 
 ![](image\spring-security执行流程.jpg)
 
 
 
-#### 添加验证码验证
+#### 认证
 
-> 一、自定义过滤器处理验证码
+```java
+public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
-1. 自定义过滤器继承自 GenericFilterBean，并实现其中的 doFilter 方法 
+    private AuthenticationManager authenticationManager;
+    private RsaKeyProperties prop;
 
-   ```
-   @Component
-   publicclass VerifyCodeFilter extends GenericFilterBean {
-       private String defaultFilterProcessUrl = "/doLogin";
-   
-       @Override
-       public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-               throws IOException, ServletException {
-           HttpServletRequest request = (HttpServletRequest) req;
-           HttpServletResponse response = (HttpServletResponse) res;
-           if ("POST".equalsIgnoreCase(request.getMethod()) && defaultFilterProcessUrl.equals(request.getServletPath())) {
-               // 验证码验证
-               String requestCaptcha = request.getParameter("code");
-               String genCaptcha = (String) request.getSession().getAttribute("index_code");
-               if (StringUtils.isEmpty(requestCaptcha))
-                   thrownew AuthenticationServiceException("验证码不能为空!");
-               if (!genCaptcha.toLowerCase().equals(requestCaptcha.toLowerCase())) {
-                   thrownew AuthenticationServiceException("验证码错误!");
-               }
-           }
-           chain.doFilter(request, response);
-       }
-   }
-   ```
+    public JwtLoginFilter(AuthenticationManager authenticationManager, RsaKeyProperties prop) {
+        this.authenticationManager = authenticationManager;
+        this.prop = prop;
+    }
 
-   ```
-   自定义过滤器继承自 GenericFilterBean，并实现其中的 doFilter 方法，在 doFilter 方法中，当请求方法是 POST，并且请求地址是 /doLogin 时，获取参数中的 code 字段值，该字段保存了用户从前端页面传来的验证码，然后获取 session 中保存的验证码，如果用户没有传来验证码，则抛出验证码不能为空异常，如果用户传入了验证码，则判断验证码是否正确，如果不正确则抛出异常，否则执行 chain.doFilter(request, response); 使请求继续向下走。
-   ```
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        try {
+            SysUser sysUser = new ObjectMapper().readValue(request.getInputStream(), SysUser.class);
+            UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(sysUser.getUsername(), sysUser.getPassword());
+            return authenticationManager.authenticate(authRequest);
+        }catch (Exception e){
+            try {
+                response.setContentType("application/json;charset=utf-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                PrintWriter out = response.getWriter();
+                Map resultMap = new HashMap();
+                resultMap.put("code", HttpServletResponse.SC_UNAUTHORIZED);
+                resultMap.put("msg", "用户名或密码错误！");
+                out.write(new ObjectMapper().writeValueAsString(resultMap));
+                out.flush();
+                out.close();
+            }catch (Exception outEx){
+                outEx.printStackTrace();
+            }
+            throw new RuntimeException(e);
+        }
+    }
 
-   
+    public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        SysUser user = new SysUser();
+        user.setUsername(authResult.getName());
+        user.setRoles((List<SysRole>) authResult.getAuthorities());
+        String token = JwtUtils.generateTokenExpireInMinutes(user, prop.getPrivateKey(), 24 * 60);
+        response.addHeader("Authorization", "Bearer "+token);
+        try {
+            response.setContentType("application/json;charset=utf-8");
+            response.setStatus(HttpServletResponse.SC_OK);
+            PrintWriter out = response.getWriter();
+            Map resultMap = new HashMap();
+            resultMap.put("code", HttpServletResponse.SC_OK);
+            resultMap.put("msg", "认证通过！");
+            out.write(new ObjectMapper().writeValueAsString(resultMap));
+            out.flush();
+            out.close();
+        }catch (Exception outEx){
+            outEx.printStackTrace();
+        }
+    }
 
-2.  在 Spring Security 的配置中，配置过滤器 
+}
 
-   ```java
-   @Configuration
-   publicclass SecurityConfig extends WebSecurityConfigurerAdapter {
-   
-       @Autowired
-       VerifyCodeFilter verifyCodeFilter;
-       ...
-       ...
-       @Override
-       protected void configure(HttpSecurity http) throws Exception {
-           http.addFilterBefore(verifyCodeFilter, UsernamePasswordAuthenticationFilter.class);
-           http.authorizeRequests()
-                   .antMatchers("/admin/**").hasRole("admin")
-                   ...
-                   ...
-                   .permitAll()
-                   .and()
-                   .csrf().disable();
-       }
-   }
-   ```
-
-   ```
-   这里只贴出了部分核心代码，即 http.addFilterBefore(verifyCodeFilter, UsernamePasswordAuthenticationFilter.class); ，如此之后，整个配置就算完成了。
-   ```
-
-   
-
-> 二、自定义过滤器处理验证码
-
-1. 自定义WebAuthenticationDetails 和 自定义 AuthenticationProvider
+```
 
 
 
-#### 认证流程
+#### 授权
 
+```java
+public class JwtVerifyFilter extends BasicAuthenticationFilter {
 
+    private RsaKeyProperties prop;
+
+    public JwtVerifyFilter(AuthenticationManager authenticationManager, RsaKeyProperties prop) {
+        super(authenticationManager);
+        this.prop = prop;
+    }
+
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            //如果携带错误的token，则给用户提示请登录！
+            chain.doFilter(request, response);
+            response.setContentType("application/json;charset=utf-8");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            PrintWriter out = response.getWriter();
+            Map resultMap = new HashMap();
+            resultMap.put("code", HttpServletResponse.SC_FORBIDDEN);
+            resultMap.put("msg", "请登录！");
+            out.write(new ObjectMapper().writeValueAsString(resultMap));
+            out.flush();
+            out.close();
+        } else {
+            //如果携带了正确格式的token要先得到token
+            String token = header.replace("Bearer ", "");
+            //验证tken是否正确
+            Payload<SysUser> payload = JwtUtils.getInfoFromToken(token, prop.getPublicKey(), SysUser.class);
+            SysUser user = payload.getUserInfo();
+            if(user!=null){
+                UsernamePasswordAuthenticationToken authResult = new UsernamePasswordAuthenticationToken(user.getUsername(), null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authResult);
+                chain.doFilter(request, response);
+            }
+        }
+    }
+
+}
+
+```
 
 
 
