@@ -97,7 +97,7 @@ services:
 >
 >重启ES的容器，让Ik分词器生效。
 
-```
+```json
 # 测试IK分词器
 POST _analyze 
 {
@@ -154,14 +154,14 @@ POST _analyze
 >  - ip:port/index：查询索引信息
 >    ip:port/index/type/doc_id：查询指定的文档信息
 >- POST请求:
->  - ip:port/index/type/_ search：查询文档，可以在请求体中添加json字符串来代表查询条件
->  - ip:port/index/type/doc_ id/_update：修改文档，在请求体中指定json字符串代表修改的具体信息
+>  - ip:port/index/type/_search：查询文档，可以在请求体中添加json字符串来代表查询条件
+>  - ip:port/index/type/doc_id/_update：修改文档，在请求体中指定json字符串代表修改的具体信息
 >- PUT请求:
 >  - ip:port/index： 创建一个索引，需要在请求体中指定索引的信息，类型，结构
->  - ip:port/index/type/_ mappings：代表创建索引时，指定索引文档存储的属性的信息
+>  - ip:port/index/type/_mappings：代表创建索引时，指定索引文档存储的属性的信息
 >- DELETE请求:
 >  - ip:port/index：删除索引
->  - ip:port/index/type/doc_ id：删除指定的文档
+>  - ip:port/index/type/doc_id：删除指定的文档
 
 
 
@@ -299,7 +299,7 @@ PUT /book
 
 #### 4.6 文档的操作
 
-> 文档在ES服务中的唯一标识，`_index` ，`_ type` ，`_id` 三个内容为组合，锁定一个文档
+> 文档在ES服务中的唯一标识，`_index` ，`_type` ，`_id` 三个内容为组合，锁定一个文档
 
 
 
@@ -549,7 +549,7 @@ public void delete() throws IOException {
 
 #### 5.3 Java操作文档
 
-##### 5.3.1 添加文档操作 
+##### 5.3.1 添加文档 
 
 > 实体类
 
@@ -599,6 +599,745 @@ public class Demo3 {
         System.out.println(resp.getResult().toString());
     }
 
+}
+```
+
+##### 
+
+##### 5.3.2 修改文档
+
+> 代码如下
+
+```java
+@Test
+public void updateDoc() throws IOException {
+    //1. 创建一个Map，指定需要修改的内容
+    Map<String,Object> doc = new HashMap<>();
+    doc.put("name","张大三");
+    String docId = "1";
+
+    //2. 创建request对象，封装数据
+    UpdateRequest request = new UpdateRequest(index,type,docId);
+    request.doc(doc);
+
+    //3. 通过client对象执行
+    UpdateResponse update = client.update(request, RequestOptions.DEFAULT);
+
+    //4. 输出返回结果
+    System.out.println(update.getResult().toString());
+}
+```
+
+
+
+##### 5.3.3 删除文档
+
+> 代码如下
+
+```java
+@Test
+public void deleteDoc() throws IOException {
+    //1. 封装Request对象
+    DeleteRequest request = new DeleteRequest(index,type,"1");
+
+    //2. client执行
+    DeleteResponse resp = client.delete(request, RequestOptions.DEFAULT);
+
+    //3. 输出结果
+    System.out.println(resp.getResult().toString());
+}
+```
+
+
+
+#### 5.4 Java批量操作
+
+##### 5.4.1 批量添加
+
+> 代码如下
+
+```java
+@Test
+public void bulkCreateDoc() throws IOException {
+    //1. 准备多个json数据
+    Person p1 = new Person(1,"张三",23,new Date());
+    Person p2 = new Person(2,"李四",24,new Date());
+    Person p3 = new Person(3,"王五",25,new Date());
+
+    String json1 = mapper.writeValueAsString(p1);
+    String json2 = mapper.writeValueAsString(p2);
+    String json3 = mapper.writeValueAsString(p3);
+
+    //2. 创建Request，将准备好的数据封装进去
+    BulkRequest request = new BulkRequest();
+    request.add(new IndexRequest(index,type,p1.getId().toString()).source(json1,XContentType.JSON));
+    request.add(new IndexRequest(index,type,p2.getId().toString()).source(json2,XContentType.JSON));
+    request.add(new IndexRequest(index,type,p3.getId().toString()).source(json3,XContentType.JSON));
+
+    //3. 用client执行
+    BulkResponse resp = client.bulk(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    System.out.println(resp.toString());
+}
+```
+
+
+
+##### 5.4.2 批量删除
+
+> 代码如下
+
+```java
+@Test
+public void bulkDeleteDoc() throws IOException {
+    //1. 封装Request对象
+    BulkRequest request = new BulkRequest();
+    request.add(new DeleteRequest(index,type,"1"));
+    request.add(new DeleteRequest(index,type,"2"));
+    request.add(new DeleteRequest(index,type,"3"));
+
+    //2. client执行
+    BulkResponse resp = client.bulk(request, RequestOptions.DEFAULT);
+
+    //3. 输出
+    System.out.println(resp);
+}
+```
+
+
+
+#### 5.5 ElasticSearch练习
+
+> 创建索引，指定数据结构
+>
+> 索引名：sms-logs-index
+>
+> 类型名：sms-logs-type
+>
+> 结构如下：
+
+![](images/索引结构图.png)
+
+
+
+###  六、ElasticSearch的各种查询
+
+#### 6.1 term&terms查询(重点)
+
+##### 6.1.1 term查询
+
+> term的查询是代表完全匹配，搜索之前不会对你搜索的关键字进行分词，对你的关键字去文档分词库中去匹配内容。
+
+```json
+# term查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "from": 0, # limit ?
+  "size": 5, # limit x,?
+  "query": {
+    "term": {
+    	"province": {
+        	"value": "北京"
+        }
+    }
+  }
+}
+```
+
+> 代码实现方式
+
+```java
+@Test
+public void termQuery() throws IOException {
+    //1. 创建Request对象
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    builder.from(0);
+    builder.size(5);
+    builder.query(QueryBuilders.termQuery("province","北京"));
+
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 获取到_source中的数据，并展示
+    for (SearchHit hit : resp.getHits().getHits()) {
+        Map<String, Object> result = hit.getSourceAsMap();
+        System.out.println(result);
+    }
+}
+```
+
+
+
+##### 6.1.2 terms查询
+
+>- terms和term的查询机制是一样，都不会将指定的查询关键字进行分词，直接去分词库中匹配，找到相应文档内容。
+>- terms是在针对一个字段包含多个值的时候使用。
+>- term：where province = 北京;
+>- terms：where province = 北京 or province= ? or province = ?
+
+```json
+# terms查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "terms": {
+    	"province": [
+        	"北京",
+        	"山西",
+        	"武汉"
+      ]
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void termsQuery() throws IOException {
+    //1. 创建request
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 封装查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    builder.query(QueryBuilders.termsQuery("province","北京","山西"));
+
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出_source
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+#### 6.2 match查询【重点】
+
+>match查询属于高层查询，他会根据你查询的字段类型不一样，采用不同的查询方式。
+>
+>- 查询的是日期或者是数值的话，他会将你基于的字符串查询内容转换为日期或者数值对待。
+>
+>- 如果查询的字段是一个不能被分词的字段(keyword) ，match查询不会对你指定的查询关键字进行分词。
+>
+>- 如果查询的字段时一个可以被分词的字段(text) ，match会将你指定的查询内容根据一 定的方式去分词，去分词库中匹配指定的内容。
+>
+>match查询，实际底层就是多个term查询，将多个term查询的结果给你封装到了-起。
+
+
+
+##### 6.2.1 match_all查询
+
+```
+查询全部内容，不指定任何查询条件。
+```
+
+```json
+# match_all查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+  	"match_all": {
+          
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void matchAllQuery() throws IOException {
+    //1. 创建Request
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    builder.query(QueryBuilders.matchAllQuery());
+    builder.size(20);           // ES默认只查询10条数据，如果想查询更多，添加size
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+    System.out.println(resp.getHits().getHits().length);
+}
+```
+
+
+
+##### 6.2.2 match查询
+
+> 指定一个Field作为筛选的条件
+
+```json
+# match查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "match": {
+  		"smsContent": "收货安装"
+  	}
+  }
+}
+```
+
+> 代码实现
+
+```java
+@Test
+public void matchQuery() throws IOException {
+    //1. 创建Request
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //-----------------------------------------------
+    builder.query(QueryBuilders.matchQuery("smsContent","收货安装"));
+    //-----------------------------------------------
+    request.source(builder);
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+##### 6.2.3 布尔match查询
+
+> 基于一个Field匹配的内容，采用and或者or的方式连接
+
+```json
+#布尔match查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "match": {
+      "smsContent": {
+          "query": "中国 健康",
+          "operator": "and"
+          #内容包含中国并且包含健康
+      }
+    }
+  }
+}
+
+#布尔match查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "match": {
+      "smsContent": {
+          "query": "中国 健康",
+          "operator": "or"
+          #内容包含中国或者包含健康
+      }
+    }
+  }
+}
+```
+
+> 代码实现
+
+```java
+@Test
+public void booleanMatchQuery() throws IOException {
+    //1. 创建Request
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //-----------------------------------------------     选择AND或者OR
+    builder.query(QueryBuilders.matchQuery("smsContent","中国 健康").operator(Operator.OR));
+    //-----------------------------------------------
+    request.source(builder);
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+##### 6.2.4 multi_match查询
+
+> match针对一个field做检索，multi _match针对多个field进行检索，多个field对应一个text。
+
+```json
+# multi_match查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "北京",
+      #指定text
+      "fields": ["province", "smsContent"]
+      #指定field们
+    }
+  }
+}
+```
+
+> 代码如下
+
+```json
+@Test
+public void multiMatchQuery() throws IOException {
+    //1. 创建Request
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //-----------------------------------------------
+    builder.query(QueryBuilders.multiMatchQuery("北京", "province", "smsContent"));
+    //-----------------------------------------------
+    request.source(builder);
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+#### 6.3 其他查询
+
+##### 6.3.1 id查询
+
+> 根据id查询where id = ?
+
+```json
+# id查询
+GET /sms-logs-index/sms-logs-type/1
+```
+
+> 代码如下
+
+```java
+@Test
+public void findById() throws IOException {
+    //1. 创建GetRequest
+    GetRequest request = new GetRequest(index,type,"1");
+
+    //2. 执行查询
+    GetResponse resp = client.get(request, RequestOptions.DEFAULT);
+
+    //3. 输出结果
+    System.out.println(resp.getSourceAsMap());
+}
+```
+
+
+
+##### 6.3.2 ids查询
+
+>根据多个id查询，类似MySQL中的where id in (id1, id2, id2... )
+
+```json
+# ids查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "ids": {
+    "values": ["1","2","3"]
+    }
+  }
+}
+```
+
+> 代码实现
+
+```java
+@Test
+public void findByIds() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //----------------------------------------------------------
+    builder.query(QueryBuilders.idsQuery().addIds("1","2","3"));
+    //----------------------------------------------------------
+    request.source(builder);
+
+    //3. 执行
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+##### 6.3.3 prefix查询
+
+> 前缀查询，可以通过一个关键字去指定一个Field的前缀，从而查询到指定的文档。
+
+```json
+# prefix查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "prefix": {
+      "corpName": {
+      	"value": "途虎"
+      }
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void findByPrefix() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //----------------------------------------------------------
+    builder.query(QueryBuilders.prefixQuery("corpName","盒马"));
+    //----------------------------------------------------------
+    request.source(builder);
+
+    //3. 执行
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+##### 6.3.4 fuzzy查询
+
+> 模糊查询，我们输入字符的大概，ES就可以去根据输入的内容大概去匹配一下结果。
+
+```json
+# fuzzy查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "fuzzy": {
+      "corpName": {
+        "value": "盒马先生",
+        "prefix_length": 2
+        #指定前面几个字符是不允许出现错误的
+      }
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void findByFuzzy() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //----------------------------------------------------------
+    builder.query(QueryBuilders.fuzzyQuery("corpName","盒马先生").prefixLength(2));
+    //----------------------------------------------------------
+    request.source(builder);
+
+    //3. 执行
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+##### 6.3.5 wildcard查询
+
+> 通配查询，和MySQL中的like是一个套路，可以在查询时，在字符串中指定通配符*和占位符?
+
+```json
+# wildcard查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "wildcard": {
+      "corpName": {
+        "value": "中国*"
+      }
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void findByWildCard() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //----------------------------------------------------------
+    builder.query(QueryBuilders.wildcardQuery("corpName","中国*"));
+    //----------------------------------------------------------
+    request.source(builder);
+
+    //3. 执行
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+
+    }
+}
+```
+
+
+
+##### 6.3.6 range查询
+
+> 范围查询，只针对数值类型，对某一个Field进行大于 或者小于的范围指定
+
+```json
+# range查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "range": {
+      "fee": {
+        "gt": 5,
+        "lte": 10
+      }
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void findByRange() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //----------------------------------------------------------
+    builder.query(QueryBuilders.rangeQuery("fee").lte(10).gte(5));
+    //----------------------------------------------------------
+    request.source(builder);
+
+    //3. 执行
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+
+
+##### 6.3.7 regexp查询
+
+>正则查询，通过你编写的正则表达式去匹配内容。
+>Ps：prefix, fuzzy, wildcard和regexp查 询效率相对比较低，要求效率比较高时，避免去使用
+
+```json
+# regexp查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "regexp": {
+      "mobile": "180[0-9]{8}"
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void findByRegexp() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //----------------------------------------------------------
+    builder.query(QueryBuilders.regexpQuery("mobile","139[0-9]{8}"));
+    //----------------------------------------------------------
+    request.source(builder);
+
+    //3. 执行
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
 }
 ```
 
