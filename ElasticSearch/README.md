@@ -1341,3 +1341,322 @@ public void findByRegexp() throws IOException {
 }
 ```
 
+
+
+#### 6.4 深分页Scroll
+
+>ES对from + size是有限制的，from和size- =者之和不能超过1W
+>原理:
+>
+>+ from+size在ES查 询数据的方式
+>
+>  + 第一步现将用户指定的关键进行分词。
+>
+>  + 第二步将词汇去分词库中进行检索，得到多个文档的id。
+>
+>  + 第三步去各个分片中去拉取指定的数据。耗时较长。
+>
+>  + 第四步将数据根据score进行排序。 耗时较长。
+>
+>  + 第五步根据from的值，将查询到的数据舍弃一 部分。
+>
+>  + 第六步返回结果。
+>
+>    
+>
+>+ scroll+tsize在ES查 询数据的方式:
+>
+>  + 第一步现将用户指定的关键进行分词。
+>  + 第二步将词汇去分词库中进行检索，得到多个文档的id。
+>  + 第三步将文档的id存放在一 个ES的上下文中。
+>  + 第四步根据你指定的size的个数去ES中检索指定个数的数据，拿完数据的文档id,会从上下文中移除。
+>  + 第五步如果需要下一-页数据，直接去ES的上下文中，找后续内容。
+>  + 第六步循环第四步和第五步
+>
+>Scroll查询方式，不适合做实时的查询  [ElasticSearch scroll查询原理](https://blog.csdn.net/zc19921215/article/details/108823733)
+
+```json
+# scroll查询,返回第一页数据，并且将文档id信息存放在ES上下文中，指定生存时间1分钟
+POST /sms-logs-index/sms-logs-type/_search?scroll=1m
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 2,
+  "sort": [
+    {
+      "fee": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+```
+
+```json
+# 根据scroll查询下一页数据
+POST /_search/scroll
+{
+  "scroll_id": "上一步得到的scroll_id",
+  "scroll": "1m"
+}
+```
+
+```json
+
+# 删除scroll在ES上下文中的doc id
+DELETE /_search/scroll/scroll_id
+```
+
+> 代码如下
+
+```java
+@Test
+public void scrollQuery() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定scroll信息
+    request.scroll(TimeValue.timeValueMinutes(1L));
+
+    //3. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    builder.size(4);
+    builder.sort("fee", SortOrder.DESC);
+    builder.query(QueryBuilders.matchAllQuery());
+
+    request.source(builder);
+
+    //4. 获取返回结果scrollId，source
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    String scrollId = resp.getScrollId();
+    System.out.println("----------首页---------");
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+
+
+    while(true) {
+        //5. 循环 - 创建SearchScrollRequest
+        SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
+
+        //6. 指定scrollId的生存时间
+        scrollRequest.scroll(TimeValue.timeValueMinutes(1L));
+
+        //7. 执行查询获取返回结果
+        SearchResponse scrollResp = client.scroll(scrollRequest, RequestOptions.DEFAULT);
+
+        //8. 判断是否查询到了数据，输出
+        SearchHit[] hits = scrollResp.getHits().getHits();
+        if(hits != null && hits.length > 0) {
+            System.out.println("----------下一页---------");
+            for (SearchHit hit : hits) {
+                System.out.println(hit.getSourceAsMap());
+            }
+        }else{
+            //9. 判断没有查询到数据-退出循环
+            System.out.println("----------结束---------");
+            break;
+        }
+    }
+
+
+    //10. 创建CLearScrollRequest
+    ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+
+    //11. 指定ScrollId
+    clearScrollRequest.addScrollId(scrollId);
+
+    //12. 删除ScrollId
+    ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+
+    //13. 输出结果
+    System.out.println("删除scroll：" + clearScrollResponse.isSucceeded());
+
+}
+```
+
+
+
+
+
+#### 6.5 delete-by-query
+
+>根据term, match等 查询方式去删除大量的文档
+>
+>Ps:如果你需要删除的内容，是index 下的大部分数据，推荐创建一个全新的index,将保留的文档内容，添加到全新的索引
+
+```json
+# delete-by-query
+POST /sms-logs-index/sms-logs-type/_delete_by_query
+{
+  "query": {
+    "range": {
+      "fee": {
+      	"lt": 4
+      }
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void deleteByQuery() throws IOException {
+    //1. 创建DeleteByQueryRequest
+    DeleteByQueryRequest request = new DeleteByQueryRequest(index);
+    request.types(type);
+
+    //2. 指定检索的条件    和SearchRequest指定Query的方式不一样
+    request.setQuery(QueryBuilders.rangeQuery("fee").lt(4));
+
+    //3. 执行删除
+    BulkByScrollResponse resp = client.deleteByQuery(request, RequestOptions.DEFAULT);
+
+    //4. 输出返回结果
+    System.out.println(resp.toString());
+
+}
+```
+
+
+
+#### 6.6 符合查询
+
+##### 6.6.1 bool查询
+
+>复合过滤器，将你的多个查询条件，以一定的逻辑组合在一起。
+>
+>+ must：所有的条件，用must组合在一 起，表示And的意思
+>+ must_not：将must_ not中的条件，全部都不能匹配，标识Not的意思
+>+ should：所有的条件，用should组合在 一起，表示Or的意思
+
+```json
+# 查询省份为武汉或者北京
+# 运营商不是联通
+# smsContent中包含中国和平安
+# bool查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "term": { 
+            "province": {
+              "value": "北京"
+            }
+          }
+        },
+        {
+          "term": {
+            "province": {
+              "value": "武汉"
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "term": {
+            "operatorId": {
+              "value": "2"
+            }
+          }
+        }
+       ],
+      "must": [
+        {
+          "match": {
+            "smsContent": "中国"
+          }
+        },
+        {
+          "match": {
+            "smsContent": "平安"
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void BoolQuery() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+    // # 查询省份为武汉或者北京
+    boolQuery.should(QueryBuilders.termQuery("province","武汉"));
+    boolQuery.should(QueryBuilders.termQuery("province","北京"));
+    // # 运营商不是联通
+    boolQuery.mustNot(QueryBuilders.termQuery("operatorId",2));
+    // # smsContent中包含中国和平安
+    boolQuery.must(QueryBuilders.matchQuery("smsContent","中国"));
+    boolQuery.must(QueryBuilders.matchQuery("smsContent","平安"));
+
+    builder.query(boolQuery);
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+
+
+
+
+#### 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
