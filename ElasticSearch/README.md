@@ -1622,7 +1622,70 @@ public void BoolQuery() throws IOException {
 
 
 
+##### 6.6.1 boosting 查询
 
+>boosting查询可以帮助我们去影响查询后的score。
+>
+>+ positive：只有匹配上positive的查询的内容，才会被放到返回的结果集中。
+>+ negative：如果匹配上和positive并且也匹配上了negative, 就可以降低这样的文档score。
+>+ negative_ boost：指定系数，必须小于1.0（查询后的_score乘以该系数）
+>
+>关于查询时，分数是如何计算的：
+>
+>+ 搜索的关键字在文档中出现的频次越高，分数就越高
+>+ 指定的文档内容越短，分数就越高
+>+ 我们在搜索时，指定的关键字也会被分词，这个被分词的内容，被分词库匹配的个数越多，分数越高
+
+```json
+# boosting查询收货安装
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "query": {
+    "boosting": {
+      "positive": {
+        "match": {
+          "smsContent": "收货安装"
+        }
+      },
+      "negative": {
+        "match": {
+          "smsContent": "王五"
+        }
+      },
+      "negative_boost": 0.5
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void BoostingQuery() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    BoostingQueryBuilder boostingQuery = QueryBuilders.boostingQuery(
+        QueryBuilders.matchQuery("smsContent", "收货安装"),
+        QueryBuilders.matchQuery("smsContent", "王五")
+    ).negativeBoost(0.5f);
+
+    builder.query(boostingQuery);
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
 
 
 
