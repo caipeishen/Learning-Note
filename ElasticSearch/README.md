@@ -1689,35 +1689,589 @@ public void BoostingQuery() throws IOException {
 
 
 
-#### 
+#### 6.7 filter查询
+
+>query：根据你的查询条件，去计算文档的匹配度得到一个分数，并且根据分数进行排序，不会做缓存的。
+>
+>filter：根据你的查询条件去查询文档，不去计算分数，而且filter会对经常被过滤的数据进行缓存。
+
+```json
+# filter查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+	"query": {
+        "bool": {
+            "filter": [
+                {   
+                    "term": {
+                        "corpName": "盒马生鲜"
+                    }
+                },
+                {
+                    "range": {
+                        "fee": {
+                            "lte": 4
+                        }
+                    }
+                }
+            ]
+        }
+	}
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void filter() throws IOException {
+    //1. SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 查询条件
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+    boolQuery.filter(QueryBuilders.termQuery("corpName","盒马鲜生"));
+    boolQuery.filter(QueryBuilders.rangeQuery("fee").lte(5));
+
+    builder.query(boolQuery);
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+
+}
+```
 
 
 
+#### 6.8 高亮查询【重点】
+
+>高亮查询就是你用户输入的关键字，以一定的特殊样式展示给用户
+>
+>高亮展示的数据，本身就是文档中的一个Field, 单独将Field以highlight的形式返回给你。
+>
+>
+>
+>ES提供了-个highlight属性，和query同级别的。
+>
+>+ fragment_size：指定高亮数据展示多少个字符回来。
+>+ pre_tags：指定前缀标签，举个栗子< font color="red">
+>+ post_tags：指定后缀标签，举个栗子</font>
+>+ fields：指定哪几个Field以高亮形式返回
+
+```json
+# highlight查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+    "query": {
+        "match": {
+			"smsContent":"盒马"
+        }
+    }
+    "highlight": {
+        "fields": {
+        	"smsContent": {}
+        },
+        "pre_ tags": "<font color='red'>",
+        "post_ tags": "</font>",
+        "fragment_ size": 10
+    }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void highLightQuery() throws IOException {
+    //1. SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定查询条件（高亮）
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //2.1 指定查询条件
+    builder.query(QueryBuilders.matchQuery("smsContent","盒马"));
+    //2.2 指定高亮
+    HighlightBuilder highlightBuilder = new HighlightBuilder();
+    highlightBuilder.field("smsContent",10)
+        .preTags("<font color='red'>")
+        .postTags("</font>");
+    builder.highlighter(highlightBuilder);
+
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 获取高亮数据，输出
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getHighlightFields().get("smsContent"));
+    }
+}
+```
 
 
 
+#### 6.9 聚合查询【重点】
+
+> ES的聚合查询和MySQL的聚合查询类似，ES的聚合查询比MySQL强大，ES提供的统计数据的方式多种多样
+
+```json
+# ES聚合查询的RESTful语法
+POST /index/type/_search
+{
+    "aggs": {
+        "名字(agg)": {
+            "agg_type": {
+            	"属性": "值"
+            }
+        }
+    }
+}
+```
 
 
 
+##### 6.9.1 去重计数查询
+
+> 去重计数，即Cardinality, 第一步 先将返回的文档中的一个指定的field进行去重，统计一共有多少条
+
+```json
+# 去重计数查询北京 上海 武汉 山西
+POST /sms-logs-index/sms-logs-type/_search
+{
+    # aggregations
+    "aggs": {
+        "agg": {
+            "cardinality": {
+            	"field": "province"
+                # Fielddata is disabled on text fields by default.
+                # 解决办法，在构建查询语句时，给字段添加.keyword即可解决：province.keyword即可解决
+            }
+        }
+    }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void cardinality() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定使用的聚合查询方式
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    builder.aggregation(AggregationBuilders.cardinality("agg").field("province"));
+
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 获取返回结果
+    Cardinality agg = resp.getAggregations().get("agg");
+    long value = agg.getValue();
+    System.out.println(value);
+}
+```
 
 
 
+##### 6.9.2 范围统计
+
+>统计一定范围内出现的文档个数，比如，针对某一个Field的值在 0~ 100,100-200,200~-300之间文档出现的个数分别是多少。
+>
+>范围统计可以针对普通的数值，针对时间类型，针对ip类 型都可以做相应的统计。
+>
+>range, date_ range, ip_ range
 
 
 
+> 数值统计
+
+```json
+#数值方式范围统计
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "aggs": {
+    "agg": {
+      "range": {
+        "field": "fee",
+        "ranges": [
+            {
+                "from": 10
+                # 大于等于10
+            },
+            {
+                "to": 5
+                # 小于5
+            },
+            {
+                "from": 5,
+                "to": 10
+                # 大于等于10 小于5
+            }
+        ]
+      }
+    }
+  }
+}
+```
 
 
 
+> 时间统计
+
+```json
+#时间方式范围统计
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "aggs": {
+    "agg": {
+      "date_range": {
+        "field": "createDate",
+        "format": "yyyy",
+        "ranges": [
+        	{
+            	"to": "2020"
+        	},
+        	{
+            	"from": "2020"
+        	}
+        ]
+      }
+    }
+  }
+}
+```
 
 
 
+> IP统计
+
+```json
+# ip方式范围统计
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "aggs": {
+    "agg": {
+        "ip_range": { 
+          "field": "ipAddr",
+          "ranges": [
+              {
+              	"to": "10.126.2.8"
+              },
+              {
+              	"from": "10.126.2.8"
+              }
+          ]
+        }
+    }
+  }
+}
+```
 
 
 
+> 代码如下
+
+```java
+@Test
+public void range() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定使用的聚合查询方式
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //---------------------------------------------
+    builder.aggregation(AggregationBuilders.range("agg").field("fee")
+                        .addUnboundedTo(5)
+                        .addRange(5,10)
+                        .addUnboundedFrom(10));
+    //---------------------------------------------
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 获取返回结果
+    Range agg = resp.getAggregations().get("agg");
+    for (Range.Bucket bucket : agg.getBuckets()) {
+        String key = bucket.getKeyAsString();
+        Object from = bucket.getFrom();
+        Object to = bucket.getTo();
+        long docCount = bucket.getDocCount();
+        System.out.println(String.format("key：%s，from：%s，to：%s，docCount：%s",key,from,to,docCount));
+    }
+}
+```
 
 
 
+##### 6.9.3 统计聚合查询
 
+>他可以帮你查询指定Field的最大值，最小值，平均值，平方和等
+>使用: extended_ stats
+
+```json
+#统计聚合查询
+POST /sms-logs-index/sms-logs-type/_search
+{
+  "aggs": {
+    "agg": {
+      "extended_stats": {
+      	"field": "fee"
+      }
+    }
+  }
+}
+```
+
+> 代码如下
+
+```java
+@Test
+public void extendedStats() throws IOException {
+    //1. 创建SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定使用的聚合查询方式
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    //---------------------------------------------
+    builder.aggregation(AggregationBuilders.extendedStats("agg").field("fee"));
+    //---------------------------------------------
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 获取返回结果
+    ExtendedStats agg = resp.getAggregations().get("agg");
+    double max = agg.getMax();
+    double min = agg.getMin();
+    System.out.println("fee的最大值为：" + max + "，最小值为：" + min);
+}
+```
+
+> 其他的聚合查询方式参考： https://www.elastic.co/guide/en/elasticsearch/reference/6.5/index.html
+
+
+
+#### 6.10 地图经纬度搜索
+
+>ES中提供了一个数据类型geo_ point, 这个类型就是用来存储经纬度的。
+>
+>创建一个带geo_point类 型的索引，并添加测试数据
+
+```json
+#创建一个索引，指定一个name, locaiton
+PUT /map
+{
+  "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+  },
+  "mappings": {
+    "map": {
+      "properties": {
+        "name": {
+          "type": "text"
+        },
+        "location": {
+        	"type": "geo_point"
+        }
+      }
+    }
+  }
+}
+
+# 添加测试数据
+PUT /map/map/1
+{
+  "name": "天安门",
+  "location": {
+    "lon": 116.403981,
+    "lat": 39.9144921
+  }
+}
+
+
+# 添加测试数据
+PUT /map/map/2
+{
+  "name": "海淀公园",
+  "location": {
+    "lon": 116.302509,
+    "lat": 39.991152
+  }
+}
+
+
+# 添加测试数据
+PUT /map/map/3
+{
+  "name": "北京动物园",
+  "location": {
+    "lon": 116.343184,
+    "lat": 39.947468
+  }
+}
+```
+
+
+
+##### 6.10.1 ES的地图检索方式
+
+> + geo_distance							直线距离检索方式
+> + geo_bounding_box				  以两个点确定一个矩形，获取在矩形内的全部数据
+> + geo_polygon							 以多个点，确定一个多边形，获取多边形内的全部数据
+
+
+
+##### 6.10.2 基于RESTful实现地图检索
+
+> geo_ _distance
+
+```json
+# geo_distance
+POST /map/map/_search
+{
+  "query": {
+    "geo_distance": {
+      "location": {
+        # 确定一个点  
+        "lon": 116.433733,
+        "lat": 39.908404
+      },
+      "distance": "3000", # 确定半径
+      "distance_type": "arc" #指定形状为圆形
+    }
+  }
+}
+```
+
+
+
+>geo_bounding_box
+
+```json
+# geo_bounding_box
+POST /map/map/_search
+{
+    "query": {
+        "geo_bounding_box": {
+            "location": {
+                "top_left": {
+                    #左上角的坐标点
+                    "lon": 116.326943,
+                    "lat": 39.95499
+                },
+                "bottom_ right": {
+                    #右下角的坐标点
+                    "lon": 116.433446,
+                    "lat": 39.908737
+                }
+            }
+        }
+    }
+}
+```
+
+
+
+> geo_polygon
+
+```
+# geo_polygon
+POST /map/map/_search
+{
+    "query": {
+        "geo_polygon": {
+            "location": {
+                "points": [
+                    #指定多个点确定一个多边形
+                    {
+                        "lon": 116.298916,
+                        "lat": 39.99878
+                    },
+                    {
+                        "lon": 116.29561,
+                        "lat": 39.972576
+                    },
+                    {
+                        "lon": 116.327661,
+                        "lat": 39.984739
+                    }
+                ]
+            }
+        }
+    }
+}
+```
+
+
+
+##### 6.10.3 Java实现geo_polygon
+
+```java
+@Test
+public void geoPolygon() throws IOException {
+    //1. SearchRequest
+    SearchRequest request = new SearchRequest(index);
+    request.types(type);
+
+    //2. 指定检索方式
+    SearchSourceBuilder builder = new SearchSourceBuilder();
+    List<GeoPoint> points = new ArrayList<>();
+    points.add(new GeoPoint(39.99878,116.298916));
+    points.add(new GeoPoint(39.972576,116.29561));
+    points.add(new GeoPoint(39.984739,116.327661));
+    builder.query(QueryBuilders.geoPolygonQuery("location",points));
+
+    request.source(builder);
+
+    //3. 执行查询
+    SearchResponse resp = client.search(request, RequestOptions.DEFAULT);
+
+    //4. 输出结果
+    for (SearchHit hit : resp.getHits().getHits()) {
+        System.out.println(hit.getSourceAsMap());
+    }
+}
+```
+
+
+
+### 报错
+
+> ES 如何解决 Fielddata is disabled on text fields by default 错误
+
+参考：[ES 如何解决 Fielddata is disabled on text fields by default 错误](https://blog.csdn.net/zc19921215/article/details/108823733)
+
+```json
+PUT /sms-logs-index/sms-logs-type/_mapping
+{
+  "properties": {
+    "ipAddr": { 
+      "type":     "text",
+      "fielddata": true
+    }
+  }
+}
+```
 
 
 
