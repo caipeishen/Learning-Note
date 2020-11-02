@@ -47,7 +47,7 @@ User user = (User)class.newInstance();//创建实例
 2、bean 生命周期
     1).通过构造器创建bean实例（无参数构造）
     2).为bean的属性设置值和对其他bean引用（调用set方法）
-    3).把bean实例传递给bean 后置处理器方法 -> postProcessBeforeInitialization
+    3).把bean实例传递给bean 前置处理器方法 -> postProcessBeforeInitialization
     4).调用bean的初始化的方法（需要进行配置初始化的方法）
     5).把bean实例传递给bean 后置处理器方法 -> postProcessAfterInitialization
     6).bean可以使用了（对象获取到了）
