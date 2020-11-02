@@ -239,7 +239,7 @@ SpringApplication.run(SpringbootApplication.class, args);
         refresh()方法中所作的工作也挺多，没办法面面俱到，主要根据IoC容器的初始化步骤和IoC依赖注入的过程进行分析
 
         IoC容器初始化步骤(invokeBeanFactoryPostProcessors()方法中)
-            第一步：Resource定位
+            第一步：Resource定位 -> 找到需要spring管理的类
                 在SpringBoot中，我们都知道他的包扫描是从主类所在的包开始扫描的，prepareContext()方法中，
                 会先将主类解析成BeanDefinition，然后解析主类的BeanDefinition获取basePackage的路径，这样就完成了定位的过程
                 常规的在SpringBoot中有三种实现定位，
@@ -247,14 +247,14 @@ SpringApplication.run(SpringbootApplication.class, args);
                 第二个是SPI扩展机制实现的自动装配（比如各种starter），
                 第三种就是@Import注解指定的类。各种@EnableXXX注解，很大一部分都是对@Import的二次封装（其实也是为了解耦，比如当@Import导入的类发生变化时，我们的业务系统也不需要改任何代码）
 
-            第二步：BeanDefinition的载入
+            第二步：BeanDefinition的载入 -> 加载这些类
                 所谓的载入就是通过上面的定位得到的basePackage，
                 SpringBoot会将该路径拼接成：classpath*:org/springframework/boot/demo/**/*.class这样的形式，
                 然后一个类会将该路径下所有的.class文件都加载进来，然后遍历判断是不是有@Component注解，
                 如果有的话，就是我们要装载的BeanDefinition
                 TIPS：@Configuration，@Controller，@Service等注解底层都是@Component注解，只不过包装了一层罢了。
 
-            第三个：注册BeanDefinition
+            第三个：注册BeanDefinition -> 将这些类的BeanDefinition注册到ioc
                 这个过程通过调用上文提到的BeanDefinitionRegister接口的实现来完成。
                 这个注册过程把载入过程中解析得到的BeanDefinition向IoC容器进行注册。
                 通过上文的分析，我们可以看到，在IoC容器中将BeanDefinition注入到一个ConcurrentHashMap中，
@@ -264,3 +264,6 @@ SpringApplication.run(SpringbootApplication.class, args);
 
 
 
+#### Spring Boot 自定义注解，AOP 切面统一打印出入参请求日志
+
+参考：[Spring Boot 自定义注解，AOP 切面统一打印出入参请求日志](https://www.exception.site/springboot/spring-boot-aop-web-request)
