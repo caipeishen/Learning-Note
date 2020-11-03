@@ -159,7 +159,8 @@ SpringApplication.run(SpringbootApplication.class, args);
         setListeners()
             初始化classpath下所有已配置的 ApplicationListener
             加载过程和Initializer差不多
-            ApplicationListener是spring的事件监听器，典型的观察者模式，通过 ApplicationEvent 类和 ApplicationListener 接口，可以实现对spring容器全生命周期的监听，当然也可以自定义监听事件
+            ApplicationListener是spring的事件监听器，典型的观察者模式
+            通过 ApplicationEvent 类和 ApplicationListener 接口，可以实现对spring容器全生命周期的监听，当然也可以自定义监听事件
 
 	4.推断主入口类
         deduceMainApplicationClass()
@@ -195,6 +196,7 @@ SpringApplication.run(SpringbootApplication.class, args);
 		getRunListeners(args)
 			读取META-INF/spring.factories的SpringApplicationRunListener反射机制得到发布启动监听器，
 			SpringApplicationRunListener -> EventPublishingRunListener(是Spring容器的启动监听器)
+			它其实是用来在整个启动流程中接收不同执行点事件通知的监听者，SpringApplicationRunListener接口规定了SpringBoot的生命周期，在各个生命周期广播相应的事件，调用实际的ApplicationListener类
 		listeners.starting()
 			循环调用监听starting方法()
 			
@@ -236,7 +238,7 @@ SpringApplication.run(SpringbootApplication.class, args);
 		设置 beanFactory 的后置处理
 		据IoC容器的初始化步骤和IoC依赖注入
 	
-        refresh()方法中所作的工作也挺多，没办法面面俱到，主要根据IoC容器的初始化步骤和IoC依赖注入的过程进行分析
+        refresh()方法中所作的工作也挺多，没办法面面俱到，主要是IoC容器的初始化步骤和tomcat/jetty容器创建
 
         IoC容器初始化步骤(invokeBeanFactoryPostProcessors()方法中)
             第一步：Resource定位 -> 找到需要spring管理的类
@@ -259,7 +261,12 @@ SpringApplication.run(SpringbootApplication.class, args);
                 这个注册过程把载入过程中解析得到的BeanDefinition向IoC容器进行注册。
                 通过上文的分析，我们可以看到，在IoC容器中将BeanDefinition注入到一个ConcurrentHashMap中，
                 IoC容器就是通过这个HashMap来持有这些BeanDefinition数据的。比如DefaultListableBeanFactory 中的beanDefinitionMap属性。
-
+		
+		tomcat/jetty容器创建
+			refresh()中的onRefresh()方法，也就说这里要回到子类：ServletWebServerApplicationContext
+			根据servletWebServerFactory对象调用getWebServer()方法
+			可以根据不同的配置创建不同的容器，例如：TOmcat、Jetty就是在这里面创建的
+			
 ```
 
 

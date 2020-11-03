@@ -116,34 +116,17 @@ User user = (User)class.newInstance();//创建实例
 
 
 
-#### Spring观察者模式四个角色 
+#### Spring中的观察者模式
+
+参考：[监听者模式和观察者模式的区别与联系](https://blog.csdn.net/lovexiaotaozi/article/details/102579360)  [Spring 中的观察者模式](https://www.cnblogs.com/jmcui/p/11054756.html)
 
 ```
-一、Spring 中观察者模式的四个角色
-1. 事件（ApplicationEvent）
-ApplicationEvent 是所有事件对象的父类。ApplicationEvent 继承自 jdk 的 EventObject, 所有的事件都需要继承 ApplicationEvent, 并且通过 source 得到事件源。
+律师是被观察者(Subject)，需要存储所有拍卖的人员，当价格改变，律师需要通知所有拍卖人员价格改变
 
-2. 事件监听（ApplicationListener）
-ApplicationListener 事件监听器，也就是观察者。继承自 jdk 的 EventListener，该类中只有一个方法 onApplicationEvent。当监听的事件发生后该方法会被执行。
-
-3. 事件发布/事件源（ApplicationContext）
-ApplicationContext 是 Spring 中的核心容器，在事件监听中 ApplicationContext 可以作为事件的发布者，也是事件源，因为 ApplicationContext 继承自 ApplicationEventPublisher。ApplicationContext是事件源是因为在new ClassPathApplication()中，底层调用publishEvent(new ContextRefreshedEvent(this))
-
-在ApplicationEventPublisher 中定义了事件发布的方法 — publishEvent(Object event) ，底层调用ApplicationEventMulticaster
-
-4. 事件管理（ApplicationEventMulticaster）
-ApplicationEventMulticaster 用于事件监听器的注册和事件的广播。监听器的注册就是通过它来实现的，它的作用是把 Applicationcontext 发布的 Event 广播给它的监听器列表
+张三和李四准备上演一场抢劫银行的行动,张三负责抢劫,李四负责放哨,
+他们两约定,如果李四这边看到警察来就立即通知张三,张三收到通知后立马逃跑...
+在上面的例子中,张三的角色其实就是观察者,李四是被观察者.
 ```
 
 
-
-#### Spring中实现观察者模式
-
-```
-1.自定义需要发布的事件类，需要继承 ApplicationEvent 类或 PayloadApplicationEvent (该类也仅仅是对 ApplicationEvent 的一层封装)
-
-2.使用 @EventListener 来监听事件或者实现 ApplicationListener 接口。
-
-3.使用 ApplicationEventPublisher 来发布自定义事件（@Autowired注入即可）
-```
 
