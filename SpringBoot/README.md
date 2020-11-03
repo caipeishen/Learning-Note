@@ -274,3 +274,67 @@ SpringApplication.run(SpringbootApplication.class, args);
 #### Spring Boot 自定义注解，AOP 切面统一打印出入参请求日志
 
 参考：[Spring Boot 自定义注解，AOP 切面统一打印出入参请求日志](https://www.exception.site/springboot/spring-boot-aop-web-request)
+
+
+
+
+
+### SpringBoot打war包部署
+
+1. pom.xml配置修改
+
+```pom.xml
+<packaging>war</packaging>
+```
+
+2. 排除spring boot中内嵌的tomcat依赖包：
+
+```xml
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-tomcat</artifactId>
+   <scope>provided</scope><!-- provided打包时不加载此包 -->
+</dependency>
+```
+
+3. 修改maven打war包插件
+
+```xml
+<build>
+    <finalName>war包名</finalName>
+    <plugins>
+        <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <version>3.0.0</version>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.3</version>
+            <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+4. 如果是发布jar包，程序的入口时main函数所在的类，使用@SpringBootApplication注解；如果是war包发布，需要增加SpringBootServletInitializer子类，并重写其configure方法，或者将main函数所在的类继承SpringBootServletInitializer子类，并重写configure方法，当时打包为war时上传到tomcat服务器中访问项目始终报404错就是忽略了这个步骤！！！
+
+```java
+//继承SpringBootServletInitializer子类
+@SpringBootApplication
+public class DemoApplication extends SpringBootServletInitializer {
+
+    //重写configure方法
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(DemoApplication.class);
+    }
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+```
+

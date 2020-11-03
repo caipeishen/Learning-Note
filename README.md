@@ -1,5 +1,92 @@
 
 
+## 设计模式
+
+### 单例模式
+
+> 懒汉
+
+```java
+public class SingleTon{
+   private static SingleTon  INSTANCE = null;
+   private SingleTon(){}
+   public static SingleTon getInstance() {  
+   if(INSTANCE == null){
+      INSTANCE = new SingleTon(); 
+    } 
+    return INSTANCE；
+  }
+}
+//懒汉模式在方法被调用后才创建对象，以时间换空间，在多线程环境下存在风险。
+```
+
+
+
+> 饿汉
+
+```java
+public class SingleTon{
+	private static SingleTon INSTANCE = new SingleTon();
+	private SingleTon(){
+	
+	}
+	public static SingleTon getInstance(){ 
+		return INSTANCE; 
+	}
+}
+//饿汉模式在类被初始化时就已经在内存中创建了对象，以空间换时间，故不存在线程安全问题。
+```
+
+
+
+> 静态内部类
+
+```java
+public class SingleTon{
+  private SingleTon(){}
+ 
+  private static class SingleTonHoler{
+     private static SingleTon INSTANCE = new SingleTon();
+ }
+ 
+  public static SingleTon getInstance(){
+    return SingleTonHoler.INSTANCE;
+  }
+}
+//静态内部类的优点是：外部类加载时并不需要立即加载内部类，内部类不被加载则不去初始化INSTANCE，故而不占内存。即当SingleTon第一次被加载时，并不需要去加载SingleTonHoler，只有当getInstance()方法第一次被调用时，才会去初始化INSTANCE,第一次调用getInstance()方法会导致虚拟机加载SingleTonHoler类，这种方法不仅能确保线程安全，也能保证单例的唯一性，同时也延迟了单例的实例化。
+```
+
+
+
+### 工厂模式
+
+参考：[工厂模式](https://www.runoob.com/design-pattern/factory-pattern.html)
+
+
+
+### 策略模式
+
+参考：[策略模式](https://www.runoob.com/design-pattern/strategy-pattern.html)
+
+
+
+### 工厂模式与策略模式
+
+```
+工厂模式中只管生产实例，具体怎么使用工厂实例由调用方决定，策略模式是将生成实例的使用策略放在策略类中配置后才提供调用方使用。 
+工厂模式调用方可以直接调用工厂实例的方法属性等，策略模式不能直接调用实例的方法属性，需要在策略类中封装策略后调用。
+```
+
+
+
+### 观察者与监听器
+
+参考：[监听者模式和观察者模式的区别与联系](https://blog.csdn.net/lovexiaotaozi/article/details/102579360)   [Spring监听模式实例](https://www.cnblogs.com/dubhlinn/p/10725636.html)
+
+```
+重点：理解事件与事件源的关系
+```
+
 
 
 ## Linux
@@ -109,7 +196,7 @@ lsof -c java
 
 ### Linux后台运行项目
 
-```linux
+```sh
 #如果让程序始终在后台执行，即使关闭当前的终端也执行（之前的&做不到），这时候需要nohup。该命令可以在你退出帐户/关闭终端之后继续运行相应的进程。关闭中断后，在另一个终端jobs已经无法看到后台跑得程序了，此时利用ps（进程查看命令）
 nohup ./startup.sh &
 nohup java -jar weChat.jar &
@@ -252,7 +339,7 @@ yum install -y gcc-c++
 
 2. 添加配置
 
-   ```Linux
+   ```shell
    [mysqld]
    #中文无法插入数据
    character-set-server=utf8
@@ -264,7 +351,7 @@ yum install -y gcc-c++
    default-character-set=utf8
    ```
 
-   ```
+   ```sh
    #设置编码格式
    mysql> set character_set_database=utf8;
     
@@ -272,7 +359,7 @@ yum install -y gcc-c++
    
    # vi /etc/my.cnf;
    [mysqld]
-   character_set_server = utf8
+   character_set_server=utf8
     
    [mysql]
    default-character-set=utf8
@@ -490,91 +577,6 @@ private static object getFieldValueByName(String fieldName, object o) throws Exc
 参考：[JAVA注解与元注解](https://blog.csdn.net/pengjunlee/article/details/79683621)  [JAVA注解+反射机制](https://baijiahao.baidu.com/s?id=1612408653409570352&wfr=spider&for=pc)  [JAVA框架常用注解](https://www.jianshu.com/p/a4db04398df6)
 
 
-
-### 单例模式
-
-> 懒汉
-
-```java
-public class SingleTon{
-   private static SingleTon  INSTANCE = null;
-   private SingleTon(){}
-   public static SingleTon getInstance() {  
-   if(INSTANCE == null){
-      INSTANCE = new SingleTon(); 
-    } 
-    return INSTANCE；
-  }
-}
-//懒汉模式在方法被调用后才创建对象，以时间换空间，在多线程环境下存在风险。
-```
-
-
-
-> 饿汉
-
-```java
-public class SingleTon{
-	private static SingleTon INSTANCE = new SingleTon();
-	private SingleTon(){
-	
-	}
-	public static SingleTon getInstance(){ 
-		return INSTANCE; 
-	}
-}
-//饿汉模式在类被初始化时就已经在内存中创建了对象，以空间换时间，故不存在线程安全问题。
-```
-
-
-
-> 静态内部类
-
-```java
-public class SingleTon{
-  private SingleTon(){}
- 
-  private static class SingleTonHoler{
-     private static SingleTon INSTANCE = new SingleTon();
- }
- 
-  public static SingleTon getInstance(){
-    return SingleTonHoler.INSTANCE;
-  }
-}
-//静态内部类的优点是：外部类加载时并不需要立即加载内部类，内部类不被加载则不去初始化INSTANCE，故而不占内存。即当SingleTon第一次被加载时，并不需要去加载SingleTonHoler，只有当getInstance()方法第一次被调用时，才会去初始化INSTANCE,第一次调用getInstance()方法会导致虚拟机加载SingleTonHoler类，这种方法不仅能确保线程安全，也能保证单例的唯一性，同时也延迟了单例的实例化。
-```
-
-
-
-### 工厂模式
-
-参考：[工厂模式](https://www.runoob.com/design-pattern/factory-pattern.html)
-
-
-
-### 策略模式
-
-参考：[策略模式](https://www.runoob.com/design-pattern/strategy-pattern.html)
-
-
-
-### 工厂模式与策略模式
-
-```
-工厂模式中只管生产实例，具体怎么使用工厂实例由调用方决定，策略模式是将生成实例的使用策略放在策略类中配置后才提供调用方使用。 
-工厂模式调用方可以直接调用工厂实例的方法属性等，策略模式不能直接调用实例的方法属性，需要在策略类中封装策略后调用。
-```
-
-
-
-### 观察者与监听器
-
-参考：[监听者模式和观察者模式的区别与联系](https://blog.csdn.net/lovexiaotaozi/article/details/102579360)   [Spring监听模式实例](https://www.cnblogs.com/dubhlinn/p/10725636.html)
-
-```
-重点：理解事件与事件源的关系
-```
 
 
 
@@ -1162,67 +1164,6 @@ mvn clean package -Dmaven.test.skip=true
 　　GroupId一般分为多个段，这里我只说两段，第一段为域，第二段为公司名称。域又分为org、com、cn等等许多，其中org为非营利组织，com为商业组织。举个apache公司的tomcat项目例子：这个项目的GroupId是org.apache，它的域是org（因为tomcat是非营利项目），公司名称是apache，ArtifactId是tomcat。
 　　
 　　比如我创建一个项目，我一般会将GroupId设置为cn.mht，cn表示域为中国，mht是我个人姓名缩写，ArtifactId设置为testProj，表示你这个项目的名称是testProj，依照这个设置，在你创建Maven工程后，新建包的时候，包结构最好是cn.zr.testProj打头的，如果有个StudentDao[Dao层的]，它的全路径就是cn.zr.testProj.dao.StudentDao
-```
-
-
-
-### SpringBoot打war包部署
-
-1. pom.xml配置修改
-
-```pom.xml
-<packaging>war</packaging>
-```
-
-2. 排除spring boot中内嵌的tomcat依赖包：
-
-```pom.xml
-<dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-tomcat</artifactId>
-   <scope>provided</scope><!-- provided打包时不加载此包 -->
-</dependency>
-```
-
-3. 修改maven打war包插件
-
-```
-<build>
-    <finalName>war包名</finalName>
-    <plugins>
-        <plugin>
-            <artifactId>maven-war-plugin</artifactId>
-            <version>3.0.0</version>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.3</version>
-            <configuration>
-                <source>1.8</source>
-                <target>1.8</target>
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
-```
-
-4. 如果是发布jar包，程序的入口时main函数所在的类，使用@SpringBootApplication注解；如果是war包发布，需要增加SpringBootServletInitializer子类，并重写其configure方法，或者将main函数所在的类继承SpringBootServletInitializer子类，并重写configure方法，当时打包为war时上传到tomcat服务器中访问项目始终报404错就是忽略了这个步骤！！！
-
-```java
-//继承SpringBootServletInitializer子类
-@SpringBootApplication
-public class DemoApplication extends SpringBootServletInitializer {
-
-    //重写configure方法
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(DemoApplication.class);
-    }
-    public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
-    }
-}
 ```
 
 
@@ -2745,15 +2686,26 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 
 
+### 热部署Devtools
 
+> 1.导入maven依赖
 
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <scope>runtime</scope>
+    <optional>true</optional>
+</dependency>
+```
 
+> 2.工具支持
 
+![1604396597764](images\热部署IDEA设置.png)
 
+> 3.再次设置  Ctrl + Shift + Alt + /
 
-
-
-
+![](images/热部署再次设置.png)
 
 
 
