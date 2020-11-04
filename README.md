@@ -2709,9 +2709,31 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 
 
+### IDEA中设置Run Dashboard
 
+参考：[IDEA中设置Run Dashboard](https://blog.csdn.net/chinoukin/article/details/80577890) 
 
+> 在工程目录下找.idea文件夹下的workspace.xml  ，在其中增加如下组件 
 
+```xml
+<component name="RunDashboard">
+    <option name="configurationTypes">
+        <set>
+            <option value="SpringBootApplicationConfigurationType" />
+        </set>
+    </option>
+    <option name="ruleStates">
+        <list>
+            <RuleState>
+                <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+            </RuleState>
+            <RuleState>
+                <option name="name" value="StatusDashboardGroupingRule" />
+            </RuleState>
+        </list>
+    </option>
+</component>
+```
 
 
 
