@@ -282,58 +282,172 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 #### Eureka保证AP
 
-```
-Eureka看明白了这一点, 因此在设计时就优先保证可用性。Eureka各个节点都是平等的,几个节点挂掉不会影响正常节点的工作，剩余的节点依然可以提供注册和查询服务。而Eureka的客户端在向某个Eureka注册或时如果发现连接失败,则会自动切换至其它节点，只要有一台Eureka还在,就能保证注册服务可用(保证可用性)，只不过查到的信息可能不是最新的(不保证强一致性)。
-
-除此之外，Eureka还有一种自我保护机制， 如果在15分钟内超过85%的节点都没有正常的心跳，那么Eureka就认为客户端 与注册中心出现了网络故障，此时会出现以下几种情况:
-
-1. Eureka不再从注册列表中移除因为长时间没收到心跳而应该过期的服务
-2. Eureka仍然能够接受新服务的注册和查询请求,但是不会被同步到其它节点上(即保证当前节点依然可用)
-3.当网络稳定时，当前实例新的注册信息会被同步到其它节点中
-因此，Eureka可以很好的应对因网络故障导致部分节 点失去联系的情况，而不会像zookeeper那样使整 个注册服务瘫痪。
-```
+>Eureka看明白了这一点, 因此在设计时就优先保证可用性。Eureka各个节点都是平等的,几个节点挂掉不会影响正常节点的工作，剩余的节点依然可以提供注册和查询服务。而Eureka的客户端在向某个Eureka注册或时如果发现连接失败,则会自动切换至其它节点，只要有一台Eureka还在,就能保证注册服务可用(保证可用性)，只不过查到的信息可能不是最新的(不保证强一致性)。
+>
+>除此之外，Eureka还有一种自我保护机制， 如果在15分钟内超过85%的节点都没有正常的心跳，那么Eureka就认为客户端 与注册中心出现了网络故障，此时会出现以下几种情况:
+>
+>1. Eureka不再从注册列表中移除因为长时间没收到心跳而应该过期的服务
+>2. Eureka仍然能够接受新服务的注册和查询请求,但是不会被同步到其它节点上(即保证当前节点依然可用)
+>   3.当网络稳定时，当前实例新的注册信息会被同步到其它节点中
+>   因此，Eureka可以很好的应对因网络故障导致部分节 点失去联系的情况，而不会像zookeeper那样使整 个注册服务瘫痪。
 
 
 
 #### Zookepper保证CP
 
-```
-当向注册中心查询服务列表时，我们可以容忍注册中心返回的是几分钟以前的注册信息，但不能接受服务直接down掉不可用。也就是说，服务注册功能对可用性的要求要高于一致性。
+>当向注册中心查询服务列表时，我们可以容忍注册中心返回的是几分钟以前的注册信息，但不能接受服务直接down掉不可用。也就是说，服务注册功能对可用性的要求要高于一致性。
+>
+>但是zk会出现这样一种情况， 当master节 点因为网络故障与其他节点失去联系时，剩余节点会重新进行leader选举。问题在于，选举leader的时间太长， 30 ~ 120s,且选举期间整个zk集群都是不可用的,这就导致在选举期间注册服务瘫痪。
+>
+>在云部署的环境下，因网络问题使得zk集群失去master节点是较大概率会发生的事,虽然服务能够最终恢复，但是漫长的选举时间导致的注册长期不可用是不能容忍的。
 
-但是zk会出现这样一种情况， 当master节 点因为网络故障与其他节点失去联系时，剩余节点会重新进行leader选举。问题在于，选举leader的时间太长， 30 ~ 120s,且选举期间整个zk集群都是不可用的,这就导致在选举期间注册服务瘫痪。
 
-在云部署的环境下，因网络问题使得zk集群失去master节点是较大概率会发生的事,虽然服务能够最终恢复，但是漫长的选举时间导致的注册长期不可用是不能容忍的。
-```
 
 
 
 #### 自我保护机制
 
+>默认情况下，如果没有自我保护，EurekaServer在一定时间内没有接收到某个微服务实例的心跳，EurekaServer将会注销该实例(默认90秒)。但是当网络分区故障发生时，微服务与EurekaServer之间无法正常通信，以上行为可能变得非常危险了一因为微服务本身其实是健康的，此时本不应该注销这个微服务。
+>
+>Eureka通过"自我保护模式"来解决这个问题一当EurekaServer节点在短时间内丢失过多客户端时(可能发生了网络分区故障)，那么这个节点就会进入自我保护模式。一旦进入该模式，EurekaServer就会保护服务注册表中的信息，不再删除服务注册表中的数据(也就是不会注销任何微服务)。当网络故障恢复后,该Eureka Server节点会自动退出自我保护模式。
+>
+>更容易理解的方式
+>在自我保护模式中，Eureka Server会保护服务注册表中的信息,不再注销任何服务实例。当它收到的心跳数重新恢复到阈值以上时，该Eureka Server节点就会自动退出自我保护模式。它的设计哲学就是宁可保留错误的服务注册信息，也不盲目注销任何可能健康的服务实例。一句话讲解:好死不如赖活着 AP(可用和容错)
+
+
+
+> 服务端关闭自我保护机制
+
+```yml
+server:
+  port: 7001
+
+
+eureka:
+  instance:
+    hostname: eureka7001.com        # eureka服务端的实例名称
+  client:
+    register-with-eureka: false     # false表示不向注册中心注册自己。
+    fetch-registry: false           # false表示自己端就是注册中心，我的职责就是维护服务实例，并不需要去检索服务
+    service-url:
+      #单机指向自己
+      #defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      #集群指向其它eureka
+      defaultZone: http://eureka7002.com:7002/eureka/
+  server:
+    #关闭自我保护机制，保证不可用服务被及时踢除
+    enable-self-preservation: false
+    #剔除超时两秒的服务
+    eviction-interval-timer-in-ms: 2000
 ```
-默认情况下，如果没有自我保护，EurekaServer在一定时间内没有接收到某个微服务实例的心跳，EurekaServer将会注销该实例(默认90秒)。但是当网络分区故障发生时，微服务与EurekaServer之间无法正常通信，以上行为可能变得非常危险了一因为微服务本身其实是健康的，此时本不应该注销这个微服务。
 
-Eureka通过"自我保护模式"来解决这个问题一当EurekaServer节点在短时间内丢失过多客户端时(可能发生了网络分区故障)，那么这个节点就会进入自我保护模式。一旦进入该模式，EurekaServer就会保护服务注册表中的信息，不再删除服务注册表中的数据(也就是不会注销任何微服务)。当网络故障恢复后,该Eureka Server节点会自动退出自我保护模式。
 
--- 更容易理解的方式
-在自我保护模式中，Eureka Server会保护服务注册表中的信息,不再注销任何服务实例。当它收到的心跳数重新恢复到阈值以上时，该Eureka Server节点就会自动退出自我保护模式。它的设计哲学就是宁可保留错误的服务注册信息，也不盲目注销任何可能健康的服务实例。一句话讲解:好死不如赖活着 AP(可用和容错)
+
+> 客户端与服务端心跳配置
+
+```yml
+server:
+  port: 8001
+
+
+eureka:
+  instance:
+    #实例名
+    instance-id: payment8001
+    #访问路径可以显示IP
+    prefer-ip-address: true
+    #Eureka客户端向服务端发送心跳的时间间隔，单位为秒(默认是30秒)
+    lease-renewal-interval-in-seconds: 1
+    #Eureka服务端在收到最后一次心跳后等待时间上限，单位为秒(默认是90秒)，超时将剔除服务
+    lease-expiration-duration-in-seconds: 2
+  client:
+    #表示是否将自己注册进EurekaServer默认为true。
+    register-with-eureka: true
+    #是否从EurekaServer抓取已有的注册信息，默认为true。单节点无所谓，集群必须设置为true才能配合ribbon使用负载均衡
+    fetchRegistry: true
+    service-url:
+      #单机版
+      #defaultZone: http://localhost:7001/eureka
+      #集群
+      defaultZone: http://eureka7001.com:7001/eureka,http://eureka7002.com:7002/eureka
 ```
 
 
 
-### Bibbon负载均衡
+### Ribbon负载均衡
 
-Ribbon提供了多种负载均衡策略：比如轮询(RoundRobinRule)、随机(RandomRule)和撞南墙(RetyRule)、根据响应时间加权
+> 负载均衡+RestTemplate调用(getForObject方法/getForEntity方法)
 
-```
-Spring Cloud Ribbon是基于Netflix Ribbon实现的一套 客户端 负载均衡的工具。
- 
-简单的说，Ribbon是Netflix发布的开源项目，主要功能是提供客户端的软件负载均衡算法，将Netflix的中间层服务连接在一起。Ribbon客户端组件提供一系列完善的配置项如连接超时，重试等。简单的说，就是在配置文件中列出Load Balancer（简称LB）后面所有的机器，Ribbon会自动的帮助你基于某种规则（如简单轮询，随机连接等）去连接这些机器。我们也很容易使用Ribbon实现自定义的负载均衡算法。
+> 主要功能是提供客户端的软件负载均衡算法和服务调用。
 
-LB，即负载均衡(Load Balance)，在微服务或分布式集群中经常用的一种应用。
-负载均衡简单的说就是将用户的请求平摊的分配到多个服务上，从而达到系统的HA。
-常见的负载均衡有软件Nginx，LVS，硬件 F5等。
-相应的在中间件，例如：dubbo和SpringCloud中均给我们提供了负载均衡，SpringCloud的负载均衡算法可以自定义。 
-```
+> 负载均衡策略：比如轮询(RoundRobinRule)、随机(RandomRule)和重试(RetyRule)、根据响应时间加权
+
+> Ribbon本地负载均衡客户端 VS Nginx服务端负载均衡区别
+>
+> 1. Nginx是服务器负载均衡，客户端所有请求都会交给nginx，然后由nginx实现转发请求。即负载均衡是由服务端实现的。
+>
+> 2. Ribbon本地负载均衡，在调用微服务接口时候，会在注册中心上获取注册信息服务列表之后缓存到VM本地，从而在本地实现RPC远程服务调用技术。
+
+
+
+#### 组件IRule
+
+> IRule：根据特定算法中从服务列表中选择一个要访问的服务
+
+> + RoundRobinRule 轮询
+> + RandomRule 随机 
+> + RetryRule  先按照RoundRobinRule的策略获取服务，如果获取失败则再指定时间内重试，获取可用服务
+> + WeightResponseTimeRule   对RoundRobinRule的扩展，响应速度越快的实例选择权重越大
+> + BestAvailableRule   会先过滤掉由于多次访问故障而处于断路器跳闸状态的服务，然后选择一个并发量最小的服务
+> + AvailabilityFilterRule 先过滤掉故障实例，再选择并发较小的实例
+> + ZoneAvoidanceRule 默认规则，复合判断server所在区域的性能和server的可用性选择服务器
+
+
+
+#### 如何替换
+
+>1. 新建包但不能放在@ComponentScan的扫描范围内
+>
+>   ```java
+>   cn.cps
+>       myrule
+>       	MySelfRule
+>       springcloud
+>       	OrderMain80
+>   ```
+>
+>   
+>
+>2. 新建自己的负载均衡算法配置类 myRule
+>
+>   ```java
+>   @Configuration
+>   public class MySelfRule
+>   {
+>       @Bean
+>       public IRule myRandomRule()
+>       {
+>           return new RandomRule();//定义为随机
+>       }
+>   }
+>   ```
+>
+>3. 主启动类添加注解@RibbonClient
+>
+>   ```java
+>   @EnableEurekaClient
+>   @SpringBootApplication
+>   // 注意必须要和服务中的名字大小写一样
+>   @RibbonClient(name = "CLOUD-PAYMENT-SERVICE", configuration=MySelfRule.class)
+>   public class OrderMain80
+>   {
+>       public static void main(String[] args) {
+>               SpringApplication.run(OrderMain80.class, args);
+>       }
+>   }
+>   ```
+
+
 
 
 
