@@ -1054,6 +1054,14 @@ List<Person> listC = listA.stream().filter(item -> !listB.contains(item)).collec
 
 
 
+### CAS 实现自旋锁
+
+参考：[CAS 实现自旋锁](https://www.cnblogs.com/fengzheng/p/9018152.html)
+
+> CAS 是实现自旋锁的基础，CAS 利用 CPU 指令保证了操作的原子性，以达到锁的效果，至于自旋呢，看字面意思也很明白，自己旋转，翻译成人话就是循环，一般是用一个无限循环实现。这样一来，一个无限循环中，执行一个 CAS 操作，当操作成功，返回 true 时，循环结束；当返回 false 时，接着执行循环，继续尝试 CAS 操作，直到返回 true 
+
+
+
 ### HashMap红黑树
 
 参考：[HashMap红黑树](https://www.jianshu.com/p/2c7a4a4e1f53)   [HashMap理解](https://blog.csdn.net/wenyiqingnianiii/article/details/52204136)
@@ -2737,6 +2745,10 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
     </option>
 </component>
 ```
+
+
+
+
 
 
 
