@@ -449,6 +449,16 @@ eureka:
 
 
 
+#### 负载均衡算法
+
+> 原理：获取某个服务的实例，然后定义算法进行获取去执行请求
+>
+> List<Servicelnstance> instances = discoveryClient.getIlnstances("CLOUD-PAYMENT-SERVICE");
+>
+> + 轮询：次数(索引) % 实例数 = 实际调用服务实例位置下标，每次服务重启动后rest接口计数从0开始。
+>
+> 
+
 
 
 ### Feign负载均衡
