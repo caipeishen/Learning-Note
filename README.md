@@ -934,9 +934,15 @@ TCP/IP协议族中最重要的一点就是分层。按层次分别分为：应�
 
 
 
-### HTTPS
+### Https
 
-参考：[https加密机制](https://blog.csdn.net/iCode_girl/article/details/108541202)   [https原理](http://www.easemob.com/news/3706)
+<img src="images/Https交互过程.png" style="zoom: 50%;" />
+
+参考： [小程序Https理解](https://mp.weixin.qq.com/s/aHPZgNFWYT9d_sbuEAYcIA)   [https加密机制](https://blog.csdn.net/iCode_girl/article/details/108541202)   [https原理](http://www.easemob.com/news/3706)
+
+> 大家可能都听说过 Https 协议之所以是安全的是因为 Https 协议会对传输的数据进行加密，而加密过程是使用了非对称加密实现。但其实，Https 在内容传输的加密上使用的是对称加密，非对称加密只作用在证书验证阶段。 
+
+
 
 
 
