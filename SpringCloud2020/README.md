@@ -390,6 +390,62 @@ eureka:
 
 
 
+#### 如何使用
+
+> 主启动类添加注解
+
+```java
+@EnableEurekaClient
+@SpringBootApplication
+@RibbonClient(name = "CLOUD-PAYMENT-SERVICE", configuration = MyRule.class) // 使用自定义负载均衡才需要添加
+public class OrderMain80
+{
+    public static void main(String[] args) {
+        SpringApplication.run(OrderMain80.class, args);
+    }
+}
+```
+
+
+
+> 负载均衡配置算法
+
+```java
+@Configuration
+public class ApplicationContextConfig {
+    @Bean
+    @LoadBalanced // 当为集群时，必须要启用负载均衡策略，不然多个服务不知道调用哪一个
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+}
+```
+
+
+
+> 服务调用
+
+```java
+@Slf4j
+@RestController
+public class OrderController {
+
+    @Resource
+    private RestTemplate restTemplate;
+    
+    // 集群时，需要指明一种负载均衡策略，不然多个服务，不知道调用哪一个 -> 在RestTemplate配置上添加@LoadBalanced
+    public static final String PAYMENT_URL = "http://CLOUD-PAYMENT-SERVICE";
+
+    @GetMapping("/consumer/payment/get/{id}")
+    public CommonResult<Payment> getPayment(@PathVariable("id") Long id) {
+        return restTemplate.getForObject(PAYMENT_URL+"/payment/get/"+id,CommonResult.class);
+    }
+   
+}
+```
+
+
+
 #### 组件IRule
 
 > IRule：根据特定算法中从服务列表中选择一个要访问的服务
@@ -451,43 +507,111 @@ eureka:
 
 #### 负载均衡算法
 
-> 原理：获取某个服务的实例，然后定义算法进行获取去执行请求
+> 原理：获取某个服务的实例，然后定义算法进行获取去执行请求。使用CAS自旋锁实现原子性。
 >
 > List<Servicelnstance> instances = discoveryClient.getIlnstances("CLOUD-PAYMENT-SERVICE");
 >
 > + 轮询：次数(索引) % 实例数 = 实际调用服务实例位置下标，每次服务重启动后rest接口计数从0开始。
 >
-> 
 
 
 
-### Feign负载均衡
+### OpenFeign负载均衡
 
-Feign是一个声明式的Web服务客户端， 使得编写Web服务客户端变得非常容易,
-**只需要创建一个接口，然后在上面添加注解即可**。
-参考官网: https://github.com/OpenFeign/feign
+> 微服务调用接口 + @FeignClient
 
 
 
-### Feign能干什么
+>Feign旨在使编写Java Http客户端变得更容易。
+>
+>前面在使用Ribbon + RestTemplate时，利用RestTemplate对http请求的封装处理，形成了一套模版化的调用方法。但是在实际开发中，由于对服务依赖的调用可能不止一处，往往一个接口会被多处调用，所以通常都会针对每个微服务自行封装一 些客户端类来包装这些依赖服务的调用。
+>
+>所以Feign在此基础上做了进一 步封装，由他来帮助我们定义和实现依赖服务接口的定义。在Feign的实现下，我们只需创建一个接并使用注解的方式来配置它(以前是Dao接口，上面标注Mapper注解现在是一 个微服务接口上面标注一个Feign注解即可)， 即可完成对服务提供方的接口绑定,简化了使用Spring cloud Ribbon时，自动封装服务调用客户端的开发量。
 
+
+
+#### Feign与 OpenFeign
+
+> + Feign：Feign是Spring Cloud组件中的一个轻量级RESTful的HTTP服务客户端Feign内置了Ribbon，用来做客户端负载均衡，去调用服务注册中心的服务。Feign的使用方式是:使用Feign的注解定义接口，调用这个接口，就可以调用服务注册中心的服务。
+> + OpenFeign：OpenFeign是Spring Cloud 在Feign的基础上支持了SpringMVC的注解，如@RequesMapping等等。OpenFeign的@FeignClient可以解析SpringMVC的@RequestMapping注解下的接口，并通过动态代理的方式产生实现类，实现类中做负载均衡并调用其他服务。
+
+
+
+#### 如何使用
+
+> 主启动类添加注解
+
+```java
+@EnableFeignClients
+@SpringBootApplication
+public class OrderFeignMain80 {
+    public static void main(String[] args) {
+        SpringApplication.run(OrderFeignMain80.class, args);
+    }
+}
 ```
-Feign旨在使编写Java Http客户端变得更容易。
-前面在使用Ribbon + RestTemplate时，利用RestTemplate对http请求的封装处理，形成了一套模版化的调用方法。但是在实际
-开发中，由于对服务依赖的调用可能不止一处，往往一个接口会被多处调用，所以通常都会针对每个微服务自行封装一 些客户端
-类来包装这些依赖服务的调用。所以Feign在此基础上做了进一 步封装，由他来帮助我们定义和实现依赖服务接口的定义。在
-Feign的实现下，我们只需创建一个接并使用注解的方式来配置它(以前是Dao接口，上面标注Mapper注解现在是一 个微服务接口
-上面标注一个Feign注解即可)， 即可完成对服务提供方的接口绑定,简化了使用Spring cloud Ribbon时，自动封装服务调用客户
-端的开发量。
+
+
+
+> Service添加注解
+
+```java
+@Service
+@FeignClient(value = "CLOUD-PAYMENT-SERVICE") // 调用服务
+public interface PaymentFeignService {
+
+    @GetMapping(value = "/payment/get/{id}") // 服务的具体路径
+    public CommonResult<Payment> getPaymentById(@PathVariable("id") Long id);
+
+    @GetMapping(value = "/payment/feign/timeout")
+    public String paymentFeignTimeout();
+
+}
 ```
 
 
 
-### Ribbon与Feign
+#### OpenFeign超时控制
 
+```yml
+#设置feign客户端超时时间(OpenFeign默认支持ribbon)
+ribbon:
+  #指的是建立连接所用的时间，适用于网络状况正常的情况下,两端连接所用的时间
+  ReadTimeout: 5000
+  #指的是建立连接后从服务器读取到可用资源所用的时间
+  ConnectTimeout: 5000
 ```
-1.微服务名字获得调用地址
-2.就是通过接口+注解，获得我们的调用服务。
+
+
+
+#### OpenFeign日志打印功能
+
+> 日志级别
+
+```java
+/*
+    NONE:默认的,不显示任何日志;
+    BASIC:仅记录请求方法、URL、响应状态码及执行时间;
+    HEADERS:除了BASIC中定义的信息之外，还有请求和响应的头信息;
+    FULL除了HEADERS 中定义的信息之外，还有请求和响应的正文及元数据。
+*/
+@Configuration
+public class FeignConfig {
+    @Bean
+    Logger.Level feignLoggerLevel(){
+        return Logger.Level.FULL;
+    }
+}
+```
+
+
+
+> yml文件开启日志打印
+
+```yml
+logging:
+  level:
+    cn.cps.springcloud.service.PaymentFeignService: debug
 ```
 
 
