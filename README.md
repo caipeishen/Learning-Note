@@ -458,7 +458,7 @@ show slave status\G;
 
 ### Git
 
-参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)
+参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)   [配置SSH](https://blog.csdn.net/fighting_tl/article/details/76009639)
 
 
 
@@ -1689,28 +1689,6 @@ this.lr.peopleData.push(...newUser)
 2.验证没有登陆 重定向到统一登陆认证中心
 3.验证是否有全局对话 ①没有则响应到同意登录页面 ②有 则相应到A域名主页
 4.没有的话 则进行登录创建全局
-```
-
-
-
-### Https配置
-
-> 生成密钥文件
-
-```cmd
-keytool -genkey -v -alias nianshaoyouwei -keyalg RSA -keystore C:/keys/nianshaoyouwei.keystore -validity 36500
-```
-
-> 生成证书
-
-```cmd
-keytool -export -alias nianshaoyouwei -storepass a9530.A. -file C:/keys/nianshaoyouwei.cer -keystore C:/keys/nianshaoyouwei.keystore
-```
-
-> 导入证书 需要先删除 jre\lib\security\cacerts 文件
-
-```cmd
-keytool -import -keystore "C:\Program Files\Java\jdk1.8.0_131\jre\lib\security\cacerts" -storepass changeit -keypass changeit -alias emailcert -file C:/keys/nianshaoyouwei.cer
 ```
 
 
