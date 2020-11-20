@@ -618,18 +618,19 @@ logging:
 
 ### Hystrix断路器
 
-向调用方返回一个符合预期的、可处理的备选响应(FallBack) ,而不是长时间的等待或者抛出调用方无法处理的异常
-
-```
-复杂分布式体系结构中的应用程序有数十个依赖关系，每个依赖关系在某些时候将不可避免地失败。
-Hystrix是一个用于处理分布式系统的延迟和容错的开源库,在分布式系统里,许多依赖不可避免的会调用失败,比如超时、异常等，Hystrix能够保证在一个依赖出问题的情况下，不会导致整体服务失败,避免级联故障,以提高分布式系统的弹性。
-"断路器”本身是一种开关装置,当某个服务单元发生故障之后,通过断路器的故障监控(类似熔断保险丝)，向调用方返回一个符合预期的、可处理的备选响应(FallBack) ,而不是长时间的等待或者抛出调用方无法处理的异常,这样就保证了服务调用方的
-线程不会被长时间、不必要地占用，从而避免了故障在分布式系统中的蔓延，乃至雪崩。
-```
+> Hystrix是一个用于处理分布式系统的延迟和容错的开源库,在分布式系统里,许多依赖不可避免的会调用失败,比如超时、异常等，Hystrix能够保证在一个依赖出问题的情况下，不会导致整体服务失败,避免级联故障,以提高分布式系统的弹性。
+>
+> 向调用方返回一个符合预期的、可处理的备选响应，而不是长时间的等待或者抛出调用方无法处理的异常
 
 
 
->服务雪崩
+#### 熔断器
+
+> “断路器”本身是一种开关装置，当某个服务单元发生故障之后，通过断路器的故障监控（类似熔断保险丝)，向调用方返回一个符合预期的、可处理的备选响应(FallBack)，而不是长时间的等待或者抛出调用方无法处理的异常，这样就保证了服务调用方的线程不会被长时间、不必要地占用，从而避免了故障在分布式系统中的蔓延，乃至雪崩。
+
+
+
+#### 服务雪崩
 
 ```
 多个微服务之间调用的时候，假设微服务A调用微服务B和微服务C，微服务B和微服务C又调用其它的微服务,这就是所谓的“扇出”。
@@ -640,32 +641,152 @@ Hystrix是一个用于处理分布式系统的延迟和容错的开源库,在分
 故障和延迟进行隔离和管理，以便单个依赖关系的失败，不能取消整个应用程序或系统。
 ```
 
+> 
 
 
-> 服务熔断
 
-一般是某个服务故障或者异常引起类似现实世界中的“保险丝“， 当某个异常条件被触发，直接熔断整个服务，而不是一直等到此服务超时导致雪崩。
+#### 服务降级
+
+>所谓降级， 一般是从整体负荷考虑。就是当某个服务熔断之后，服务器将不再被调用
+>此时客户端可以自己准备一个本地的fallback回调， 返回一个缺省值。
+>这样做，虽然服务水平下降，但好歹可用，比直接挂掉要强。
+>
+>整体资源快不够了，忍痛将某些服务先关掉，待渡过难关，再开启回来
+>服务降级处理是在客户端实现完成的，与服务端没有关系
+>让客户端在服务端不可用时也会获得提示信息而不会挂起耗死服务器
+
+
+
+
+
+#### 服务熔断
+
+> 一般是某个服务故障或者异常引起类似现实世界中的“保险丝“， 当某个异常条件被触发，直接熔断整个服务，而不是一直等到此服务超时导致雪崩。
 
 ```
 熔断机制是应对雪崩效应的一种微服务链路保护机制。
 当扇出链路的某个微服务不可用或者响应时间太长时，会进行服务的降级,进而熔断该节点微服务的调用,快速返回”错误”的响应信息。
 当检测到该节点微服务调用响应正常后恢复调用链路。在SpringCloud框架里熔断机制通过Hystrix实现。
-Hystrix会监控微服务间调用的状况，当失败的调用到一定阈值,缺省是5秒内20次调用失败就会启动熔断机制。熔断机制的注解是@HystrixCommand.
+Hystrix会监控微服务x间调用的状况，当失败的调用到一定阈值,缺省是5秒内20次调用失败就会启动熔断机制。熔断机制的注解是@HystrixCommand.
 ```
 
 
 
-> 服务降级
+#### 如何使用
 
-```
-所谓降级， 一般是从整体负荷考虑。就是当某个服务熔断之后，服务器将不再被调用
-此时客户端可以自己准备一个本地的fallback回调， 返回一个缺省值。
-这样做，虽然服务水平下降，但好歹可用，比直接挂掉要强。
+> 主启动类添加注解@EnableHystrix / @EnableCircuitBreaker
 
-整体资源快不够了，忍痛将某些服务先关掉，待渡过难关，再开启回来
-服务降级处理是在客户端实现完成的，与服务端没有关系
-让客户端在服务端不可用时也会获得提示信息而不会挂起耗死服务器
+```java
+@EnableHystrix
+@EnableEurekaClient
+@SpringBootApplication
+public class PaymentHystrixMain8001
+{
+    public static void main(String[] args) {
+            SpringApplication.run(PaymentHystrixMain8001.class, args);
+    }
+}
 ```
+
+
+
+>标明处理的方法
+
+```java
+@GetMapping("/consumer/payment/hystrix/timeout/{id}")
+@HystrixCommand(fallbackMethod = "paymentTimeOutFallbackMethod", commandProperties = {
+    @HystrixProperty(name="execution.isolation.thread.timeoutInMilliseconds",value="1000")
+})
+public String paymentInfo_TimeOut(@PathVariable("id") Integer id)
+{
+    String result = paymentHystrixService.paymentInfo_TimeOut(id);
+    return result;
+}
+public String paymentTimeOutFallbackMethod(@PathVariable("id") Integer id) {
+    return "我是消费者80,对方支付系统繁忙请10秒钟后再试或者自己运行出错请检查自己,o(╥﹏╥)o";
+}
+```
+
+
+
+#### 全局处理
+
+> 给controller类添加注解
+
+```java
+@RestController
+@DefaultProperties(defaultFallback = "payment_Global_FallbackMethod")
+public class OrderHystirxController {
+
+	@HystrixCommand
+    public String paymentInfo_TimeOut(@PathVariable("id") Integer id) {
+        int age = 10/0;
+        String result = paymentHystrixService.paymentInfo_TimeOut(id);
+        return result;
+    }
+    
+    // 下面是全局fallback方法
+    public String payment_Global_FallbackMethod() {
+        return "Global异常处理信息，请稍后再试，/(ㄒoㄒ)/~~";
+    }
+    
+}
+```
+
+
+
+#### 优美解决方案
+
+> yml配置
+
+```yml
+#启用feign对hystrix支持
+feign:
+  hystrix:
+    enabled: true
+```
+
+
+
+> 在接口处处理，@FeignClient中添加属性 fallback -> 降级处理
+
+```java
+@Component
+@FeignClient(value = "CLOUD-PROVIDER-HYSTRIX-PAYMENT", fallback = PaymentFallbackService.class)
+public interface PaymentHystrixService {
+    @GetMapping("/payment/hystrix/ok/{id}")
+    public String paymentInfo_OK(@PathVariable("id") Integer id);
+
+    @GetMapping("/payment/hystrix/timeout/{id}")
+    public String paymentInfo_TimeOut(@PathVariable("id") Integer id);
+}
+```
+
+
+
+> 创建实体类继承Feign接口
+
+```java
+@Component
+public class PaymentFallbackService implements PaymentHystrixService
+{
+    @Override
+    public String paymentInfo_OK(Integer id) {
+        return "-----PaymentFallbackService fall back-paymentInfo_OK ,o(╥﹏╥)o";
+    }
+
+    @Override
+    public String paymentInfo_TimeOut(Integer id) {
+        return "-----PaymentFallbackService fall back-paymentInfo_TimeOut ,o(╥﹏╥)o";
+    }
+}
+```
+
+
+
+
+
+
 
 
 
