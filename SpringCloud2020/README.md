@@ -624,24 +624,11 @@ logging:
 
 
 
-#### 熔断器
+> 服务雪崩
 
-> “断路器”本身是一种开关装置，当某个服务单元发生故障之后，通过断路器的故障监控（类似熔断保险丝)，向调用方返回一个符合预期的、可处理的备选响应(FallBack)，而不是长时间的等待或者抛出调用方无法处理的异常，这样就保证了服务调用方的线程不会被长时间、不必要地占用，从而避免了故障在分布式系统中的蔓延，乃至雪崩。
+>多个微服务之间调用的时候，假设微服务A调用微服务B和微服务C，微服务B和微服务C又调用其它的微服务,这就是所谓的“扇出”。如果扇出的链路上某个微服务的调用响应时间过长或者不可用，对微服务A的调用就会占用越来越多的系统资源,进而引起系统崩溃,所谓的“雪崩效应”.
 
 
-
-#### 服务雪崩
-
-```
-多个微服务之间调用的时候，假设微服务A调用微服务B和微服务C，微服务B和微服务C又调用其它的微服务,这就是所谓的“扇出”。
-如果扇出的链路上某个微服务的调用响应时间过长或者不可用，对微服务A的调用就会占用越来越多的系统资源,进而引起系统崩溃,所谓的“雪崩效应”.
-
-对于高流量的应用来说，单一的后端依赖可能会导致所有服务器上的所有资源都在几秒钟内饱和。比失败更糟糕的是,这些应用程
-序还可能导致服务之间的延迟增加，备份队列，线程和其他系统资源紧张，导致整个系统发生更多的级联故障。这些都表示需要对
-故障和延迟进行隔离和管理，以便单个依赖关系的失败，不能取消整个应用程序或系统。
-```
-
-> 
 
 
 
@@ -657,22 +644,7 @@ logging:
 
 
 
-
-
-#### 服务熔断
-
-> 一般是某个服务故障或者异常引起类似现实世界中的“保险丝“， 当某个异常条件被触发，直接熔断整个服务，而不是一直等到此服务超时导致雪崩。
-
-```
-熔断机制是应对雪崩效应的一种微服务链路保护机制。
-当扇出链路的某个微服务不可用或者响应时间太长时，会进行服务的降级,进而熔断该节点微服务的调用,快速返回”错误”的响应信息。
-当检测到该节点微服务调用响应正常后恢复调用链路。在SpringCloud框架里熔断机制通过Hystrix实现。
-Hystrix会监控微服务x间调用的状况，当失败的调用到一定阈值,缺省是5秒内20次调用失败就会启动熔断机制。熔断机制的注解是@HystrixCommand.
-```
-
-
-
-#### 如何使用
+##### 如何使用
 
 > 主启动类添加注解@EnableHystrix / @EnableCircuitBreaker
 
@@ -709,7 +681,7 @@ public String paymentTimeOutFallbackMethod(@PathVariable("id") Integer id) {
 
 
 
-#### 全局处理
+##### 全局处理
 
 > 给controller类添加注解
 
@@ -735,7 +707,7 @@ public class OrderHystirxController {
 
 
 
-#### 优美解决方案
+##### 优雅解决方案
 
 > yml配置
 
@@ -784,16 +756,113 @@ public class PaymentFallbackService implements PaymentHystrixService
 
 
 
+#### 服务熔断
+
+<img src="/images/服务熔断.png" style="zoom:50%;" />
+
+>熔断机制是应对雪崩效应的一种微服务链路保护机制。
+>当扇出链路的某个微服务不可用或者响应时间太长时，会进行服务的降级,进而熔断该节点微服务的调用,快速返回”错误”的响应信息。当检测到该节点微服务调用响应正常后恢复调用链路。
+
+> 类比保险丝到最大服务访问后，直接拒绝访问，拉闸限电，然后调用服务降级的方法返回友好提示
+> **服务降级 -> 进而熔断 -> 恢复调用**
 
 
 
+##### 熔断类型
+
+> + 熔断打开：请求不再进行调用当前服务，内部设置时钟一般为MTTR(平均故障处理时间)，当打开时长达到所设时钟则进入半熔断状态
+>
+> + 熔断关闭：熔断关闭不会对服务进行熔断，再有请求调用的时候，将不会调用主逻辑，而是直接调用降级fallback
+> + 熔断半开：部分请求根据规则调用当前服务，如果请求成功且符合规则认为当前服务恢复正常，关闭熔断
 
 
+
+##### 如何使用
+
+> + 快照时间窗：断路器确定是否打开需要统计一些请求和错误数据，而统计的时间范围就是快照时间窗，默认为最近的10秒。
+> + 请求总数阀值：在快照时间窗内，必须满足请求总数阀值才有资格熔断。默认为20，意味着在10秒内，如果该nysti命令的调用次数不足20次，使所有的请求都超时或其他原因失败，断路器都不会打开。
+> + 错误百分比阀值：当请求总数在快照时间窗内超过了阀值，比如发生了30次调用，如果在这30次调用中，有15次发生了超时异常，也就是超过50%的错误百分比，在默认设定50%阀值情况下，这时候就会将断路器打开。
+
+
+
+>主启动类添加注解@EnableHystrix / @EnableCircuitBreaker
+
+```java
+@EnableHystrix
+@EnableEurekaClient
+@SpringBootApplication
+public class PaymentHystrixMain8001
+{
+    public static void main(String[] args) {
+            SpringApplication.run(PaymentHystrixMain8001.class, args);
+    }
+}
+```
+
+
+
+> 标明处理的方法
+
+```java
+@HystrixCommand(fallbackMethod = "paymentCircuitBreaker_fallback",commandProperties = {
+    @HystrixProperty(name = "circuitBreaker.enabled",value = "true"),// 是否开启断路器
+    @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold",value = "10"),// 请求次数
+    @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds",value = "10000"), // 时间窗口期
+    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value = "60")// 失败率达到多少后跳闸
+})
+public String paymentCircuitBreaker(@PathVariable("id") Integer id) {
+    if(id < 0) {
+        throw new RuntimeException("******id 不能负数");
+    }
+    String serialNumber = IdUtil.simpleUUID();
+    return Thread.currentThread().getName()+"\t"+"调用成功，流水号: " + serialNumber;
+}
+public String paymentCircuitBreaker_fallback(@PathVariable("id") Integer id) {
+    return "id 不能负数，请稍后再试，/(ㄒoㄒ)/~~   id: " +id;
+}
+```
+
+
+
+#### 监控仪表盘
 
 > 服务监控hystrixDashboard
 
-```
-除了隔离依赖服务的调用以外，Hystrix还提供了准实时的调用监控（Hystrix Dashboard），Hystrix会持续地记录所有通过Hystrix发起的请求的执行信息，并以统计报表和图形的形式展示给用户，包括每秒执行多少请求多少成功，多少失败等。Netflix通过hystrix-metrics-event-stream项目实现了对以上指标的监控。Spring Cloud也提供了Hystrix Dashboard的整合，对监控内容转化成可视化界面。
+> 除了隔离依赖服务的调用以外，Hystrix还提供了准实时的调用监控（Hystrix Dashboard），Hystrix会持续地记录所有通过Hystrix发起的请求的执行信息，并以统计报表和图形的形式展示给用户，包括每秒执行多少请求多少成功，多少失败等。Netflix通过hystrix-metrics-event-stream项目实现了对以上指标的监控。
+
+
+
+> 打开监控地址：http://localhost:9001/hystrix
+
+> 测试服务的格式：http://localhost:8001/actuator/hystrix.stream
+
+
+
+>Unable to connect to Command Metric Stream解决办法
+
+```java
+/**
+* 使用Dashboard的坑，在其他服务中配置（8001）
+* 此配置是为了服务监控而配置，与服务容错本身无关，springcloud升级后的坑
+* ServletRegistrationBean因为springboot的默认路径不是"/hystrix.stream"
+* 只要在自己的项目里配置上下面的servlet就可以了
+*/
+@Bean
+public ServletRegistrationBean getServlet() {
+    HystrixMetricsStreamServlet streamServlet = new HystrixMetricsStreamServlet();
+    ServletRegistrationBean registrationBean = new ServletRegistrationBean(streamServlet);
+    registrationBean.setLoadOnStartup(1);
+    registrationBean.addUrlMappings("/actuator/hystrix.stream");
+    registrationBean.setName("HystrixMetricsStreamServlet");
+    return registrationBean;
+}
+
+// 这个也需要配上
+@Bean
+@LoadBalanced
+RestTemplate restTemplate() {
+    return new RestTemplate();
+}
 ```
 
 
