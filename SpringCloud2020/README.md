@@ -842,6 +842,138 @@ Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆
 
 
 
+
+
+### Gateway
+
+> Spring Cloud Gateway 使用的Webflux中的reactor-netty响应式编程组件，底层使用了Netty通讯框架
+
+> 微服务网关是整个微服务API请求的入口，可以实现日志拦截、权限控制、解决跨域问题、限流、熔断、负载均衡、黑名单与白名单拦截、授权等
+
+>构成
+>
+>+ route：路由是构建网关的基本模块，它由ID，目标URI，一系列的断言和过滤器组成，如果断言为true则匹配该路由
+>
+>+ Filter ：指的是Spring框架中GatewayFilter的实例，使用过滤器，可以在请求被路由前或者之后对请求进行修改。
+>
+>+ predicate：参考的是java8的java.util.function.Predicate开发人员可以匹配HTTP请求中的所有内容（例如请求头或请求参数），如果请求与断言相匹配则进行路由
+
+
+
+#### Zuul与Gateway对比
+
+>过滤器与网关的区别：过滤器用于拦截单个服务、网关拦截整个的微服务
+>
+>Zuul与Gateway有那些区别
+>Zuul网关属于netfix公司开源的产品属于第一代微服务网关
+>Gateway属于SpringCloud自研发的第二代微服务网关
+>相比来说SpringCloud Gateway性能比Zuul性能要好：
+>注意：Zuul基于Servlet实现的，阻塞式的Api，不支持长连接。
+>SpringCloudGateway基于Spring5构建，能够实现响应式非阻塞式的Api，支持长连接，能够更好的整合Spring体系的产品。
+>
+>基于Spring Framework 5, Project Reactor和Spring Boot 2.0进行构建;动态路由:能够匹配任何请求属性;
+>可以对路由指定Predicate(断言)和Filter (过滤器);集成Hystrix的断路器功能;
+>集成Spring Cloud 服务发现功能;
+>易于编写的Predicate(断言）和 Filter (过滤器);请求限流功能;
+>支持路径重写。
+
+
+
+#### 工作流程：路由转发 + 执行过滤器链
+
+<img src="/images/Gateway执行流程.png" style="zoom: 80%;" />
+
+
+
+
+
+#### Route路由
+
+> 默认情况下Gateway会根据注册中心的服务列表，以注册中心上微服务名为路径创建动态路由进行转发，从而实现动态路由的功能
+
+
+
+#### Predicate断言
+
+> 满足的条件
+
+>+ After Route Predicate： 
+>
+>
+>  ```java
+>  ZonedDateTime zonedDateTime = ZonedDateTime.now();
+>  System.out.println(zonedDateTime);
+>  ```
+>
+>+ Before Route Predicate
+>
+>+ Between Route Predicate
+>
+>+ Cookie Route Predicate
+>
+>+ Header Route Predicate
+>
+>+ Host Route Predicate
+>
+>+ Method Route Predicate
+>
+>+ Path Route Predicate
+>
+>+ Query Route Predicate
+
+
+
+#### Filter过滤器
+
+
+
+
+
+> yml配置
+
+```yml
+
+server:
+  port: 9527
+
+spring:
+  application:
+    name: cloud-gateway-service
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true                       #开启从注册中心动态创建路由的功能，利用微服务名进行路由
+      routes:
+        - id: payment_routh #payment_route    #路由的ID，没有固定规则但要求唯一，建议配合服务名
+          #uri: http://localhost:8001         #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service     #匹配后提供服务的路由地址
+          predicates:
+            - Path=/payment/get/**         # 断言，路径相匹配的进行路由
+
+        - id: payment_routh2 #payment_route    #路由的ID，没有固定规则但要求唯一，建议配合服务名
+          #uri: http://localhost:8001          #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service      #匹配后提供服务的路由地址
+          predicates:
+            - Path=/payment/lb/**         # 断言，路径相匹配的进行路由
+            #- After=2020-02-21T15:51:37.485+08:00[Asia/Shanghai]
+            #- Cookie=username,zzyy
+            #- Header=X-Request-Id, \d+  # 请求头要有X-Request-Id属性并且值为整数的正则表达式
+
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client: #服务提供者provider注册进eureka服务列表内
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://eureka7001.com:7001/eureka
+```
+
+
+
+
+
 ## Spring Cloud Alibaba
 
 ```
@@ -864,27 +996,6 @@ SpringCloud Alibaba 最终技术搭配方案
     SpringCloud - Gateway: API网关(webflux 编程模式)
     SpringCloud - Sleuth: 调用链监控
     SpringCloud Alibaba - Seata: 原Fescar, 即分布式事务解决方案
-
-版本选择
-    Spring Cloud Version		Spring Cloud Alibaba 	Version Spring Boot Version
-    -----						-----					-----
-    Spring Cloud Greenwich		2.1.x.RELEASE			2.1.x. RELEASE
-    Spring Cloud Finchley		2.0.x.RELEASE			2.0.x.RELEASE
-    Spring Cloud Edgware		1 5.x.RELEASE			1 5.x.RELEASE
-    
-    
-依赖统一管理，然后在新创建dependencies标签中添加自己所需要的以来，无需写版本号
-	<dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>2.1.0.RELEASE</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 ```
 
 
@@ -1098,111 +1209,6 @@ Nacos.从1.0版本支持CP和AP混合模式集群，默认是采用Ap保证服�
 ```
 
 
-
-### Feign
-
-> Feign远程调用(openFeign)
-
-```
-1.引入依赖
-    <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-openfeign</artifactId>
-    </dependency>
-
-2.开启feign功能
-	@EnableFeignClients(basePackages = "com.atguigu.gulimall.member.feign")
-    @EnableDiscoveryClient
-    @SpringBootApplication
-    public class Application {
-        public static void main(String[] args) {
-            SpringApplication.run(Application.class, args);
-        }
-    }
-    
-3.声明远程接口
-    @FeignClient("gulimall-coupon")
-    public interface CouponFeignService {
-        @RequestMapping("/coupon/coupon/member/list")
-        public R membercoupons();
-    }
-```
-
-
-
-### GateWay
-
-> Spring Cloud GateWay
-
-```
-微服务
-微服务网关是整个微服务API请求的入口，可以实现日志拦截、权限控制、解决跨域问题、限流、熔断、负载均衡、黑名单与白名单拦截、授权等
-    
-过滤器与网关的区别    
-过滤器用于拦截单个服务
-网关拦截整个的微服务
-
-Zuul与Gateway有那些区别
-Zuul网关属于netfix公司开源的产品属于第一代微服务网关
-Gateway属于SpringCloud自研发的第二代微服务网关
-相比来说SpringCloud Gateway性能比Zuul性能要好：
-注意：Zuul基于Servlet实现的，阻塞式的Api，不支持长连接。
-SpringCloudGateway基于Spring5构建，能够实现响应式非阻塞式的Api，支持长连接，能够更好的整合Spring体系的产品。
-
-keep+keepAlived
-Nignx Nignx Nignx
-Gateway Gateway Gateway
-订单服务 会员服务 积分服务 商品服务
-```
-
-
-
-```
-构成
-    1.route		路由
-    2.predicate 断言
-    3.Filter	过滤
-    * 断言条件判断成功 路由再经过一些过滤，最终到相对应的请求
-    
-    
-使用
-
-	1.引入依赖
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
-        </dependency>
-        
-	2.注册服务
-		@EnableDiscoveryClient
-        @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}) #排除数据源
-        public class Application {
-            public static void main(String[] args) {
-                SpringApplication.run(Application.class, args);
-            }
-        }
-        
-	3.添加bootstrap.properties配置
-		spring.application.name=gulimall-coupon
-        spring.cloud.nacos.config.server-addr=127.0.0.1:8848
-        spring.cloud.nacos.config.namespace=b5d62415-0dea-4747-a65d-874cc6203bf2
-        
-	4.application.yml网关配置
-		spring:
-      cloud:
-        gateway:
-          routes:
-    #        - id: test_route
-    #          uri: https://www.baidu.com
-    #          predicates:
-    #            - Query=url,baidu
-    #
-    #        - id: qq_route
-    #          uri: https://www.qq.com
-    #          predicates:
-    #            - Query=url,qq
-	
-```
 
 
 
