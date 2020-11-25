@@ -879,7 +879,9 @@ Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆
 
 
 
-#### 工作流程：路由转发 + 执行过滤器链
+#### 工作流程
+
+>路由转发+执行过滤器链
 
 <img src="/images/Gateway执行流程.png" style="zoom: 80%;" />
 
@@ -891,11 +893,17 @@ Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆
 
 > 默认情况下Gateway会根据注册中心的服务列表，以注册中心上微服务名为路径创建动态路由进行转发，从而实现动态路由的功能
 
+> 需要注意的是uri的协议为lb，表示启用Gateway的负载均衡功能。
+>
+> ```
+> uri:lb://cloud-payment-service      #匹配后提供服务的路由地址
+> ```
+
 
 
 #### Predicate断言
 
-> 满足的条件
+> 实现一组匹配规则
 
 >+ After Route Predicate： 
 >
@@ -905,27 +913,105 @@ Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆
 >  System.out.println(zonedDateTime);
 >  ```
 >
+>  ```yml
+>  predicates:
+>    - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+>  ```
+>
 >+ Before Route Predicate
+>
+>  ```yml
+>  - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+>  - Before=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+>  ```
 >
 >+ Between Route Predicate
 >
+>  ```yml
+>  - Between=2020-03-08T10:59:34.102+08:00[Asia/Shanghai] , 2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+>  ```
+>
 >+ Cookie Route Predicate
+>
+>  ```yml
+>  #https://blog.csdn.net/leedee/article/details/82685636 #cookie乱码
+>  - Cookie=username,atguigu    #并且Cookie是username=zhangshuai才能访问
+>  ```
 >
 >+ Header Route Predicate
 >
+>  ```yml
+>  - Header=X-Request-Id, \d+   #请求头中要有X-Request-Id属性并且值为整数的正则表达式
+>  ```
+>
 >+ Host Route Predicate
+>
+>  ```yml
+>  - Host=**.atguigu.com
+>  ```
 >
 >+ Method Route Predicate
 >
+>  ```yml
+>  - Method=GET
+>  ```
+>
 >+ Path Route Predicate
 >
+>  ```yml
+>  - Path=/payment/get/**
+>  ```
+>
 >+ Query Route Predicate
+>
+>  ```yml
+>  - Query=username, \d+ #要有参数名称并且是正整数才能路由
+>  ```
 
 
 
 #### Filter过滤器
 
-
+> + 生命周期
+>
+>   + pre，在业务逻辑之前
+>   + post，在业务逻辑之后
+>
+> + 种类
+>
+>   + GatewayFilter，单一
+>
+>     ```yml
+>     filters:
+>       - AddRequestHeader=X-Request-Foo, Bar
+>     ```
+>
+>   + GlobalFilter，全局
+>
+>     自定义过滤器自定义过滤器 impiemerts GlobalFilter，Ordered；可以全局日志记录、统一网关鉴权
+>
+>     ```java
+>     @Slf4j
+>     @Component
+>     public class MyLogGateWayFilter implements GlobalFilter,Ordered {
+>     	@Override
+>         public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+>             log.info("***********come in MyLogGateWayFilter:  "+new Date());
+>             String uname = exchange.getRequest().getQueryParams().getFirst("uname");
+>             if(uname == null) {
+>                 log.info("*******用户名为null，非法用户，o(╥﹏╥)o");
+>                 exchange.getResponse().setStatusCode(HttpStatus.NOT_ACCEPTABLE);
+>                 return exchange.getResponse().setComplete();
+>             }
+>             return chain.filter(exchange);
+>         }
+>     
+>         @Override
+>         public int getOrder() {
+>             return 0;
+>         }
+>     }
+>     ```
 
 
 
