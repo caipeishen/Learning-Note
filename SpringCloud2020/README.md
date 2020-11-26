@@ -778,85 +778,9 @@ RestTemplate restTemplate() {
 
 ### Zuul路由网关
 
-Zuul包含了对请求的路由和过滤两个最主要的功能：
+> Zuul包含了对请求的路由和过滤两个最主要的功能：
 
-```
-其中路由功能负责将外部请求转发到具体的微服务实例上，是实现外部访问统一入口的基础而过滤器功能则负责对请求的处理过程进行干预，是实现请求校验、服务聚合等功能的基础.
-
-Zuul和Eureka进行整合，将Zuul自身注册为Eureka服务治理下的应用，同时从Eureka中获得其他微服务的消息，也即以后的访问微服务都是通过Zuul跳转后获得。
-
-注意：Zuul服务最终还是会注册进Eureka
-
-提供=代理+路由+过滤三大功能
-```
-
- 
-
- 
-
-### Config分布式配置中心
-
-> 是什么
-
-```
-SpringCloud Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为各个不同微服务应用的所有环境提供了一个中心化的外部配置。
-```
-
-
-
-> 怎么玩
-
-```
-SpringCloud Config分为服务端和客户端两部分。
-
-服务端也称为分布式配置中心，它是一个独立的微服务应用，用来连接配置服务器并为客户端提供获取配置信息,加密/解密信息等访问接口
-
-客户端则是通过指定的配置中心来管理应用资源，以及与业务相关的配置内容,并在启动的时候从配置中心获取和加载配置信息
-配置服务器默认采用git来存储配置信息,这样就有助于对环境配置进行版本管理,并且可以通过git客户端工具来方便的管理和访问配置内容。
-```
-
-
-
-> 分布式面临的配置问题
-
-```
-微服务意味着要将单体应用中的业务拆分成一个个 子服务，每个服务的粒度相对较小，因此系统中会出现大量的服务。由于每个
-服务都需要必要的配置信息才能运行，所以一集中式的、动态的配置管理设施是必不可少的。SpringCloud提供 了
-ConfigServer来解决这个问题，我们每一个微服务自己带着一 个application.yml,. 上百个配置文件的管理...
-
-Config查看配置信息：http://127.0.0.1:3344/application-dev.yml
-```
-
-
-
-> bootstrap.yml
-
-```
-applicaiton.yml是用户级的资源配置项
-bootstrap.yml是系统级的，优先级更加高
-
-Spring Cloud会创建一个Bootstrap Context',作为Spring应用的Application Context'的父上下文。
-初始化的时候,Bootstrap Context负责从外部源加载配置属性并解析配置。这两个上下文共享一个从外部获取的“Environment'。
-Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆盖。'Bootstrap context'和Application Context'有着不同的约定,所以新增了一个bootstrap.yml文件, 保证Bootstrap Context'和Application Context'配置的分离。
-```
-
-
-
-
-
-### Gateway
-
-> Spring Cloud Gateway 使用的Webflux中的reactor-netty响应式编程组件，底层使用了Netty通讯框架
-
-> 微服务网关是整个微服务API请求的入口，可以实现日志拦截、权限控制、解决跨域问题、限流、熔断、负载均衡、黑名单与白名单拦截、授权等
-
->构成
->
->+ route：路由是构建网关的基本模块，它由ID，目标URI，一系列的断言和过滤器组成，如果断言为true则匹配该路由
->
->+ Filter ：指的是Spring框架中GatewayFilter的实例，使用过滤器，可以在请求被路由前或者之后对请求进行修改。
->
->+ predicate：参考的是java8的java.util.function.Predicate开发人员可以匹配HTTP请求中的所有内容（例如请求头或请求参数），如果请求与断言相匹配则进行路由
+>其中路由功能负责将外部请求转发到具体的微服务实例上，是实现外部访问统一入口的基础而过滤器功能则负责对请求的处理过程进行干预，是实现请求校验、服务聚合等功能的基础.
 
 
 
@@ -876,6 +800,26 @@ Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆
 >集成Spring Cloud 服务发现功能;
 >易于编写的Predicate(断言）和 Filter (过滤器);请求限流功能;
 >支持路径重写。
+
+ 
+
+ 
+
+### Gateway
+
+> Spring Cloud Gateway 使用的Webflux中的reactor-netty响应式编程组件，底层使用了Netty通讯框架
+
+> 微服务网关是整个微服务API请求的入口，可以实现日志拦截、权限控制、解决跨域问题、限流、熔断、负载均衡、黑名单与白名单拦截、授权等
+
+>构成
+>
+>+ route：路由是构建网关的基本模块，它由ID，目标URI，一系列的断言和过滤器组成，如果断言为true则匹配该路由
+>
+>+ Filter ：指的是Spring框架中GatewayFilter的实例，使用过滤器，可以在请求被路由前或者之后对请求进行修改。
+>
+>+ predicate：参考的是java8的java.util.function.Predicate开发人员可以匹配HTTP请求中的所有内容（例如请求头或请求参数），如果请求与断言相匹配则进行路由
+
+
 
 
 
@@ -914,59 +858,58 @@ Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆
 >  ```
 >
 >  ```yml
->  predicates:
->    - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
->  ```
->
+>  - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+> ```
+>  
 >+ Before Route Predicate
 >
->  ```yml
+>```yml
 >  - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
->  - Before=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
->  ```
->
+> - Before=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+> ```
+>  
 >+ Between Route Predicate
 >
->  ```yml
+>```yml
 >  - Between=2020-03-08T10:59:34.102+08:00[Asia/Shanghai] , 2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
->  ```
->
+> ```
+>  
 >+ Cookie Route Predicate
 >
->  ```yml
+>```yml
 >  #https://blog.csdn.net/leedee/article/details/82685636 #cookie乱码
 >  - Cookie=username,atguigu    #并且Cookie是username=zhangshuai才能访问
->  ```
->
+> ```
+>  
 >+ Header Route Predicate
 >
->  ```yml
+>```yml
 >  - Header=X-Request-Id, \d+   #请求头中要有X-Request-Id属性并且值为整数的正则表达式
->  ```
->
+> ```
+>  
 >+ Host Route Predicate
 >
->  ```yml
+>```yml
 >  - Host=**.atguigu.com
->  ```
->
+> ```
+>  
 >+ Method Route Predicate
 >
->  ```yml
+>```yml
 >  - Method=GET
->  ```
->
+> ```
+>  
 >+ Path Route Predicate
 >
->  ```yml
+>```yml
 >  - Path=/payment/get/**
->  ```
->
+> ```
+>  
 >+ Query Route Predicate
 >
->  ```yml
+>```yml
 >  - Query=username, \d+ #要有参数名称并且是正整数才能路由
->  ```
+> ```
 
 
 
@@ -982,8 +925,8 @@ Bootstrap'属性有高优先级,默认情况下，它们不会被本地配置覆
 >   + GatewayFilter，单一
 >
 >     ```yml
->     filters:
->       - AddRequestHeader=X-Request-Foo, Bar
+>    filters:
+>   - AddRequestHeader=X-Request-Foo, Bar
 >     ```
 >
 >   + GlobalFilter，全局
@@ -1057,6 +1000,232 @@ eureka:
 ```
 
 
+
+### Config分布式配置中心
+
+> 是什么
+>
+> SpringCloud Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为各个不同微服务应用的所有环境提供了一个中心化的外部配置。
+
+
+
+> 怎么玩
+
+>SpringCloud Config分为服务端和客户端两部分。
+>
+>+ 服务端也称为分布式配置中心，它是一个独立的微服务应用，用来连接配置服务器并为客户端提供获取配置信息,加密/解密信息等访问接口
+>
+>+ 客户端则是通过指定的配置中心来管理应用资源，以及与业务相关的配置内容,并在启动的时候从配置中心获取和加载配置信息
+>
+>配置服务器默认采用git来存储配置信息,这样就有助于对环境配置进行版本管理,并且可以通过git客户端工具来方便的管理和访问配置内容。
+
+
+
+#### 服务端
+
+##### 如何使用
+
+> 配置主启动类
+
+```yml
+@EnableConfigServer
+@SpringBootApplication
+public class ConfigCenterMain3344 {
+    public static void main(String[] args) {
+            SpringApplication.run(ConfigCenterMain3344.class, args);
+    }
+}
+```
+
+
+
+> 配置yml
+
+```yml
+server:
+  port: 3344
+
+spring:
+  application:
+    name: cloud-config-center #注册进Eureka服务器的微服务名
+  cloud:
+    config:
+      server:
+        git:
+        #GitHub上面的git仓库名字，所以要先创建一个配置中心的项目
+          uri: https://github.com/Cps-Ferris/springcloud2020-config.git 
+        ####搜索目录
+          search-paths:
+            - springcloud2020-config
+      ####读取分支
+      label: master
+
+#服务注册到eureka地址
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+```
+
+
+
+##### 配置读取规则
+
+> + /{label}/{application}-{profile}.yml（最推荐使用这种方式）
+>
+>   ```yml
+>   http://config-3344.com:3344/master/config-dev.yml
+>   http://config-3344.com:3344/master/config-test.yml
+>   http://config-3344.com:3344/master/config-prod.yml
+>   ####################
+>   http://config-3344.com:3344/dev/config-dev.yml
+>   http://config-3344.com:3344/dev/config-test.yml
+>   http://config-3344.com:3344/dev/config-prod.yml
+>   ```
+>
+> + /{application}-{profile}.yml
+>
+>   ```yml
+>   http://config-3344.com:3344/config-dev.yml
+>   http://config-3344.com:3344/config-test.yml
+>   http://config-3344.com:3344/config-prod.yml
+>   ```
+>
+> + /{application}/{profile}/{label}
+>
+>   ```yml
+>   http://config-3344.com:3344/config/dev/master
+>   http://config-3344.com:3344/config/test/master
+>   http://config-3344.com:3344/config/prod/master
+>   ```
+
+
+
+### 客户端
+
+> bootstrap.yml：
+>
+> + applicaiton.yml 是用户级的资源配置项
+>
+> + bootstrap.yml 是系统级的,优先级更加高
+
+
+
+##### 如何使用
+
+> 主启动类
+
+```java
+@EnableEurekaClient
+@SpringBootApplication
+public class ConfigClientMain3355
+{
+    public static void main(String[] args) {
+            SpringApplication.run(ConfigClientMain3355.class, args);
+    }
+}
+```
+
+
+
+> yml配置
+
+```yml
+server:
+  port: 3355
+
+spring:
+  application:
+    name: config-client
+  cloud:
+    #Config客户端配置
+    config:
+      label: master #分支名称
+      name: config #配置文件名称
+      profile: dev #读取后缀名称   上述3个综合：master分支上config-dev.yml的配置文件被读取http://config-3344.com:3344/master/config-dev.yml
+      uri: http://localhost:3344 #配置中心地址
+
+#服务注册到eureka地址
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+```
+
+
+
+##### 动态刷新手动版
+
+> 引入actuator监控
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+
+
+> 暴露监控端口
+
+```yml
+server:
+  port: 3355
+
+spring:
+  application:
+    name: config-client
+  cloud:
+    config:
+      label: master
+      name: config
+      profile: dev
+      uri: http://localhost:3344
+      
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka
+      
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+```
+
+
+
+> @RefreshScope业务类Controller修改
+
+```java
+@RefreshScope //动态刷新
+@RestController
+public class ConfigClientController {
+
+    @Value("${config.info}")
+    private String configInfo;
+
+    @GetMapping("/configInfo")
+    public String getConfigInfo() {
+        return configInfo;
+    }
+    
+}
+```
+
+
+
+> 需要手动刷新访问路径
+
+```cmd
+curl -X POST "http://localhost:3355/actuator/refresh"
+```
+
+
+
+> 自动刷新使用Bus，下方持续跟进
 
 
 
