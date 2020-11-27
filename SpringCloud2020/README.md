@@ -1101,7 +1101,7 @@ eureka:
 
 
 
-### 客户端
+#### 客户端
 
 > bootstrap.yml：
 >
@@ -1350,6 +1350,39 @@ curl -X POST "http://localhost:3344/actuator/bus-refresh"
 #http://localhost:配置中心的端口号/actuator/bus-refresh/{destination}
 curl -X POST "http://localhost:3344/actuator/bus-refresh/config-client:3355"
 ```
+
+
+
+### Stream消息驱动
+
+> Binder
+>
+> + INPUT对应于消费者
+> + OUTPUT对应于生产者
+>
+> 屏蔽底层消息中间件的差异，降低切换版本，统一消息的编程模型；目前只支持RabbitMQ和Kafka
+
+
+
+#### 基本原理
+
+>在没有绑定器这个概念的情况下，我们的SpringBoot应用要直接与消息中间件进行信息交互的时候，由于各消息中间件构建的初衷不同，它们的实现细节上会有较大的差异性
+>**通过定义绑定器作为中间层，完美地实现了成用程序与消息中间件细节之间的隔离。**
+>通过向应用程序暴露统一的Channel通道，使得应用程序不需要再考虑各种不同的消息中间件实现。
+
+
+
+#### Stream标准流程
+
+![](/images/SpringCloudStream标准流程.png)
+
+
+
+#### 常用API和注解
+
+![](/images/SpringCloudStream常用API和注解.png)
+
+
 
 
 
