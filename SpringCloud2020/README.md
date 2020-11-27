@@ -4,7 +4,7 @@
 
 
 
-## 微服务：
+## 微服务
 
 >但通常而言，微服务是一种架构模式或者说是一种架构风格, 它提倡将单一应用程序划分成一组小的服务，每个服务运行，在其独立的自己的进程中，服务之间互相协调、互相配合,为用户提供最终价值。
 
@@ -1187,7 +1187,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka7001.com:7001/eureka
-      
+
+#暴露监控端口	
 management:
   endpoints:
     web:
@@ -1226,6 +1227,129 @@ curl -X POST "http://localhost:3355/actuator/refresh"
 
 
 > 自动刷新使用Bus，下方持续跟进
+
+
+
+### Bus消息总线动态刷新
+
+> 是什么
+>
+> 在微服务架构的系统中，通常会使用轻量级的消息代理来构建一个共用的消息主题，并让系统中所有微服务实例都连接上来。由于该主题中产生的消息会被所有实例监听和消费，所以称它为消息总线。在总线上的各个实例，都可以方便地广播一些需要让其他连接在该主题上的实例都知道的消息。解决上方手动刷新config
+>
+> 目前支持：RabbitMQ和Kafka
+
+
+
+> 基本原理
+>
+> ConfigClient实例都监听MQ中同一个topic(默认是springCloudBus)。当一个服务刷新数据的时候，它会把这个信息放入到Topic中，这样其它监听同一Topic的服务就能得到通知，然后去更新自身的配置。
+
+
+
+#### 涉及思想
+
+>+ 1) 利用消息总线触发一个客户端/bus/refresh，而刷新所有客户端的配置
+>+ 2) 利用消息总线触发一个服务端ConfigServer的/bus/refresh端点，而刷新所有客户端的配置（推荐）
+
+
+
+#### 如何使用
+
+> 给cloud-config-center-3344配置中心服务端添加消息总线支持
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bus-amqp</artifactId>
+</dependency>
+```
+
+```yml
+#注意这里是在spring下的
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'bus-refresh'
+```
+
+
+
+> 给cloud-config-center-3355客户端添加消息总线支持
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bus-amqp</artifactId>
+</dependency>
+```
+
+```yml
+#注意这里是在spring下的
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+```
+
+
+
+> 给cloud-config-center-3366客户端添加消息总线支持
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bus-amqp</artifactId>
+</dependency>
+```
+
+```yml
+#注意这里是在spring下的
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+```
+
+
+
+> 一次发送处处生效
+
+```cmd
+curl -X POST "http://localhost:3344/actuator/bus-refresh"
+```
+
+
+
+> 刷新定点通知
+
+```cmd
+#http://localhost:配置中心的端口号/actuator/bus-refresh/{destination}
+curl -X POST "http://localhost:3344/actuator/bus-refresh/config-client:3355"
+```
 
 
 
