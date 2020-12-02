@@ -22,6 +22,66 @@
 
 ![](images/SpringCloud技术升级.png)
 
+### 本地添加映射
+
+> 修改：C:\Windows\System32\drivers\etc
+
+```
+#################SpringCLoud2020######################
+127.0.0.1	eureka7001.com
+127.0.0.1	eureka7002.com
+127.0.0.1	eureka7003.com
+```
+
+
+
+### 数据库脚本
+
+```sql
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : MySQL本机
+ Source Server Type    : MySQL
+ Source Server Version : 80019
+ Source Host           : localhost:3306
+ Source Schema         : cloud
+
+ Target Server Type    : MySQL
+ Target Server Version : 80019
+ File Encoding         : 65001
+
+ Date: 23/11/2020 12:41:33
+*/
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for payment
+-- ----------------------------
+DROP TABLE IF EXISTS `payment`;
+CREATE TABLE `payment`  (
+  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `serial` varchar(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of payment
+-- ----------------------------
+INSERT INTO `payment` VALUES (1, '尚硅谷');
+INSERT INTO `payment` VALUES (2, 'alibaba');
+INSERT INTO `payment` VALUES (3, '京东');
+INSERT INTO `payment` VALUES (4, '头条');
+INSERT INTO `payment` VALUES (5, 'Ferris');
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+```
+
+
+
 ### 父工程pom文件
 
 ```xml
@@ -120,6 +180,10 @@
   </build>
 </project>
 ```
+
+
+
+#### ---------
 
 
 
@@ -1383,6 +1447,52 @@ curl -X POST "http://localhost:3344/actuator/bus-refresh/config-client:3355"
 ![](/images/SpringCloudStream常用API和注解.png)
 
 
+
+#### 重复消费问题
+
+![](/images/Stream消息驱动重复消费.png)
+
+>默认分组group是不同的
+>
+>Stream中处于同一个group的多个消费者是竞争关系，就能够保证消息只会被其中一个应用消费一次
+>
+>**微服务应用放置于同一个group中，就能够保证消息只会被其中一个应用消费一次**
+>
+>**不同的组是可以消费的，同一个组内会发生竞争关系，只有其中一个可以消费**
+
+
+
+> 如何配置
+
+```yml
+spring:
+  application:
+    name: cloud-stream-consumer
+  cloud:
+      stream:
+        binders: # 在此处配置要绑定的rabbitmq的服务信息；
+          defaultRabbit: # 表示定义的名称，用于于binding整合
+            type: rabbit # 消息组件类型
+            environment: # 设置rabbitmq的相关的环境配置
+              spring:
+                rabbitmq:
+                  host: localhost
+                  port: 5672
+                  username: guest
+                  password: guest
+        bindings: # 服务的整合处理
+          input: # 这个名字是一个通道的名称
+            destination: studyExchange # 表示要使用的Exchange名称定义
+            content-type: application/json # 设置消息类型，本次为对象json，如果是文本则设置“text/plain”
+            binder: defaultRabbit # 设置要绑定的消息服务的具体设置
+            group: springcloud-stream # 消费组
+```
+
+
+
+#### 消息持久化
+
+> 配置group就配置了持久化
 
 
 
