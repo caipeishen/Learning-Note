@@ -1496,40 +1496,101 @@ spring:
 
 
 
+### Sleuth链路追踪
+
+> Spring Cloud Sleuth提供了一套完整的服务跟踪的解决方案
+
+
+
+#### zipkin
+
+> sleuth用来收集，zipkin用来展示
+>
+> Spring Cloud Sleuth 可以结合 Zipkin，将信息发送到 Zipkin，利用 Zipkin 的存储来存储信息，利用 Zipkin UI 来展示数据 
+
+
+
+#### 下载
+
+> SpringCloud从F版起已不需要自己构建Zipkin Server了，只需调用jar包即可
+>
+> https://dl.bintray.com/openzipkin/maven/io/zipkin/java/zipkin-server/
+>
+> zipkin-server-2.12.9-exec.jar
+>
+> java -jar zipkin-server-2.12.9-exec.jar
+>
+> http://localhost:9411/zipkin/
+
+
+
+#### 链路图
+
+> + span:表示调用链路来源，通俗的理解span就是一次请求信息
+> + Trace:类似于树结构的Span集合，表示一条调用链路，存在唯一标识
+
+![](/images/zipkin链路图.png)
+
+
+
+#### 如何使用
+
+> 运行zipkin-serverjar包
+
+```cmd
+java -jar zipkin-server-2.12.9-exec.jar
+```
+
+
+
+> yml配置
+
+```yml
+spring:
+  application:
+    name: cloud-order-service
+  zipkin:
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+      #采样率值介于 0 到 1 之间，1 则表示全部采集
+      probability: 1
+```
+
+
+
+> 请求controller
+
+
+
+>http://localhost:9411/zipkin/查看
+
+
+
 ## Spring Cloud Alibaba
 
-```
-SpringCloud的几大痛点
-    SpringCloud部分组件停止维护更新，部分不再开源，给开发带来不便;
-    SpringCloud部分环境搭建复杂，没有完善的可视化界面，我们需要大量的二次开发和定制
-    SpringCloud配置复杂，难以上手，部分配置差别难以区分和合理应用
-
-SpringCloud Alibaba的优势:
-    阿里使用过的组件经历了考验，性能强悍，设计合理，现在开源出来大家用
-    成套的产品搭配完善的可视化界面给开发运维带来极大的便利
-    搭建简单，学习曲线低。
-    
-SpringCloud Alibaba 最终技术搭配方案
-    SpringCloud Alibaba - Nacos:注册中心(服务发现/注册)
-    SpringCloud Alibaba - Nacos:配置中心(动态配置管理)
-    SpringCloud - Ribbon: 负载均衡
-    SpringCloud - Feign: 声明式httP客户端(调用远程服务，feign闭源，使用的openFeign)
-    SpringCloud Alibaba - Sentinel: 服务容错(限流、降级、熔断)
-    SpringCloud - Gateway: API网关(webflux 编程模式)
-    SpringCloud - Sleuth: 调用链监控
-    SpringCloud Alibaba - Seata: 原Fescar, 即分布式事务解决方案
-```
+>+ **服务限流降**：默认支持WebServlet、WebFlux, OpenFeign、RestTemplate、Spring Cloud Gateway, Zuul, Dubbo和RocketMQ限流降级功能的接入，可以在运行时通过控制台实时修改限流降级规则，还支持查看限流降级Metrics监控。
+>+ **服务注册与发现**：适配 Spring Cloud服务注册与发现标准，默认集成了Ribbon的支持。分布式配置管理:支持分布式系统中的外部化配置，配置更改时自动刷新。
+>+ **消息驱动能力**：基于Spring Cloud Stream为微服务应用构建消息驱动能力。
+>+ **分布式事务**：使用@GlobalTransactional注解，高效并且对业务零侵入地解决分布式事务问题。
+>+ **阿里云对象存储**：阿里云提供的海星、安全、低成本、高可靠的云存储服务。支持在任何应用、任何时间、任何地点存储和访问任意类型的数据。
+>+ **分布式任务调度**：提供秒级、精准、高可靠、高可用的定时(基于Cron表达式）任务调度服务。同时提供分布式的任务执行模型，如网格任务。网格任务支持海量子任务均匀分配到所有Worker (schedulerx-client)上执行。
+>+ **阿里云短信服务**：覆盖全球的短信服务，友好、高效、智能的互联化通讯能力，帮助企业迅速搭建客户触达通道。
 
 
 
 ### Nacos
 
-> Nacos注册配置中心
+> 前四个字母分别为Namina和Conficuration的前两个字母，最后的s为Service.
+>
+> —个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。
 
-```
-记录所有的服务信息，以Map<String,List<Object>>存储个服务信息，key为服务名，我们通过服务名就可以取。
-自定义负载均衡，获取所有服务，它采用策略模式，就是声明接口，我们只需要去继承该接口，实现返回服务的方法就可以。
-```
+
+
+#### Nacos注册配置中心
+
+>记录所有的服务信息，以Map<String,List<Object>>存储个服务信息，key为服务名，我们通过服务名就可以取。
+>自定义负载均衡，获取所有服务，它采用策略模式，就是声明接口，我们只需要去继承该接口，实现返回服务的方法就可以。
 
 
 
@@ -1568,7 +1629,7 @@ SpringCloud Alibaba 最终技术搭配方案
 
 
 
-> Nacos配置中心管理
+#### Nacos配置中心管理
 
 ```
 本地应用读取我们云端分布式配置中心文件(第一次建立长连接)。

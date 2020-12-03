@@ -1185,6 +1185,12 @@ mvn clean package -Dmaven.test.skip=true
 
 
 
+### Maven中include与exclude
+
+参考：[关于Maven resource配制中include与exclude的关系](https://www.cnblogs.com/tusheng/articles/7641336.html)
+
+
+
 ### 日期格式问题
 
 1. 后台接受前台日期问题
