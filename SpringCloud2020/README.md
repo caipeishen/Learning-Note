@@ -1577,6 +1577,16 @@ spring:
 >+ **分布式任务调度**：提供秒级、精准、高可靠、高可用的定时(基于Cron表达式）任务调度服务。同时提供分布式的任务执行模型，如网格任务。网格任务支持海量子任务均匀分配到所有Worker (schedulerx-client)上执行。
 >+ **阿里云短信服务**：覆盖全球的短信服务，友好、高效、智能的互联化通讯能力，帮助企业迅速搭建客户触达通道。
 
+```xml
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+    <version>2.1.0.RELEASE</version>
+    <type>pom</type>
+    <scope>import</scope>
+</dependency>
+```
+
 
 
 ### Nacos
@@ -1587,209 +1597,284 @@ spring:
 
 
 
+#### 服务注册中心对比
+
+| 服务注册与发现 | CAP模型 | 控制台管理 | 社区活跃度    |
+| -------------- | ------- | ---------- | ------------- |
+| Eureka         | AP      | 支持       | 低（2.x闭源） |
+| Zookeeper      | CP      | 不支持     | 中            |
+| Consul         | AP      | 支持       | 高            |
+| Nacos          | AP + CP | 支持       | 高            |
+
+
+
+> CAP
+>
+> + C是所有节点在同一时间看到的数据是一致的
+>
+> + 而A的定义是所有的请求都会收到响应。
+
+
+
+>+ Zookeeper采用CP保证数据的一致性的问题，原理采用Zab原子广播协议，当我们的zk领导因为某种原因宕机的情况下，会自动出发重新选一个新的领导角色，整个选举的过程为了保证数据的一致性的问题，在选举的过程中整个zk环境是不可以使用，可以短暂可能无法使用到zk，以为者微服务采用该模式的情况下，可能无法实现通讯。(本地有缓存除外)。
+>
+>  注意：可运行节点必须满足过半机制，整个zk采用使用。
+>  三台集群：两台宕机，一台正常，还是没法使用需要过半选举。
+>  zad协议通过比较myid谁最大谁为领导角色，只要满足过半机制就可以称为领导者。
+>  如何办证数据一致性，所有写的请求都交给我们领导角色实现，领导写完，再将数据同步每个节点(也就是说,选举过程中不能注册服务)
+>
+>+ Eureka采用ap的设计理念架构注册中心，完全去中心化思想，也就是没有主从之分。每个节点都是均等，采用相互注册原理，你中有我我中你，只要最后有一个eureka节点存在就可以保证整个微服务可以实现通讯，相互注册
+>
+>+ Nacos.从1.0版本支持CP和AP混合模式集群，默认是采用Ap保证服务可用性，CP的形式底层集群raft协议保证数据的一致性的问题。
+>  如果我们采用Ap模式注册服务的实例仅支持临时注册形式，在网络分区产生抖动的情况正任然还可以继续注册我们的服务列表。
+>  那么选择CP模式必须保证数据的强一致性的问题，如果网络分区产生抖动的情况下，是无法注册我们的服务列表。选择CP模式可以支持注册实例持久
+
+
+
 #### Nacos注册配置中心
 
 >记录所有的服务信息，以Map<String,List<Object>>存储个服务信息，key为服务名，我们通过服务名就可以取。
+>
 >自定义负载均衡，获取所有服务，它采用策略模式，就是声明接口，我们只需要去继承该接口，实现返回服务的方法就可以。
-
-
-
-```
-1.引入依赖
-    <dependency>
-        <groupId>com.alibaba.cloud</groupId>
-        <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-    </dependency>
-    
-2.在配置文件中，配置Nacos Server地址
-	#一、
-	spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
-	spring.application.name=gulimall-coupon
-	
-	#二、
-	#spring:
-    #  cloud:
-    #    nacos:
-    #      discovery:
-    #        server-addr: 127.0.0.1:8848
-    #  application:
-    #    name: gulimall-coupon
-
-3.使用@EnableDiscoveryClient注解开启服务注册与发现功能
-    @EnableDiscoveryClient
-    @SpringBootApplication
-    public class Application{
-        public static void main(String[] args) {
-            SpringApplication.run(Application.class, args);
-        }
-    }
-
-4.启动Nacos服务，启动微服务
-```
 
 
 
 #### Nacos配置中心管理
 
-```
-本地应用读取我们云端分布式配置中心文件(第一次建立长连接)。
-本地应用读取到配置文件之后，本地jvm和硬盘中都会缓存一份。
-本地应用与分布式配置中心服务器端一直保持长连接.
-当我们的配置文件发生变化(MD5|版本号)实现区分，将变化结果通知给我们的本地应用，及时的刷新我们的配置文件
-```
+>本地应用读取我们云端分布式配置中心文件(第一次建立长连接)。
+>本地应用读取到配置文件之后，本地jvm和硬盘中都会缓存一份。
+>本地应用与分布式配置中心服务器端一直保持长连接.
+>当我们的配置文件发生变化(MD5|版本号)实现区分，将变化结果通知给我们的本地应用，及时的刷新我们的配置文件
 
 
 
-```
-1.引入依赖
-    <dependency>
-        <groupId>com.alibaba.cloud</groupId>
-        <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-    </dependency>
+##### 如何使用（服务注册和配置中心）
 
-2.创建bootstrap.properties文件(优先级别高)
-	# 默认根据服务名 获取Nacos中properties文件加载配置 如果没有 则加载程序的application.properties
-    spring.application.name=gulimall-coupon
-    spring.cloud.nacos.config.server-addr=127.0.0.1:8848
+> 修改pom
 
-3.给在Nacos配置中心添加数据集(Data Id) gulimall-coupon.properties
-	设置该服务的相关配置信息
-
-4.动态刷新配置
-    @RefreshScope: 动态获取并刷新配置，给类添加
-    @Value("${配置项名}"): 获取配置
+```xml
+<!--nacos-config-->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+</dependency>
+<!--nacos-discovery-->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
 ```
 
 
 
-> Nacos分布式配置管理细节
+> 修改yml - bootstrap
 
-```
-1）、命名空间：配置隔离；
-	默认：public(保留空间)；默认新增的所有配置都在public空间。
-	1、开发，测试，生产：利用命名空间来做环境隔离。
-		注意：在bootstrap.properties; 需要使用哪个命名空间下的配置
-		spring.cloud.nacos.config.namespace=9de62e44-cd2a-4a82-bf5c-95878bd5e871
-	2、每一个微服务之间互相隔离配置，每一个微服务都创建自己的命名空间，只加载自己命名空间下的所有配置
+```yml
+# nacos配置
+server:
+  port: 3377
 
-2）、配置集：所有的配置的集合
+spring:
+  application:
+    name: nacos-config-client
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #Nacos服务注册中心地址
+      config:
+        server-addr: localhost:8848 #Nacos作为配置中心地址
+        file-extension: yaml #指定yaml格式的配置
+        group: DEV_GROUP
+        namespace: 7d8f0f5a-6a53-4785-9686-dd460158e5d4
 
-3）、配置集ID：类似文件名。
-	 Data ID：类似文件名
+# ${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}
+# nacos-config-client-dev.yaml
 
-4）、配置分组：默认所有的配置集都属于：DEFAULT_GROUP；
-	1111，618，1212
-	spring.cloud.nacos.config.group=prod
-	
-* 项目中的使用：每个微服务创建自己的命名空间，使用配置分组区分环境，dev，test，prod
-    spring.application.name=gulimall-coupon
-    spring.cloud.nacos.config.server-addr=127.0.0.1:8848
-	spring.cloud.nacos.config.namespace=9de62e44-cd2a-4a82-bf5c-95878bd5e871
-	spring.cloud.nacos.config.group=prod
-
-* 同时加载多个配置集
- * 1)、微服务任何配置信息，任何配置文件都可以放在配置中心中
- * 2）、只需要在bootstrap.properties说明加载配置中心中哪些配置文件即可
- * 3）、@Value，@ConfigurationProperties。。。
- * 以前SpringBoot任何方法从配置文件中获取值，都能使用。
- * 配置中心有的优先使用配置中心中的
- 
-	spring.cloud.nacos.config.server-addr=127.0.0.1:8848
-    spring.cloud.nacos.config.namespace=1986f4f3-69e0-43bb-859c-abe427b19f3a
-    # 如果不指定分组，默认DEFAULT_GROUP，如果naocs没有，则加载程序的application.properties
-    spring.cloud.nacos.config.group=prod 
-
-    spring.cloud.nacos.config.ext-config[0].data-id=datasource.yml
-    spring.cloud.nacos.config.ext-config[0].group=dev
-    spring.cloud.nacos.config.ext-config[0].refresh=true
-
-    spring.cloud.nacos.config.ext-config[1].data-id=mybatis.yml
-    spring.cloud.nacos.config.ext-config[1].group=dev
-    spring.cloud.nacos.config.ext-config[1].refresh=true
-
-    spring.cloud.nacos.config.ext-config[2].data-id=other.yml
-    spring.cloud.nacos.config.ext-config[2].group=dev
-    spring.cloud.nacos.config.ext-config[2].refresh=true
+# nacos-config-client-test.yaml  ---->  config.info
 ```
 
 
 
-> 数据持久化
+> 修改yml - application
 
-参考：[Nacos]( https://nacos.io/zh-cn/docs/deployment.html)
-
+```yml
+spring:
+  profiles:
+    active: dev # 表示开发环境
 ```
-默认的情况下，分布式配置中心的数据存放到本地data目录下，但是这种情况如果nacos集群的话无法保证数据的同步性。
 
-在0.7版本之前，在单机模式时nacos使用嵌入式数据库实现数据的存储，不方便观察数据存储的基本情况。0.7版本增加了支持mysql数据源能力，具体的操作步骤：
 
-1.安装数据库，版本要求：5.6.5+
-2.初始化mysql数据库，数据库初始化文件：nacos-mysql.sql
-3.修改conf/application.properties文件，增加支持mysql数据源配置（目前只支持mysql），添加mysql数据源的url、用户名和密码。
 
-spring.datasource.platform=mysql
-db.num=1
-db.url.0=jdbc:mysql://127.0.0.1:3306/nacos?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
-db.user=root
-db.password=root
+> 修改主启动类
+
+```java
+@EnableDiscoveryClient
+@SpringBootApplication
+public class NacosConfigClientMain3377 {
+    public static void main(String[] args) {
+        SpringApplication.run(NacosConfigClientMain3377.class, args);
+    }
+}
 ```
+
+
+
+> 添加自动刷新注解
+
+```java
+@RefreshScope
+@RestController
+public class ConfigClientController {
+    @Value("${config.info}")
+    private String configInfo;
+
+    @GetMapping("/config/info")
+    public String getConfigInfo() {
+        return configInfo;
+    }
+}
+```
+
+
+
+##### Namespace+Group+Data ID
+
+
+
+<img src="/images/Namespace+Group+DataID.png" style="zoom: 67%;" />
+
+
+
+>默认情况:
+>Namespace=public，Group=DEFAULT_GROUP，默认Cluster是DEFAULT
+>
+>Nacos默认的命名空间是public，Namespace主要用来实现隔离。
+>比方说我们现在有三个环境：开发、测试、生产环境，我们就可以创建三个Namespace不同的Namespace之间是隔离的。
+>
+>Group默认是DEFAULT_GROUP,Group可以把不同的微服务划分到同一个分组里面去
+>
+>Service就是微服务；一个Service可以包含多个Cluster (集群)，Nacos默认Cluster是DEFAULT，Cluster是对指定微服务的一个虚拟划分。比方说为了容灾，将Service微服务分别部署在了杭州机房和广州机房，
+>这时就可以给杭州机房的Service微服务起一个集群名称(HZ) ,
+>给广州机房的Service微服务起一个集群名称(GZ)，还可以尽量让同一个机房的微服务互相调用，以提升性能
+>
+>最后是lnstance，就是微服务的实例。
+
+
+
+
+
+##### Nacos集群和持久化（重点）
+
+<img src="/images/Nacos集群架构.png" style="zoom: 50%;" />
+
+
+
+> 默认Nacos使用嵌入式数据库derby实现数据的存储。所以，如果启动多个默认配置下的Nacos节点，数据存储是存在一致性问题的。**为了解决这个问题，Nacos采用了集中式存储的方式来支持集群化部署，目前只支持MySQL的存储。**
 
 
 
 > 集群配置
 
-<img src="images/Nacos集群.png" style="zoom: 50%;" />
+> 1. mysql数据库配置
+>
+>    ```
+>    nacos-server-1.1.4\nacos\conf目录下找到sql脚本执行
+>    ```
+>
+> 2. application.properties配置
+>
+>    ```properties
+>    #nacos-server-1.1.4\nacos\conf目录下找到application.properties
+>    spring.datasource.platform=mysql
+>    db.num=1
+>    db.url.O=jdbc:mysql://127.0.0.1:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
+>    db.user=root
+>    db.password=123456
+>    ```
+>
+> 3. Linux服务器上nacos的集群配置cluster.conf
+>
+>    ```
+>    #这里一定要写真实ip，127.0.0.1可能会有问题
+>    192.168.2.22:3333
+>    192.168.2.22:4444
+>    192.168.2.22:5555
+>    ```
+>
+> 4. 编辑Nacos的启动脚本startup.sh，使它能够接受不同的启动端
+>
+>    ```sh
+>    #编辑 /mynacos/nacos/bin目录下有startup.sh
+>    while getopts ":m:f:s:pr" opt
+>    do
+>        case $opt in
+>            m)
+>                MODE=$OPTARG;;
+>            f)
+>                FUNCTION_MODE=$OPTARG;;
+>            s)
+>                SERVER=$OPTARG;;
+>            p)
+>                PORT=$OPTARG;;
+>            ?)
+>            echo "Unknown parameter"
+>            exit 1;;
+>    	esac
+>    done
+>    
+>    #倒数第二行
+>    nohup $JAVA -Dserver.port=${PORT} ${JAVA_OPT} nacos.nacos >> ${BASE_DIR}/logs/start.out 2>&1 &
+>    ```
+>
+> 5. Nginx的配置，由它作为负载均衡器
+>
+>    ```sh
+>    #修改 /usr/local/nginx/conf/nginx.conf
+>    upstream cluster {
+>    	server 127.0.0.1:3333;
+>    	server 127.0.0.1:4444;
+>    	server 127.0.0.1:5555;
+>    }
+>    
+>    server {
+>    	listen			1111;
+>    	server_name		localhost;
+>    	location / {
+>    		#root		html;
+>    		#index		index.html index.htm;
+>    		proxy_pass	http://cluster;	
+>    	}
+>    }
+>    ```
+>
+> 6. 截止到此处，1个Nginx+3个nacos注册中心+1个mysql
+>
+>    ```sh
+>    #启动naocs集群
+>    ./startup.sh -p 3333
+>    ./startup.sh -p 4444
+>    ./startup.sh -p 5555
+>    ps -ef|grep naocs|grep -v grep|wc -l
+>    
+>    #启动nginx
+>    ./nginx -c /usr/local/nginx/conf/nginx.conf
+>    ps -ef|grep nginx
+>    
+>    #测试通过nginx访问nacos
+>    http://192.168.111.144:1111/nacos/#/login
+>    ```
 
-```
-相关集群配置
-
-
-创建cluster文件夹
----nacos-server-8848
----nacos-server-8849
----nacos-server-8850
-
-cluster.conf
-###ip和端口号 不要用127.0.0.1
-192.168.1.22:8848
-192.168.1.22:8849
-192.168.1.22:8850
-
-
-Nginx相关配置
-轮询分发给三台,关于session共享Nacos自己解决了
-
-客户端连接 
-spring.cloud.nacos.config.server-addr=192.168.1.22:8848
-
-注意： 
-1.nacos在windows版本下运行默认是单机版本 需要指定startup.cmd -m cluster
-2.nacos在linux版本下运行默认是集群版本 如果想连接单机版本 startup.cmd –m standalone
-
-```
 
 
 
-> Zookeeper Eureka Nacos区别
-
-```
-Zookeeper采用CP保证数据的一致性的问题，原理采用Zab原子广播协议，当我们的zk领导因为某种原因宕机的情况下，会自动出发重新选一个新的领导角色，整个选举的过程为了保证数据的一致性的问题，在选举的过程中整个zk环境是不可以使用，可以短暂可能无法使用到zk，以为者微服务采用该模式的情况下，可能无法实现通讯。(本地有缓存除外)。
-注意：可运行节点必须满足过半机制，整个zk采用使用。
-三台集群：两台宕机，一台正常，还是没法使用需要过半选举。
-zad协议通过比较myid 谁最大谁为领导角色，只要满足过半机制就可以称为领导者。
-如何办证数据一致性，所有写的请求都交给我们领导角色实现，领导写完，再将数据同步每个节点(也就是说,选举过程中不能注册服务)
 
 
-Eureka采用ap的设计理念架构注册中心，完全去中心化思想，也就是没有主从之分。每个节点都是均等，采用相互注册原理，你中有我我中你，只要最后有一个eureka节点存在就可以保证整个微服务可以实现通讯。相互注册
 
 
-Nacos与Eureka区别.
 
-Nacos.从1.0版本支持CP和AP混合模式集群，默认是采用Ap保证服务可用性，CP的形式底层集群raft协议保证数据的一致性的问题。
-如果我们采用Ap模式注册服务的实例仅支持临时注册形式，在网络分区产生抖动的情况正任然还可以继续注册我们的服务列表。
-那么选择CP模式必须保证数据的强一致性的问题，如果网络分区产生抖动的情况下，是无法注册我们的服务列表。选择CP模式可以支持注册实例持久。
+>+ 
 
-```
+
 
 
 
