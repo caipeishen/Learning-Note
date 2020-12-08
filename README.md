@@ -105,6 +105,12 @@ public class SingleTon{
 
 
 
+### Linux内存解释
+
+参考：[Linux内存解释](https://blog.csdn.net/lengyue1084/article/details/51488188)
+
+
+
 ### 配置防火墙端口
 
 ```sh
@@ -962,11 +968,11 @@ TCP/IP协议族中最重要的一点就是分层。按层次分别分为：应�
 
 ### Nginx
 
-参考：[Nginx面试](<https://blog.csdn.net/a303549861/article/details/88672901>)
+参考：[安装](https://www.cnblogs.com/taiyonghai/p/6728707.html)  [Nginx面试](<https://blog.csdn.net/a303549861/article/details/88672901>)
 
 参考：[Nginx是什么 ? 能干嘛 ？](<https://blog.csdn.net/forezp/article/details/87887507>)
 
-参考： [Windows 下Nginx重启项目不重新加载](https://www.cnblogs.com/zjfblog/p/11854946.html) 
+参考：[Windows 下Nginx重启项目不重新加载](https://www.cnblogs.com/zjfblog/p/11854946.html) 
 
 ```
 Nignx是一个开源的、高性能的轻量级的HTTP服务器和反向代理服务器；
