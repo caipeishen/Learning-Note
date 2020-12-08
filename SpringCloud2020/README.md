@@ -1591,7 +1591,7 @@ spring:
 
 ### Nacos
 
-> —个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。
+> [—个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台](https://github.com/alibaba/Nacos)
 
 
 
@@ -1880,7 +1880,7 @@ public class ConfigClientController {
 
 ### Sentinel
 
-> 分布式系统的流量防卫兵
+> [分布式系统的流量防卫兵](https://github.com/alibaba/Sentinel)
 >
 > 随着微服务的流行，服务和服务之间的稳定性变得越来越重要。Sentinel 以流星为切入点，从流量控制、熔断降级、系统负载保护等多个维度保护服务的稳定性。
 
@@ -1932,8 +1932,6 @@ public class ConfigClientController {
 
 #### 流控规则
 
-
-
 ![](/images/Sentinel流控规则基本介绍.png)
 
 
@@ -1957,3 +1955,136 @@ public class ConfigClientController {
 
 
 #### 熔断降级
+
+> 概述
+
+> 除了流量控制以外，对调用链路中不稳定的资源进行熔断降级也是保障高可用的重要措施之一。
+>
+> 一个服务常常会调用别的模块，可能是另外的一个远程服务、数据库，或者第三方 API 等。例如，支付的时候，可能需要远程调用银联提供的 API；查询某个商品的价格，可能需要进行数据库查询。然而，这个被依赖服务的稳定性是不能保证的。
+>
+> 如果依赖的服务出现了不稳定的情况，请求的响应时间变长，那么调用服务的方法的响应时间也会变长，线程会产生堆积，最终可能耗尽业务自身的线程池，服务本身也变得不可用。 
+>
+> 因此我们需要对不稳定的**弱依赖服务调用**进行熔断降级，暂时切断不稳定调用，避免局部不稳定因素导致整体的雪崩。熔断降级作为保护自身的手段，通常在客户端（调用端）进行配置 
+>
+> Sentinel的断路器是没有半开状态的
+
+
+
+![](/images/Sentinel降级简介.png)
+
+
+
+> 熔断策略
+
+> + RT（平均响应时间，秒级）
+>
+>   平均响应时间超出阈值且在时间窗口内通过的请求>=5，两个条件同时满足后触发降级窗口期过后关闭断路器
+>
+>   RT最大4900 (更大的需要通过-Dcsp.sentinel.statistic.max.rt=XXXX才能生效)
+>
+> + 异常比例（秒级）
+>
+>   QPS >= 5，且异常比例（秒级统计）超过阈值时，触发降级；时间窗口结束后，关闭降级
+>
+> + 异常数（分钟级）
+>
+>   异常数（分钟统计)超过阈值时，触发降级;时间窗口结束后，关闭降级
+
+
+
+>- 平均响应时间( DEGRADE_GRADE_RT )：当1s内持续进入5个请求，对应时刻的平均响应时间（秒级）均超过阈值（ count，以ms为单位)，那么在接下的时间窗口（ DegradeRule中的timewindow，以s为单位)之内，对这个方法的调用都会自动地熔断（抛出DegradeException )。注意Sentinel默认统计的RT上限是4900 ms，超出此阈值的都会算作4900ms，若需要变更此上限可以通过启动配置项`-Dcsp.sentinel.statistic.max.rt=xxx`来配置。
+>- 异常比例( DEGRADE_GRADE_EXCEPTION_RATIO )：当资源的每秒请求量>=5，并且每秒异常总数占通过量的比值超过阈值（ DegradeRule 中的 count ）之后，资源进入降级状态，即在接下的时间窗口( DegradeRule中的 timewindow，以s为单位）之内，对这个方法的调用都会自动地返回。异常比率的阈值范围是[0.0，1.0]，代表0% - 100%。
+>- 异常数（DEGRADE_GRADE_EXCEPTION_CoUNT )：当资源近1分钟的异常数目超过阈值之后会进行熔断。注意由于统计时间窗口是分钟级别的，若 timewindow小于60s，则结束熔断状态后仍可能再进入熔断状态（时间窗口一定要大于等于60s）。
+
+
+
+
+
+#### 热点限流
+
+> 在N秒内，方法的第M个形参的QPS超过，则进行限流处理
+>
+> 热点参数限流会统计传入参数中的热点参数，并根据配置的限流阈值与模式，对包含热点参数的资源调用进行限流。热点参数限流可以看做是一种特殊的流量控制，仅对包含热点参数的资源调用生效。 
+
+```java
+@GetMapping("/testHotKey")
+@SentinelResource(value = "testHotKey",blockHandler = "deal_testHotKey")
+public String testHotKey(@RequestParam(value = "p1",required = false) String p1, 
+                         @RequestParam(value = "p2",required = false) String p2) {
+    //int age = 10/0;
+    return "------testHotKey";
+}
+public String deal_testHotKey (String p1, String p2, BlockException exception) {
+    return "------deal_testHotKey,o(╥﹏╥)o";  //sentinel系统默认的提示：Blocked by Sentinel (flow limiting)
+}
+```
+
+
+
+#### 系统自适应限流
+
+> Sentinel 系统自适应限流从整体维度对应用入口流量进行控制，结合应用的 Load、CPU 使用率、总体平均 RT、入口 QPS 和并发线程数等几个维度的监控指标，通过自适应的流控策略，让系统的入口流量和系统的负载达到一个平衡，让系统尽可能跑在最大吞吐量的同时保证系统整体的稳定性。 
+
+>- **Load 自适应**（仅对 Linux/Unix-like 机器生效）：系统的 load1 作为启发指标，进行自适应系统保护。当系统 load1 超过设定的启发值，且系统当前的并发线程数超过估算的系统容量时才会触发系统保护(BBR 阶段)。系统容量由系统的 `maxQps * minRt` 估算得出。设定参考值一般是 `CPU cores * 2.5`
+>- **CPU usage**（1.5.0+ 版本）：当系统 CPU 使用率超过阈值即触发系统保护（取值范围 0.0-1.0），比较灵敏。
+>- **平均 RT**：当单台机器上所有入口流量的平均 RT 达到阈值即触发系统保护，单位是毫秒。
+>- **并发线程数**：当单台机器上所有入口流量的并发线程数达到阈值即触发系统保护。
+>- **入口 QPS**：当单台机器上所有入口流量的 QPS 达到阈值即触发系统保护。
+
+
+
+#### @SentinelResource
+
+>+ 按资源名称限流+后续处理
+>
+>  ```java
+>  @GetMapping("/byResource")
+>  @SentinelResource(value = "byResource",blockHandler = "handleException")
+>  public CommonResult byResource() {
+>      return new CommonResult(200,"按资源名称限流测试OK",new Payment(2020L,"serial001"));
+>  }
+>  public CommonResult handleException(BlockException exception) {
+>      return new CommonResult(444,exception.getClass().getCanonicalName()+"\t 服务不可用");
+>  }
+>  ```
+>
+>+ 按照Url地址限流+后续处理
+>
+>  ```java
+>  @GetMapping("/rateLimit/byUrl")
+>  @SentinelResource(value = "byUrl")
+>  public CommonResult byUrl() {
+>      return new CommonResult(200,"按url限流测试OK",new Payment(2020L,"serial002"));
+>  }
+>  ```
+>
+>+ 上面兜底方法面临的问题
+>
+>  系统默认的，没有体现我们自己的业务要求。
+>  依照现有条件，我们自定义的处理方法又和业务代码耦合在一块，不直观。
+>  每个业务方法都添加一个兜底的，那代码膨胀加剧。
+>  全局统—的处理方法没有体现
+>
+>  ```java
+>  @GetMapping("/rateLimit/customerBlockHandler")
+>  @SentinelResource(value = "customerBlockHandler",
+>                    blockHandlerClass = CustomerBlockHandler.class,
+>                    blockHandler = "handlerException2")
+>  public CommonResult customerBlockHandler() {
+>      return new CommonResult(200,"按客戶自定义",new Payment(2020L,"serial003"));
+>  }
+>  ```
+>
+>  ```java
+>  public class CustomerBlockHandler {
+>      public static CommonResult handlerException(BlockException exception) {
+>          return new CommonResult(4444,"按客戶自定义,global handlerException----1");
+>      }
+>      public static CommonResult handlerException2(BlockException exception) {
+>          return new CommonResult(4444,"按客戶自定义,global handlerException----2");
+>      }
+>  }
+>  ```
+>
+>  
+
