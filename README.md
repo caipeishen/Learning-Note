@@ -564,17 +564,9 @@ private static object getFieldValueByName(String fieldName, object o) throws Exc
 
 
 
-### JAVA多线程
-
-参考：[JAVA多线程](https://blog.csdn.net/zl1zl2zl3/article/details/81868173)  [对象锁、锁池、等待池](https://blog.csdn.net/u014561933/article/details/58639411)
-
-
-
 ### JAVA IO流
 
 参考：[JAVA IO流](https://blog.csdn.net/qq_37875585/article/details/89385688)
-
-
 
 
 
@@ -584,6 +576,17 @@ private static object getFieldValueByName(String fieldName, object o) throws Exc
 
 
 
+### JAVA多线程
+
+参考：[JAVA多线程](https://blog.csdn.net/zl1zl2zl3/article/details/81868173)  [对象锁、锁池、等待池](https://blog.csdn.net/u014561933/article/details/58639411)
+
+```java
+public void test() {
+    log.info(Thread.currentThread().getName()+"\t"+"...testB");
+	try { TimeUnit.SECONDS.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
+}
+```
+
 
 
 ### Executors线程池
@@ -592,6 +595,7 @@ private static object getFieldValueByName(String fieldName, object o) throws Exc
 >+ FixedThreadPool 创建一个定长线程池，可控制线程最大并发数，超出的线程会在队列中等待。
 >+ ScheduledThreadPool 创建一个定长线程池，支持定时及周期性任务执行。
 >+ SingleThreadExecutor 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。
+
 
 
 ### ExecutorService中对异常的处理
