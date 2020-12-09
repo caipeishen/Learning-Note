@@ -559,23 +559,9 @@ logging:
 
 
 
-> 服务雪崩
-
->多个微服务之间调用的时候，假设微服务A调用微服务B和微服务C，微服务B和微服务C又调用其它的微服务,这就是所谓的“扇出”。如果扇出的链路上某个微服务的调用响应时间过长或者不可用，对微服务A的调用就会占用越来越多的系统资源,进而引起系统崩溃,所谓的“雪崩效应”.
-
-
-
-
-
 #### 服务降级
 
->所谓降级， 一般是从整体负荷考虑。就是当某个服务熔断之后，服务器将不再被调用
->此时客户端可以自己准备一个本地的fallback回调， 返回一个缺省值。
->这样做，虽然服务水平下降，但好歹可用，比直接挂掉要强。
->
->整体资源快不够了，忍痛将某些服务先关掉，待渡过难关，再开启回来
->服务降级处理是在客户端实现完成的，与服务端没有关系
->让客户端在服务端不可用时也会获得提示信息而不会挂起耗死服务器
+>服务降级是从整个系统的负荷情况出发和考虑的，对某些负荷会比较高的情况，为了预防某些功能（业务场景）出现负荷过载或者响应慢的情况，在其内部暂时舍弃对一些非核心的接口和数据的请求，而直接返回一个提前准备好的fallback（退路）错误处理信息。这样，虽然提供的是一个有损的服务，但却保证了整个系统的稳定性和可用性。
 
 
 
@@ -675,8 +661,7 @@ public interface PaymentHystrixService {
 
 ```java
 @Component
-public class PaymentFallbackService implements PaymentHystrixService
-{
+public class PaymentFallbackService implements PaymentHystrixService {
     @Override
     public String paymentInfo_OK(Integer id) {
         return "-----PaymentFallbackService fall back-paymentInfo_OK ,o(╥﹏╥)o";
@@ -694,6 +679,10 @@ public class PaymentFallbackService implements PaymentHystrixService
 #### 服务熔断
 
 <img src="/images/服务熔断.png" style="zoom:50%;" />
+
+> 服务雪崩
+
+>多个微服务之间调用的时候，假设微服务A调用微服务B和微服务C，微服务B和微服务C又调用其它的微服务,这就是所谓的“扇出”。如果扇出的链路上某个微服务的调用响应时间过长或者不可用，对微服务A的调用就会占用越来越多的系统资源,进而引起系统崩溃,所谓的“雪崩效应”.
 
 >熔断机制是应对雪崩效应的一种微服务链路保护机制。
 >当扇出链路的某个微服务不可用或者响应时间太长时，会进行服务的降级,进而熔断该节点微服务的调用,快速返回”错误”的响应信息。当检测到该节点微服务调用响应正常后恢复调用链路。
@@ -756,6 +745,26 @@ public String paymentCircuitBreaker_fallback(@PathVariable("id") Integer id) {
     return "id 不能负数，请稍后再试，/(ㄒoㄒ)/~~   id: " +id;
 }
 ```
+
+
+
+#### 降级VS熔断
+
+##### 异同点
+
+> + 服务降级是从整个系统的负荷情况出发和考虑的，对某些负荷会比较高的情况，为了预防某些功能（业务场景）出现负荷过载或者响应慢的情况，在其内部暂时舍弃对一些非核心的接口和数据的请求，而直接返回一个提前准备好的fallback（退路）错误处理信息。这样，虽然提供的是一个有损的服务，但却保证了整个系统的稳定性和可用性。
+>
+> + 服务熔断的作用类似于我们家用的保险丝，当某服务出现不可用或响应超时的情况时，为了防止整个系统出现雪崩，暂时停止对该服务的调用。
+>
+> + 相同点：
+>
+>   目标一致 都是从可用性和可靠性出发，为了防止系统崩溃；
+>
+>   用户体验类似 最终都让用户体验到的是某些功能暂时不可用；
+>
+> + 不同点：
+>
+>   触发原因不同 服务熔断一般是某个服务（下游服务）故障引起，而服务降级一般是从整体负荷考虑；
 
 
 
@@ -2060,10 +2069,10 @@ public String deal_testHotKey (String p1, String p2, BlockException exception) {
 >
 >+ 上面兜底方法面临的问题
 >
->  系统默认的，没有体现我们自己的业务要求。
->  依照现有条件，我们自定义的处理方法又和业务代码耦合在一块，不直观。
->  每个业务方法都添加一个兜底的，那代码膨胀加剧。
->  全局统—的处理方法没有体现
+>  1.系统默认的，没有体现我们自己的业务要求。
+>  2.依照现有条件，我们自定义的处理方法又和业务代码耦合在一块，不直观。
+>  3.每个业务方法都添加一个兜底的，那代码膨胀加剧。
+>  4.全局统—的处理方法没有体现
 >
 >  ```java
 >  @GetMapping("/rateLimit/customerBlockHandler")
@@ -2085,6 +2094,204 @@ public String deal_testHotKey (String p1, String p2, BlockException exception) {
 >      }
 >  }
 >  ```
->
->  
+
+
+
+#### 服务熔断Ribbon
+
+> 主启动类
+
+```java
+@EnableDiscoveryClient
+@SpringBootApplication
+public class OrderNacosMain84 {
+    public static void main(String[] args) {
+        SpringApplication.run(OrderNacosMain84.class, args);
+    }
+}
+```
+
+
+
+> yml配置
+
+```yml
+server:
+  port: 84
+
+
+spring:
+  application:
+    name: nacos-order-consumer
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    sentinel:
+      transport:
+        #配置Sentinel dashboard地址
+        dashboard: localhost:8080
+        #默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
+        port: 8719
+
+#消费者将要去访问的微服务名称(注册成功进nacos的微服务提供者)
+service-url:
+  nacos-user-service: http://nacos-payment-provider
+```
+
+
+
+> 配置类
+
+```java
+@Configuration
+public class ApplicationContextConfig {
+    @Bean
+    @LoadBalanced
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+}
+```
+
+
+
+> Controller类
+
+```java
+@Slf4j
+@RestController
+public class CircleBreakerController {
+    public static final String SERVICE_URL = "http://nacos-payment-provider";
+
+    @Resource
+    private RestTemplate restTemplate;
+
+    @RequestMapping("/consumer/fallback/{id}")
+    //@SentinelResource(value = "fallback") //没有配置，访问该请求，让sentinel生效(懒加载)
+    //@SentinelResource(value = "fallback", fallback = "fallback") //fallback只负责业务异常
+    //@SentinelResource(value = "fallback", blockHandler = "blockHandler") //blockHandler只负责sentinel控制台配置违规
+    @SentinelResource(value = "fallback", fallback = "fallback", blockHandler = "blockHandler",
+            exceptionsToIgnore = {IllegalArgumentException.class})
+    public CommonResult<Payment> fallback(@PathVariable Long id) {
+        CommonResult<Payment> result = restTemplate.getForObject(SERVICE_URL + "/paymentSQL/"+id,CommonResult.class,id);
+
+        if (id == 4) {
+            throw new IllegalArgumentException ("IllegalArgumentException,非法参数异常....");
+        }else if (result.getData() == null) {
+            throw new NullPointerException ("NullPointerException,该ID没有对应记录,空指针异常");
+        }
+
+        return result;
+    }
+    //本例是fallback
+    public CommonResult fallback(@PathVariable  Long id,Throwable e) {
+        Payment payment = new Payment(id,"null");
+        return new CommonResult<>(444,"兜底异常handlerFallback,exception内容  "+e.getMessage(),payment);
+    }
+    //本例是blockHandler
+    public CommonResult blockHandler(@PathVariable  Long id, BlockException blockException) {
+        Payment payment = new Payment(id,"null");
+        return new CommonResult<>(445,"blockHandler-sentinel限流,无此流水: blockException  "+blockException.getMessage(),payment);
+    }
+
+}
+
+```
+
+
+
+服务
+
+
+
+|                | Sentinel                                                   | Hystrix               |
+| -------------- | ---------------------------------------------------------- | --------------------- |
+| 隔离策略       | 信号量隔离（并发线程数限流）                               | 线程池隔离/信号量隔离 |
+| 熔断降级策略   | 基于响应时间、异常比率、异常数                             | 基于异常比率          |
+| 限流           | 基于QPS，支持基于调用关系的限流                            | 有限的支持            |
+| 限流整形       | 支持预热模式、匀速器模式、预热排队模式                     | 不支持                |
+| 系统自适应保护 | 支持                                                       | 不支持                |
+| 控制台         | 提供开箱即用的控制台，可配置规则，查看秒级监控、机器发现等 | 简单的监控查看        |
+
+
+
+#### 持久化
+
+> pom
+
+```xml
+<!-- sentinel配置持久化到nacos中 -->
+<dependency>
+    <groupId>com.alibaba.csp</groupId>
+    <artifactId>sentinel-datasource-nacos</artifactId>
+</dependency>
+```
+
+
+
+> yml配置
+
+```yml
+server:
+  port: 8401
+
+spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #Nacos服务注册中心地址
+    sentinel:
+      transport:
+        dashboard: localhost:8080 #配置Sentinel dashboard地址
+        port: 8719
+      # sentinel配置持久化到nacos  
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            dataId: cloudalibaba-sentinel-service
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+feign:
+  sentinel:
+    enabled: true # 激活Sentinel对Feign的支持
+```
+
+
+
+> 直接配置在nacos中配置sentinel控流
+
+```json
+[
+    {
+        "resource": "/rateLimit/byUrl",
+        "limitApp": "default",
+        "grade": 1,
+        "count": 1,
+        "strategy": 0,
+        "controlBehavior": 0,
+        "clusterMode": false
+    }
+]
+/*
+    resource：资源名称;
+    limitApp：来源应用;
+    grade：阈值类型，o表示线程数，1表示QPS;
+    count：单机阈值;
+    strategy：流控模式，0表示直接,1表示关联,2表示链路;
+    controlBehavior：流控效果，0表示快速失败，1表示Warm up，2表示排队等待;
+    clusterMode：是否集群。
+*/
+```
 
