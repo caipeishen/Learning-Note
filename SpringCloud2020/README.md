@@ -748,23 +748,24 @@ public String paymentCircuitBreaker_fallback(@PathVariable("id") Integer id) {
 
 
 
-#### 降级VS熔断
+#### 熔断VS降级
+
+参考：[何时进行服务熔断、服务降级、服务限流?](https://blog.csdn.net/llianlianpay/article/details/79768890)
 
 ##### 异同点
 
-> + 服务降级是从整个系统的负荷情况出发和考虑的，对某些负荷会比较高的情况，为了预防某些功能（业务场景）出现负荷过载或者响应慢的情况，在其内部暂时舍弃对一些非核心的接口和数据的请求，而直接返回一个提前准备好的fallback（退路）错误处理信息。这样，虽然提供的是一个有损的服务，但却保证了整个系统的稳定性和可用性。
+> + 服务熔断的作用类似于我们家用的保险丝，当某服务出现不可用或响应超时的情况时，为了防止整个系统出现雪崩，进而熔断该节点微服务的调用，快速返回错误的响应信息。当检测到该节点微服务调用响应正常后，恢复调用链路。
 >
-> + 服务熔断的作用类似于我们家用的保险丝，当某服务出现不可用或响应超时的情况时，为了防止整个系统出现雪崩，暂时停止对该服务的调用。
+> + 服务降级是从整个系统的负荷情况出发和考虑的，对某些负荷会比较高的情况，为了预防某些功能（业务场景）出现负荷过载或者响应慢的情况，在其内部暂时舍弃对一些非核心的接口和数据的请求，而直接返回一个提前准备好的fallback（退路）错误处理信息。这样，虽然提供的是一个有损的服务，但却保证了整个系统的稳定性和可用性。
 >
 > + 相同点：
 >
->   目标一致 都是从可用性和可靠性出发，为了防止系统崩溃；
+>     目标一致 都是从可用性和可靠性出发，为了防止系统崩溃；用户体验类似 最终都让用户体验到的是某些功能暂时不可用；
 >
->   用户体验类似 最终都让用户体验到的是某些功能暂时不可用；
->
-> + 不同点：
+>   + 不同点：
 >
 >   触发原因不同 服务熔断一般是某个服务（下游服务）故障引起，而服务降级一般是从整体负荷考虑；
+>
 
 
 
@@ -2295,3 +2296,211 @@ feign:
 */
 ```
 
+
+
+#### 熔断VS降级
+
+参考：[何时进行服务熔断、服务降级、服务限流?](https://blog.csdn.net/llianlianpay/article/details/79768890)
+
+
+
+> + 服务熔断的作用类似于我们家用的保险丝，当某服务出现不可用或响应超时的情况时，为了防止整个系统出现雪崩，进而熔断该节点微服务的调用，快速返回错误的响应信息。当检测到该节点微服务调用响应正常后，恢复调用链路。
+>
+> + 服务降级是从整个系统的负荷情况出发和考虑的，对某些负荷会比较高的情况，为了预防某些功能（业务场景）出现负荷过载或者响应慢的情况，在其内部暂时舍弃对一些非核心的接口和数据的请求，而直接返回一个提前准备好的fallback（退路）错误处理信息。这样，虽然提供的是一个有损的服务，但却保证了整个系统的稳定性和可用性。
+>
+> + 相同点：
+>
+>   目标一致 都是从可用性和可靠性出发，为了防止系统崩溃；用户体验类似 最终都让用户体验到的是某些功能暂时不可用；
+>
+> + 不同点：
+>
+>   触发原因不同 服务熔断一般是某个服务（下游服务）故障引起，而服务降级一般是从整体负荷考虑；
+
+
+
+### Seata分布式事务
+
+参考：[Seata](http://seata.io/zh-cn/)
+
+> Seata是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务
+
+
+
+#### 分布式事务过程
+
+
+
+##### ID+三组件模型
+
+>+ Transaction ID XID：全局唯一的事务ID
+>+ 三组件
+>  + TC (Transaction Coordinator) - 事务协调者：维护全局和分支事务的状态，驱动全局事务提交或回滚。
+>  + TM (Transaction Manager) - 事务管理器：定义全局事务的范围：开始全局事务、提交或回滚全局事务。
+>  + RM (Resource Manager) - 资源管理器：管理分支事务处理的资源，与TC交谈以注册分支事务和报告分支事务的状态，并驱动分支事务提交或回滚。
+
+
+
+##### 处理流程
+
+![](/images/Seata分布式事务处理流程.png)
+
+>1. TM向TC申请开启一个全局事务，全局事务创建成功并生成一个全局唯一的XID
+>2. XID在微服务调用链路的上下文中传播
+>3. RM向TC注册分支事务，将其纳入XID对应全局事务的管辖
+>4. TM向TC发起针对XID的全局提交或回滚决议
+>5. TC调度XID下管辖的全部分支事务完成提交或回滚请求
+
+
+#### Seata-Server安装
+
+> 1. [官网下载](http://seata.io/zh-cn/)
+>
+> 2. 修改conf目录下的file.conf配置文件
+>
+>    1. service模块
+>
+>       ```
+>       vgroup_mapping.my_test_tx_group = "fsp_tx_group"
+>       ```
+>
+>    2. store模块
+>
+>       ```
+>       mode = "db"
+>       
+>       url = "jdbc:mysql://127.0.0.1:3306/seata"
+>       user = "root"
+>       password = "你自己的密码"
+>       ```
+>
+> 3. mysql5.7数据库新建库seata，建表db_store.sql在\seata-server-0.9.0\seata\conf目录里面
+>
+> 4. 修改seata-server-0.9.0\seata\conf目录下的registry.conf配置文件
+>
+>    ```
+>    type = "nacos"
+>    
+>    nacos {
+>        serverAddr = "localhost:8848"
+>        namespace = ""
+>        cluster = "default"
+>    }
+>    ```
+>
+> 5. 启动nacos
+>
+> 6. 启动seata-server
+
+
+
+#### 业务数据库
+
+>+ create database seata_order;
+>
+>  ```sql
+>  USE seata_order;
+>  CREATE TABLE t_order(
+>  	`id` BIGINT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+>  	`user_id` BIGINT(11) DEFAULT NULL COMMENT '用户id',
+>  	`product_id` BIGINT(11) DEFAULT NULL COMMENT '产品id',
+>  	`count` INT(11) DEFAULT NULL COMMENT '数量',
+>  	`money` DECIMAL(11,0) DEFAULT NULL COMMENT '金额',
+>  	`status` INT(1) DEFAULT NULL COMMENT '订单状态：0：创建中; 1：已完结'
+>  )ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+>  
+>  SELECT * FROM t_order;
+>  ```
+>
+>+ create database seata_storage;
+>
+>  ```sql
+>  USE seata_storage;
+>  CREATE TABLE t_storage(
+>  `id` BIGINT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+>  `product_id` BIGINT(11) DEFAULT NULL COMMENT '产品id',
+>  `total` INT(11) DEFAULT NULL COMMENT '总库存',
+>  `used` INT(11) DEFAULT NULL COMMENT '已用库存',
+>  `residue` INT(11) DEFAULT NULL COMMENT '剩余库存'
+>  ) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+>  
+>  INSERT INTO seata_storage.t_storage(`id`,`product_id`,`total`,`used`,`residue`)
+>  VALUES('1','1','100','0','100'); 
+>  
+>  SELECT * FROM t_storage;
+>  ```
+>
+>+ create database seata_account;
+>
+>  ```sql
+>  USE seata_account;
+>  CREATE TABLE t_account(
+>  	`id` BIGINT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'id',
+>  	`user_id` BIGINT(11) DEFAULT NULL COMMENT '用户id',
+>  	`total` DECIMAL(10,0) DEFAULT NULL COMMENT '总额度',
+>  	`used` DECIMAL(10,0) DEFAULT NULL COMMENT '已用余额',
+>  	`residue` DECIMAL(10,0) DEFAULT '0' COMMENT '剩余可用额度'
+>  ) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+>  
+>  INSERT INTO seata_account.t_account(`id`,`user_id`,`total`,`used`,`residue`) VALUES('1','1','1000','0','1000');
+>  
+>  SELECT * FROM t_account;
+>  ```
+>
+>+ 按照上述3库分别建回滚日志表：\seata-server-0.9.0\seata\conf目录下的db_undo_log.sql 
+>
+>  ```sql
+>  -- the table to store seata xid data
+>  -- 0.7.0+ add context
+>  -- you must to init this sql for you business databese. the seata server not need it.
+>  -- 此脚本必须初始化在你当前的业务数据库中，用于AT 模式XID记录。与server端无关（注：业务数据库）
+>  -- 注意此处0.3.0+ 增加唯一索引 ux_undo_log
+>  drop table `undo_log`;
+>  CREATE TABLE `undo_log` (
+>    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+>    `branch_id` bigint(20) NOT NULL,
+>    `xid` varchar(100) NOT NULL,
+>    `context` varchar(128) NOT NULL,
+>    `rollback_info` longblob NOT NULL,
+>    `log_status` int(11) NOT NULL,
+>    `log_created` datetime NOT NULL,
+>    `log_modified` datetime NOT NULL,
+>    `ext` varchar(100) DEFAULT NULL,
+>    PRIMARY KEY (`id`),
+>    UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)
+>  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+>  ```
+
+
+
+#### Seata原理
+
+>+ 在一阶段，Seata会拦截“业务SQL” ,
+>
+>1. 解析SQL语义，找到“业务SQL”要更新的业务数据，在业务数据被更新前，将其保存成‘before image
+>
+>2. 执行“业务SQL”更新业务数据,在业务数据更新之后
+>
+>3. 其保存成“after image”，最后生成行锁。
+>
+>   以上操作全部在一个数据库事务内完成，这样保证了一阶段操作的原子性。
+>
+>   <img src="/images/Seata一阶段.png" style="zoom:50%;" />
+>
+>+ 二阶段提交顺利：
+>
+>  因为“业务SQL”在一阶段已经提交至数据库，所以Seata框架只需将一阶段保存的快照数据和行锁删掉，完成数据清理即可。
+>
+>  <img src="/images/Seata二阶段顺利.png" style="zoom:50%;" />
+>
+>+ 二阶段回滚：
+>  Seata就需要回滚一阶段已经执行的“业务SQL”，还原业务数据。回滚方式便是用“Eefore image”还原业务数据；但在还原前要首先要校验脏写，对比“数据库当前业务数据”和“after image” ,如果两份数据完全一致就说明没有脏写，可以还原业务数据，如果不一致就说明有脏写，出现脏写就需要转人工处理。
+>
+>  <img src="/images/Seata二阶段回滚.png" style="zoom:50%;" />
+>
+>
+
+
+
+![](/images/Seata三组件简化关系图.png)
+
+![](/images/Seata原理.png)
