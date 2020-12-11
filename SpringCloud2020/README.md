@@ -2504,3 +2504,112 @@ feign:
 ![](/images/Seata三组件简化关系图.png)
 
 ![](/images/Seata原理.png)
+
+
+
+### 雪花算法
+
+> ID要求
+
+>+ 全局唯一
+>+ 趋势递增
+>+ 单调递增
+>+ 信息安全
+>+ 含时间戳
+>+ 高可用
+>+ 低延迟
+>+ 高QPS
+
+
+
+>Twitter的分布式雪花算法SnowFlake，经测试snowflake每秒能够产生26万个自增可排序的ID
+>
+>1. twitter的SnowFlake生成ID能够按照时间有序生成
+>2. SnowFlake算法生成id的结果是一个64bit大小的整数，为一个Long型(转换成字符串后长度最多19)
+>3. 分布式系统内不会产生ID碰撞（由datacenter和lworkerld作区分）并且效率较高
+
+
+
+分布式系统中，有一些需要使用全局唯一ID的场景，生成ID的基本要求
+
+> 1. 在分布式的环境下必须全局且唯一
+> 2. 一般都需要单调递增,因为一般唯一ID都会存到数据库，而Innodb的特性就是将内容存储在主键索引树上的叶子节点，而且是从左往右.遵2州的，所以考虑到数据库性能,一般生成的id也最好是单调递增。为了防止ID冲突可以使用36位的UUID，但是UUID有一些缺点，首先他相对比较长，另外UUID般是无序的
+> 3. 可能还会需要无规则,因为如果使用唯一ID作为订单号这种,为了不然别人知道一天的订单量是多少,就需要这个规则
+
+
+
+
+
+![](/images/雪花算法.png)
+
+
+
+#### 集成hutool依赖,实现雪花算法工具类
+
+> + 导入依赖
+>
+>   ```
+>   <dependency>
+>       <groupId>cn.hutool</groupId>
+>       <artifactId>hutool-captcha</artifactId>
+>       <version>5.3.9</version>
+>   </dependency>
+>   ```
+>
+> + SnowFlakeUtil工具类代码
+>
+>   ```java
+>   package com.myutil.id;
+>   
+>   import cn.hutool.core.lang.Snowflake;
+>   import cn.hutool.core.util.IdUtil;
+>   
+>   public class SnowFlakeUtil {
+>       private long machineId ;
+>       private long dataCenterId ;
+>   
+>   
+>       public SnowFlakeUtil(long machineId, long dataCenterId) {
+>           this.machineId = machineId;
+>           this.dataCenterId = dataCenterId;
+>       }
+>   
+>       /**
+>        * 成员类，SnowFlakeUtil的实例对象的保存域
+>        */
+>       private static class IdGenHolder {
+>           private static final SnowFlakeUtil instance = new SnowFlakeUtil();
+>       }
+>   
+>       /**
+>        * 外部调用获取SnowFlakeUtil的实例对象，确保不可变
+>        */
+>       public static SnowFlakeUtil get() {
+>           return IdGenHolder.instance;
+>       }
+>   
+>       /**
+>        * 初始化构造，无参构造有参函数，默认节点都是0
+>        */
+>       public SnowFlakeUtil() {
+>           this(0L, 0L);
+>       }
+>   
+>       private Snowflake snowflake = IdUtil.createSnowflake(machineId,dataCenterId);
+>   
+>       public synchronized long id(){
+>           return snowflake.nextId();
+>       }
+>   
+>       public static Long getId() {
+>           return SnowFlakeUtil.get().id();
+>       }
+>   
+>   }
+>   ```
+>
+> + 使用
+>
+>   ```java
+>   Long id = SnowFlakeUtil.getId();
+>   ```
