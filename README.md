@@ -578,7 +578,7 @@ private static object getFieldValueByName(String fieldName, object o) throws Exc
 
 ### JAVA多线程
 
-参考：[JAVA多线程](https://blog.csdn.net/zl1zl2zl3/article/details/81868173)  [对象锁、锁池、等待池](https://blog.csdn.net/u014561933/article/details/58639411)
+参考：[JAVA多线程](https://blog.csdn.net/zl1zl2zl3/article/details/81868173)  [对象锁、锁池、等待池](https://blog.csdn.net/u014561933/article/details/58639411)  [死锁](https://blog.csdn.net/hd12370/article/details/82814348)
 
 ```java
 public void test() {
@@ -591,7 +591,7 @@ public void test() {
 
 ### Executors线程池
 
->+ CachedThreadPool创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。
+>+ CachedThreadPool 创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。
 >+ FixedThreadPool 创建一个定长线程池，可控制线程最大并发数，超出的线程会在队列中等待。
 >+ ScheduledThreadPool 创建一个定长线程池，支持定时及周期性任务执行。
 >+ SingleThreadExecutor 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。
@@ -1375,8 +1375,6 @@ FastJson在复杂类型的Bean转换Json上会出现一些问题，可能会出�
 参考：[官方文档](https://alibaba-easyexcel.github.io/quickstart/read.html)  [Excel导入导出](http://www.pianshen.com/article/4672412475/)  [读取excel读复杂表头文件](https://blog.csdn.net/qq_35219282/article/details/108593454)  [操作详解](https://blog.csdn.net/weixin_46146269/article/details/108287892)  [复杂导出合并单元格](https://blog.csdn.net/Violet_201903027/article/details/105724907)
 
  
-
-
 
 ### 前后端分离 - JWT用户认证
 
@@ -2824,9 +2822,110 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >   Long id = SnowFlakeUtil.getId();
 >   ```
 >
->   
 
 
+
+### Redis实现抢票
+
+#### 使用redis
+
+> 业务代码
+
+```java
+public void stock() {
+    String lockKey = "product_001";
+    // 防止高并发引起当前请求还未走到delete(lockKey)方法，但下一次请求已经发送过来，下次请求setIfAbsent()会失败
+	String cliendId = UUID.randomUUID().toString();
+    try{
+        int n = 10;
+        // 如果不存在再赋值，同时n秒的存活时间(防止应用程序重启时，造成死锁)
+        Boolean result = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, clientId, n, TimeUnit.SECONDS);
+        if (!result){
+            return "error";
+        }
+        
+        // 如果害怕方法执行时间过长，需要开启子线程定时器，检查锁，并给锁续命
+        // 步骤繁琐，所以可以采用redisson解决，入下方模块
+        
+        int stock = Integer.parseInt(stringRedisTemplate.opsForValue().get("stock"));// jedis.get("stock")
+        if (stock > 0){
+            int realStock = stock - 1;
+            stringRedisTemplate.opsForValue().set("stock", realStock + "");// jiedis.set(key, value)
+            System.out.println("扣减成功，剩余库存:" +realStock +"");
+        }else {
+            System.out.println("扣减失败,库存不足");
+        }
+    } finally {
+        if (clientId.equals(stringfedisTemplate.opsForValue().get(lockKey))){
+        	//释放锁
+        	stringRedisTemplate.delete(lockKey);
+        }
+    }
+    return "end";
+}
+
+```
+
+
+
+#### 使用redisson
+
+<img src="/images/redisson加锁流程.png" style="zoom:50%;" />
+
+> pom依赖
+
+```xml
+<dependency>
+	<groupId>org.redisson</groupId>
+    <artifactId>redisson</artifactId>
+    <version>3.6.5</vesion>
+</dependency>
+```
+
+
+
+> 配置中心
+
+```java
+@Bean
+public Redisson redisson(){
+    //此为单机模式
+    Config config = new Config();
+    config.useSingleServer().setAddress("redirs://127.0.0.1:6379").setDatabase(O);
+    return (Redisson) Redisson.create(config);
+}
+```
+
+
+
+> 业务代码
+
+```java
+@Autowired
+private Redisson redisson;
+
+public void stock() {
+    String lockKey = "product_001";
+    // 防止高并发引起当前请求还未走到delete(lockKey)方法，但下一次请求已经发送过来，下次请求setIfAbsent()会失败
+	String cliendId = UUID.randomUUID().toString();
+	RLock redissonLock = redisson.getLock(lockKey):
+    try{
+        redissonLock.lock(30, TimeUnit.SECONDS);
+        int stock = Integer.parseInt(stringRedisTemplate.opsForValue().get("stock"));// jedis.get("stock")
+        if (stock > 0){
+            int realStock = stock - 1;
+            stringRedisTemplate.opsForValue().set("stock", realStock + "");// jiedis.set(key, value)
+            System.out.println("扣减成功，剩余库存:" +realStock +"");
+        }else {
+            System.out.println("扣减失败,库存不足");
+        }
+    } finally {
+        redissonLock.lock(lockKey);
+    }
+    return "end";
+}
+
+```
 
 
 
