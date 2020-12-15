@@ -932,57 +932,57 @@ RestTemplate restTemplate() {
 >  ```
 >
 >  ```yml
->  - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+> - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
 > ```
 >  
 >+ Before Route Predicate
 >
 >```yml
->  - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+> - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
 > - Before=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
 > ```
 >  
 >+ Between Route Predicate
 >
 >```yml
->  - Between=2020-03-08T10:59:34.102+08:00[Asia/Shanghai] , 2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+> - Between=2020-03-08T10:59:34.102+08:00[Asia/Shanghai] , 2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
 > ```
 >  
 >+ Cookie Route Predicate
 >
 >```yml
 >  #https://blog.csdn.net/leedee/article/details/82685636 #cookie乱码
->  - Cookie=username,atguigu    #并且Cookie是username=zhangshuai才能访问
+> - Cookie=username,atguigu    #并且Cookie是username=zhangshuai才能访问
 > ```
 >  
 >+ Header Route Predicate
 >
 >```yml
->  - Header=X-Request-Id, \d+   #请求头中要有X-Request-Id属性并且值为整数的正则表达式
+> - Header=X-Request-Id, \d+   #请求头中要有X-Request-Id属性并且值为整数的正则表达式
 > ```
 >  
 >+ Host Route Predicate
 >
 >```yml
->  - Host=**.atguigu.com
+> - Host=**.atguigu.com
 > ```
 >  
 >+ Method Route Predicate
 >
 >```yml
->  - Method=GET
+> - Method=GET
 > ```
 >  
 >+ Path Route Predicate
 >
 >```yml
->  - Path=/payment/get/**
+> - Path=/payment/get/**
 > ```
 >  
 >+ Query Route Predicate
 >
 >```yml
->  - Query=username, \d+ #要有参数名称并且是正整数才能路由
+> - Query=username, \d+ #要有参数名称并且是正整数才能路由
 > ```
 
 
@@ -1035,7 +1035,6 @@ RestTemplate restTemplate() {
 > yml配置
 
 ```yml
-
 server:
   port: 9527
 
