@@ -1,6 +1,6 @@
 # 多线程
 
-参考：[JAVA多线程](https://blog.csdn.net/zl1zl2zl3/article/details/81868173)  [对象锁、锁池、等待池](https://blog.csdn.net/u014561933/article/details/58639411)  [死锁](https://blog.csdn.net/hd12370/article/details/82814348)  [千锋教育多线程](https://www.bilibili.com/video/BV1Sp4y1U7tQ?p=44)
+参考：[JAVA多线程](https://blog.csdn.net/zl1zl2zl3/article/details/81868173)   [wait和sleep](https://blog.csdn.net/qiuchaoxi/article/details/79837568)  [对象锁、锁池、等待池](https://blog.csdn.net/u014561933/article/details/58639411)  [死锁](https://blog.csdn.net/hd12370/article/details/82814348)   [FureTask](https://blog.csdn.net/liuzx32/article/details/44084679) [千锋多线程](https://www.bilibili.com/video/BV1Sp4y1U7tQ?p=44)  [千锋多线程文档](https://blog.csdn.net/weixin_41121133/article/details/109554622)
 
 ```java
 public void test() {
@@ -197,7 +197,11 @@ public class Demo2 {
 
 #### Future接口
 
-> Future**：**表示将要完成任务的结果。
+> Future**：**表示将要完成任务的结果
+>
+> - **表示**`ExecutorService.submit()`**所返回的状态结果**，**就是call的返回值**
+>
+> - **方法**`V get()`**以阻塞形式等待Future中的异步处理结果**（**call的返回值**）
 
 ```java
 /**
@@ -260,11 +264,12 @@ Executors工厂类：创建线程池的工具类
 ### Lock接口
 
 >+ JDK5加入，与synchronized比较，显示定义，结构更灵活
+>+  synchronized是和if、else、for、while一样的关键字，ReentrantLock是类，这是二者的本质区别 
 >+ 提供更多实用性方法，功能更强大、性能更优越
 >+ 常用方法:
->  + void lock() //获取锁，如锁被占用，则等待
->  + boolean tryLock() //尝试获取锁（成功返回true。失败返回false，不阻塞)
->  + void unlock() //释放锁
+>   + void lock() //获取锁，如锁被占用，则等待
+>   + boolean tryLock() //尝试获取锁（成功返回true。失败返回false，不阻塞)
+>   + void unlock() //释放锁
 
 
 
@@ -478,9 +483,63 @@ public class Demo2 {
 
 
 
+> 源码分析
+>
+> + `final transient ReentrantLock lock = new ReentrantLock();`
+>
+>   此集合所使用的的锁lock是重入锁ReentrantLock
+>
+> +  `add(E)`添加元素是先把原来的数组copy到一个长度加1的新数组里，然后对新数组进行操作，最后再把新数组赋给原数组。这个操作上了锁
+>
+>   ```java
+>   public boolean add(E e) {
+>       final ReentrantLock lock = this.lock;
+>       lock.lock();
+>       try {
+>           Object[] elements = getArray();
+>           int len = elements.length;
+>           Object[] newElements = Arrays.copyOf(elements, len + 1);
+>           newElements[len] = e;
+>           setArray(newElements);
+>           return true;
+>       } finally {
+>           lock.unlock();
+>       }
+>   }
+>   ```
+>
+> +  `remove(int)`删除元素同样是复制原数组到一个长度加1的新数组里，然后对新数组进行操作，最后再把新数组赋给原数组。这个操作也上了锁
+>
+>   ```java
+>   public E remove(int index) {
+>       final ReentrantLock lock = this.lock;
+>       lock.lock();
+>       try {
+>           Object[] elements = getArray();
+>           int len = elements.length;
+>           E oldValue = get(elements, index);
+>           int numMoved = len - index - 1;
+>           if (numMoved == 0)
+>               setArray(Arrays.copyOf(elements, len - 1));
+>           else {
+>               Object[] newElements = new Object[len - 1];
+>               System.arraycopy(elements, 0, newElements, 0, index);
+>               System.arraycopy(elements, index + 1, newElements, index,
+>                                numMoved);
+>               setArray(newElements);
+>           }
+>           return oldValue;
+>       } finally {
+>           lock.unlock();
+>       }
+>   }
+>   ```
+
+
+
 #### CopyOnWriteArraySet
 
-> - 线程安全的Set，底层使用CopyOnWriteArrayList实现，所以会有顺序
+> - 线程安全的Set，底层使用`opyOnWriteArrayList`实现，所以会有顺序
 > - 唯一不同在于，使用`addIfAbsent()`添加元素，会遍历数组，如果已有元素（比较依据是equals），则不添加（扔掉副本）
 
 ```java
@@ -509,31 +568,21 @@ public class Demo3 {
 >
 > - 抛出异常：
 >
->   - `boolean add(E e)`
+>     - `boolean add(E e)`顺序添加一个元素（到达上限后，再添加则会抛出异常）
 >
->     顺序添加一个元素（到达上限后，再添加则会抛出异常）。
+>       - `E remove()` 获得第一个元素并移除（如果队列没有元素时，则抛出异常）
 >
->   - `E remove()`
+>     - `E element()` 获得第一个元素但不移除（如果队列没有元素时，则抛异常）。
 >
->     获得第一个元素并移除（如果队列没有元素时，则抛出异常）。
->
->   - `E element()`
->
->     获得第一个元素但不移除（如果队列没有元素时，则抛异常）。
->
-> - 返回特殊值：（**建议使用以下方法**）
->
->   - `boolean offer(E e)`
->
->     顺序添加一个元素（到达上限后，再添加则会返回false）。
->
->   - `E poll()`
->
->     获得第一个元素并移除（如果队列没有元素时，则返回null）。
->
->   - `E peek()`
->
->     获得第一个元素但不移除（如果队列没有元素时，则返回null）。
+>    
+>- 返回特殊值：（**建议使用以下方法**）
+>  
+>   - `boolean offer(E e)` 顺序添加一个元素（到达上限后，再添加则会返回false）
+>    
+>   - `E poll()` 获得第一个元素并移除（如果队列没有元素时，则返回null）。
+> 
+>   - `E peek()` 获得第一个元素但不移除（如果队列没有元素时，则返回null）。
+>  
 
 ```java
 //演示Queue实现类的使用
@@ -616,29 +665,115 @@ public class Demo5 {
 
 #### BlockingQueue接口（阻塞队列）
 
-> - **Queue的子接口**，阻塞的队列，增加了两个线程状态为无限期等待的方法。
+> - **Queue的子接口**，阻塞的队列，增加了两个线程状态为无限期等待的方法
 >
 > - 方法
 >
->   - `void put(E e)`
+>   - `void put(E e)`将指定元素插入此队列中，如果没有可用空间，则等待
+>  
+>        - `E take()` 获取并移除此队列头部元素，如果没有可用元素，则等待
 >
->     将指定元素插入此队列中，如果没有可用空间，则等待。
+> - **可用于解决生产者**、**消费者问题**
+
+
+
+##### 阻塞队列（实现类）
+
+> - **ArrayBlockingQueue**
 >
->   - `E take()`
+>   数组结构实现，有界队列。
 >
->     获取并移除此队列头部元素，如果没有可用元素，则等待。
+> - **LinkedBlockingQueue**
 >
-> - **可用于解决生产者**、**消费者问题**。
+>   链表结构实现，有界队列。默认上限`Integer.MAX_VALUE`
+
+```java
+public class Demo6 {
+	public static void main(String[] args) throws InterruptedException {
+		//创建一个有界队列
+		ArrayBlockingQueue<Integer> arrayBlockingQueue=new ArrayBlockingQueue<Integer>(3);
+		//添加数据使用put
+		arrayBlockingQueue.put(1);
+		arrayBlockingQueue.put(2);
+		arrayBlockingQueue.put(3);
+		System.out.println(arrayBlockingQueue.size());
+		System.out.println(arrayBlockingQueue.toString());
+		arrayBlockingQueue.put(4);
+		System.out.println("我不会被执行。");
+	}
+}
+```
+
+
+
+
+
+### ConcurrentHashMap
+
+> - 初始容量默认为16段（Segment），使用分段锁设计。每一段都对应着一个哈希表。
+> - 不对整个Map加锁，而是为每个Segment加锁。对一个Segment的操作不影响其他Segment。
+> - 当多个对象存入同一个Segment时，才需要互斥。
+> - 最理想状态为16个对象分别存入16个Segment，并行数量16。
+> - 使用方式与HashMap无异。
+>
+>  注：在JDK1.8之后，ConcurrentHashMap不再采用分段锁，而是采用无锁算法CAS
+
+```java
+//演示线程安全的Map
+public class Demo8 {
+	public static void main(String[] args) {
+		//创建集合
+		ConcurrentHashMap<String, Integer> hashMap=new ConcurrentHashMap<String, Integer>();
+		//使用多线程添加数据
+		for(int i=0;i<5;i++) {
+			new Thread(new Runnable() {				
+				@Override
+				public void run() {
+					for(int k=0;k<10;k++) {
+						hashMap.put(Thread.currentThread().getName(), k);
+						System.out.println(hashMap);
+					}
+				}
+			}).start();
+		}
+	}
+}
+```
+
+
+
+
+
+
+
+### 总结
+
+>+ ExecutorService线程池接口、Executors工厂
+>+ Callable线程任务、Future异步返回值
+>+ Lock、ReentrantLock重入锁、ReentrantReadWriteLock读写锁
+>+ CopyOnWriteArrayList线程安全的ArrayList
+>+ CopyOnWriteArraySet线程安全的Set
+>+ ConcurrentLinkedQueue线程安全的Queue
+>+ ArrayBlockingQueue线程安全的阻塞Queue(生产者、消费者)
+>+ ConcurrentHashMap线程安全的HashMap
 
 
 
 ### 
 
+### 
+
+### 
+
+### 
+
+### 
+
+
+
 ### ExecutorService中对异常的处理
 
 参考：[ExecutorService中对异常的处理](https://blog.csdn.net/huangyaa729/article/details/89474292)
-
-
 
 
 
