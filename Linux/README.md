@@ -69,12 +69,24 @@ ln -s 源文件 目标文件
 ### Linux常用命令
 
 ```sh
-chmod 777 xx #授权
+whoami #那个用户登录
+date cla #日期
+
+chmod 777 file #文件授权 r=4,w=2,x=1 进入文件需要x权限
+chown newowner file #改变文件所有者
+chgrp newgroup file #改变文件所在组
+usermod -g 组名 用户名 #更改用户所在组名
+
 tar -zxvf 文件名 #解压
 tar -zcvf 123.tar file1 file2 #压缩
-ps -ef | grep tomcat
-ps -ef | grep java
-kill -9 #进程号
+
+ps -aux | grep file #查看进程信息
+ps -ef | grep tomcat #同时查看父进程
+kill -9 #关闭进程号
+
+#正在进程信息(包括CPU、内存使用、多少人登录等信息)
+top
+
 vi 文件名	#编辑(dd删除文本当前行)
 whereis 文件名 #查找文件安装
 
@@ -83,6 +95,9 @@ ll /etc/init.d
 
 #查看文件 空格翻页 enter翻一行
 cat -n 文件 | less 
+
+#查看磁盘占用情况
+df -h
 
 #查看磁盘占用情况
 du -ach --max-depth=1 /opt
@@ -94,22 +109,6 @@ vim 文件名 #编辑文件
 	dd #删除当前行
 	/字符 #高亮显示字符，按n则查看下一个，:noh 取消高亮
 	:set nu #查看行号
-	
-	
-#查看内存使用情况
-free -m 
-
-#显示进程信息(包括CPU、内存使用等信息)
-top
-
-#查看磁盘占用情况
-df -h
-
-#显示磁盘空间使用情况
-df --block-size=M
-
-#查看详细的进程
-ps 6832
 
 #动态查询
 tail -99f text.txt
@@ -125,20 +124,13 @@ netstat -tunplp | grep 端口号
 lsof -i :8080 
 #列出某个程序所打开的文件信息
 lsof -c java 
-```
 
-
-
-### Linux后台运行项目
-
-```sh
 #如果让程序始终在后台执行，即使关闭当前的终端也执行（之前的&做不到），这时候需要nohup。该命令可以在你退出帐户/关闭终端之后继续运行相应的进程。关闭中断后，在另一个终端jobs已经无法看到后台跑得程序了，此时利用ps（进程查看命令）
 nohup ./startup.sh &
 nohup java -jar weChat.jar &
-
-ps -aux | grep "test.sh"  
-#a:显示所有程序 u:以用户为主的格式来显示 x:显示所有程序，不以终端机来区分
 ```
+
+
 
 
 
@@ -384,4 +376,14 @@ show slave status\G;
 # Slave_IO_Running: Yes
 # Slave_SQL_Running: Yes
 ```
+
+
+
+
+
+### Shell编程
+
+> Shell 是一个命令行解释器，它为用户提供了一个向 Linux 内核发送请求以便运行程序的界面系统级程序，用户可以用 Shell 来启动、挂起、停止甚至是编写一些程序.
+
+![img](images/Shell示意图.png)
 
