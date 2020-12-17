@@ -678,7 +678,7 @@ public class PaymentFallbackService implements PaymentHystrixService {
 
 #### 服务熔断
 
-<img src="/images/服务熔断.png" style="zoom:50%;" />
+<img src="images/服务熔断.png" style="zoom:50%;" />
 
 > 服务雪崩
 
@@ -901,7 +901,7 @@ RestTemplate restTemplate() {
 
 >路由转发+执行过滤器链
 
-<img src="/images/Gateway执行流程.png" style="zoom: 80%;" />
+<img src="images/Gateway执行流程.png" style="zoom: 80%;" />
 
 
 
@@ -1447,19 +1447,19 @@ curl -X POST "http://localhost:3344/actuator/bus-refresh/config-client:3355"
 
 #### Stream标准流程
 
-![](/images/SpringCloudStream标准流程.png)
+![](images/SpringCloudStream标准流程.png)
 
 
 
 #### 常用API和注解
 
-![](/images/SpringCloudStream常用API和注解.png)
+![](images/SpringCloudStream常用API和注解.png)
 
 
 
 #### 重复消费问题
 
-![](/images/Stream消息驱动重复消费.png)
+![](images/Stream消息驱动重复消费.png)
 
 >默认分组group是不同的
 >
@@ -1538,7 +1538,7 @@ spring:
 > + span:表示调用链路来源，通俗的理解span就是一次请求信息
 > + Trace:类似于树结构的Span集合，表示一条调用链路，存在唯一标识
 
-![](/images/zipkin链路图.png)
+![](images/zipkin链路图.png)
 
 
 
@@ -1758,7 +1758,7 @@ public class ConfigClientController {
 
 
 
-<img src="/images/Namespace+Group+DataID.png" style="zoom: 67%;" />
+<img src="images/Namespace+Group+DataID.png" style="zoom: 67%;" />
 
 
 
@@ -1782,7 +1782,7 @@ public class ConfigClientController {
 
 ##### Nacos集群和持久化（重点）
 
-<img src="/images/Nacos集群架构.png" style="zoom: 50%;" />
+<img src="images/Nacos集群架构.png" style="zoom: 50%;" />
 
 
 
@@ -1915,7 +1915,7 @@ public class ConfigClientController {
 
 #### Sentinel主要特性
 
-![](/images/Sentinel主要特性.png)
+![](images/Sentinel主要特性.png)
 
 
 
@@ -1941,7 +1941,7 @@ public class ConfigClientController {
 
 #### 流控规则
 
-![](/images/Sentinel流控规则基本介绍.png)
+![](images/Sentinel流控规则基本介绍.png)
 
 
 
@@ -1979,7 +1979,7 @@ public class ConfigClientController {
 
 
 
-![](/images/Sentinel降级简介.png)
+![](images/Sentinel降级简介.png)
 
 
 
@@ -2341,7 +2341,7 @@ feign:
 
 ##### 处理流程
 
-![](/images/Seata分布式事务处理流程.png)
+![](images/Seata分布式事务处理流程.png)
 
 >1. TM向TC申请开启一个全局事务，全局事务创建成功并生成一个全局唯一的XID
 >2. XID在微服务调用链路的上下文中传播
@@ -2483,26 +2483,26 @@ feign:
 >
 >   以上操作全部在一个数据库事务内完成，这样保证了一阶段操作的原子性。
 >
->   <img src="/images/Seata一阶段.png" style="zoom:50%;" />
+>   <img src="images/Seata一阶段.png" style="zoom:50%;" />
 >
 >+ 二阶段提交顺利：
 >
 >  因为“业务SQL”在一阶段已经提交至数据库，所以Seata框架只需将一阶段保存的快照数据和行锁删掉，完成数据清理即可。
 >
->  <img src="/images/Seata二阶段顺利.png" style="zoom:50%;" />
+>  <img src="images/Seata二阶段顺利.png" style="zoom:50%;" />
 >
 >+ 二阶段回滚：
 >  Seata就需要回滚一阶段已经执行的“业务SQL”，还原业务数据。回滚方式便是用“Eefore image”还原业务数据；但在还原前要首先要校验脏写，对比“数据库当前业务数据”和“after image” ,如果两份数据完全一致就说明没有脏写，可以还原业务数据，如果不一致就说明有脏写，出现脏写就需要转人工处理。
 >
->  <img src="/images/Seata二阶段回滚.png" style="zoom:50%;" />
+>  <img src="images/Seata二阶段回滚.png" style="zoom:50%;" />
 >
 >
 
 
 
-![](/images/Seata三组件简化关系图.png)
+![](images/Seata三组件简化关系图.png)
 
-![](/images/Seata原理.png)
+![](images/Seata原理.png)
 
 
 
@@ -2539,7 +2539,7 @@ feign:
 
 
 
-![](/images/雪花算法.png)
+![](images/雪花算法.png)
 
 
 
