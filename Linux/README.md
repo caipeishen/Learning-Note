@@ -31,6 +31,9 @@ vi /etc/sysconfig/iptables         //防火墙配置
 
 service iptables restart        //重启防火墙
 
+#windows检查端口命令
+telnet IP PORT
+
 
 #CentOS 7
 
@@ -68,15 +71,24 @@ ln -s 源文件 目标文件
 ```sh
 chmod 777 xx #授权
 tar -zxvf 文件名 #解压
-tar -cvf 123.tar file1 file2 #压缩
+tar -zcvf 123.tar file1 file2 #压缩
 ps -ef | grep tomcat
 ps -ef | grep java
 kill -9 #进程号
 vi 文件名	#编辑(dd删除文本当前行)
-df -h #查询磁盘的空间使用情况
-whereis 文件名 #查找文件
+whereis 文件名 #查找文件安装
 
-cat -n 文件 | less #查看文件 空格翻页 enter翻一行
+#系统中有哪些服务
+ll /etc/init.d
+
+#查看文件 空格翻页 enter翻一行
+cat -n 文件 | less 
+
+#查看磁盘占用情况
+du -ach --max-depth=1 /opt
+
+#查看目录下有多少文件
+ls -l | grep "^-" | wc -l
 
 vim 文件名 #编辑文件
 	dd #删除当前行
@@ -90,6 +102,9 @@ free -m
 #显示进程信息(包括CPU、内存使用等信息)
 top
 
+#查看磁盘占用情况
+df -h
+
 #显示磁盘空间使用情况
 df --block-size=M
 
@@ -99,7 +114,10 @@ ps 6832
 #动态查询
 tail -99f text.txt
 
-#显示tcp，udp的端口和进程等相关情况
+#查看所有的网络服务
+netstat -anp | more
+
+#网络服务tcp，udp的端口和进程等相关情况
 netstat -tunplp
 netstat -tunplp | grep 端口号
 

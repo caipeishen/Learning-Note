@@ -2153,7 +2153,7 @@ Apache Dubbo是一款高性能、轻量级的开源Java RPC框架，它提供了
 6.可视化的服务治理与运维
 ```
 
-<img src="\images\Dubbo基本概念.png" alt=" " style="zoom:60%;" />
+<img src="images\Dubbo基本概念.png" alt=" " style="zoom:60%;" />
 
 > 基本概念
 
@@ -2367,7 +2367,7 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 
 
-### Redis实现抢票
+### Redis分布式锁实现抢票
 
 #### 使用redis
 
@@ -2412,7 +2412,7 @@ public void stock() {
 
 #### 使用redisson
 
-<img src="/images/redisson加锁流程.png" style="zoom:50%;" />
+<img src="images/redisson加锁流程.png" style="zoom:50%;" />
 
 > pom依赖
 
