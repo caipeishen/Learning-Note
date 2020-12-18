@@ -389,9 +389,73 @@ show slave status\G;
 
 
 
-### Shell编程
+### Shell备份数据库
 
-> Shell 是一个命令行解释器，它为用户提供了一个向 Linux 内核发送请求以便运行程序的界面系统级程序，用户可以用 Shell 来启动、挂起、停止甚至是编写一些程序.
+> 编写备份脚本
 
-![img](images/Shell示意图.png)
+```sh
+#!/bin/bash
+
+#备份路径
+backDirectory="/data/back-up-db/"
+
+#备份时间
+backTime=$(date "+%Y_%m_%d_%H%M%S")
+
+
+echo "==========开始备份数据库=========="
+echo "备份路径：${backDirectory}"
+echo "备份时间：${backTime}"
+
+#数据库IP
+host=114.116.190.45
+
+#数据库名
+database=cloud_wall
+
+#数据库账号
+user=root
+
+#数据库密码
+password=a9530.A.
+
+echo "数据库IP：${host}"
+echo "数据库名：${database}"
+echo "数据库账号：${user}"
+echo "数据库密码：${password}"
+
+#创建文件夹
+if [ ! -d "${backDirectory}/${backTime}" ]
+then
+	mkdir -p ${backDirectory}/${database}
+fi
+
+
+#备份数据库
+mysqldump -u${user} -p${password} --host=${host} ${database} | gzip > ${backDirectory}/${database}/${database}_${backTime}.sql.gz
+
+#进入备份目录
+cd ${backDirectory}/${database}
+
+#打包成tar
+tar -zcvf ${database}_${backTime}.sql.tar.gz ${database}_${backTime}.sql.gz
+
+#删除原有的gz包
+rm -rf ${database}_${backTime}.sql.gz
+
+#结束备份
+echo "=================================="
+```
+
+
+
+> 编写定时任务
+
+```sh
+#启动编写定时任务
+crontab -e
+
+#编写定时任务
+0 2 * * * /usr/sbin/my-shell/back-up-db.sh
+```
 
