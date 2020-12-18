@@ -72,13 +72,21 @@ ln -s 源文件 目标文件
 whoami #那个用户登录
 date cla #日期
 
+crontab -e|-l|-r #定时任务
+
+mkdir -p /ferris/2020-12-18 #创建多级目录
+
 chmod 777 file #文件授权 r=4,w=2,x=1 进入文件需要x权限
 chown newowner file #改变文件所有者
 chgrp newgroup file #改变文件所在组
 usermod -g 组名 用户名 #更改用户所在组名
 
-tar -zxvf 文件名 #解压
+#使用gzip对文件进行压缩后，不会保留原来的文件
+gzip 文件 #压缩
+gunzip 文件 #解压
+
 tar -zcvf 123.tar file1 file2 #压缩
+tar -zxvf 文件名 #解压
 
 ps -aux | grep file #查看进程信息
 ps -ef | grep tomcat #同时查看父进程
