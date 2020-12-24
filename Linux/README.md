@@ -72,6 +72,11 @@ ln -s 源文件 目标文件
 whoami #那个用户登录
 date cla #日期
 
+chkconfig mysql on #mysql自启动
+chkconfig --list | grep mysql #查看mysql自启动
+
+rpm -ivh xxx.rpm #安装rpm安装包
+
 crontab -e|-l|-r #定时任务
 
 mkdir -p /ferris/2020-12-18 #创建多级目录
