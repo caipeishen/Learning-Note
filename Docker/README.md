@@ -225,8 +225,8 @@ docker rm 容器ID 删除已停止的容器
 	docker rm -f $(docker ps -a -q)
 	docker ps -a -q | xargs docker rm
 	
-	
-	
+#自动启动	
+docker update mysql --restart=always	
 
 docker run -d xxx 启动守护式容器	
     问题：然后docker ps -a 进行查看, 会发现容器已经退出
