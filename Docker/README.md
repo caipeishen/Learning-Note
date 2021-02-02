@@ -115,19 +115,17 @@ docker run hello-world
 Docker官方的中央仓库:这个仓库是镜像最全的，但是下载速度较慢。
 https://hub.docker.com/
 
-国内的镜像网站:网易蜂巢，daoCloud等，下载速度快，但是镜像相对不全。
-https://c.163yun.com/hub#/home
-http://hub.daocloud.io/(推荐使用）
-
-在公司内部会采用私服的方式拉取镜像，需要添加配置，如下......
-需要创建/etc/docker/daemon.json，并添加如下内容
+#阿里镜像云
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-	"registry-mirrors":["https://registry.docker-cn.com"],
-	"insecure-registries":["ip:port"]
+  "registry-mirrors": ["https://b193taez.mirror.aliyuncs.com"]
 }
+EOF
+
 #重启两个服务
-systemctl daemon-reload
-systemctl restart docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
 ```
 
 
