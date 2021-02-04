@@ -1444,18 +1444,38 @@ List<User> userList = userMapper.selectList(userQueryWrapper);
 
 ### ES6
 
+> 对象的所有keys,values 返回一个数组
+
+```js
+let user = { name:"张三",age:20 };
+Object.keys(user);
+Object.values(user);
+Object.entries(user);
+```
+
+
+
 > 解构
 
-```
+```js
 let user = {name:'张三',age:18}
 let {name,age} = user;
 ```
 
 
 
+> 深拷贝
+
+```js
+let user = { name:"张三",age:20 };
+let user2 = { ..user };
+```
+
+
+
 > 箭头函数
 
-```
+```js
 var f1 = function(m){
 	return m;
 }
@@ -1466,7 +1486,7 @@ var f2 = m => m;
 
 > 模板字符串
 
-```0
+```js
 let name = '张三';
 let str = `我是${name}`;//我是张三
 
@@ -1525,7 +1545,7 @@ let fPersons = persons.map(item => ({
 
 > reduce 为数组中的每一个元素依次执行回调函数，不包括数组中被删除或从未被赋值的元素
 
-```
+```js
 arr.reduce(callback,[initialValue])
 1、previousValue (上一次调用回调返回的值，或者是提供的初始值( initialValue) )
 2、currentValue (数组中当前被处理的元素)
