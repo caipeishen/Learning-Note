@@ -862,18 +862,25 @@ public void export(@RequestBody JSONObject data){
 
 
 
-### 预检请求
+### 跨域 预检请求
 
 参考：[options预检请求](https://www.jianshu.com/p/f69e38ca6465)
 
 ```
-当采用CORS（跨域资源共享）来解决跨域问题时，需要前后端配合。
-在发送CORS请求时，如果是简单请求（具体解释看后面）则直接发送，
-否则浏览器检测到跨域请求，会自动发出一个 options请求来检测本次请求是否被服务器接受。
+options是预检请求，在真正的请求发送出去之前，
+浏览器会先发送一个options请求向服务询问此接口是否允许我访问
+浏览器在当前真实请求是**非简单**请求且跨域的情况下会发起options预检请求
 
-服务端收到该预检请求后，接受则会返回与CORS相关的响应头，不接受则会没响应，后续的浏览器请求无法发出。
-服务端通过后，浏览器会发送正式的数据请求。
-这样，总共发送了两次请求，一个是预检请求，一个是正式数据请求。这些都可以在浏览器的网络请求中看到。
+什么是简单请求
+1.请求方法为get，post，head
+2.Content-Type限于(application/x-www-form-urlencoded,mutipart/form-data,text/plain)
+3.不可以有自定义请求头如xxx-token等
+
+什么是复杂请求
+非简单请求即为复杂请求
+1.常见请求方法为 put delete
+2.Content-Type为application/json
+3.添加自定义http header
 ```
 
 
@@ -2488,6 +2495,8 @@ public void stock() {
 }
 
 ```
+
+
 
 
 
