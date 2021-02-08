@@ -1639,13 +1639,103 @@ fun2();
 
 
 
-### 阿里云OSS
+### 阿里云OSS 云存储
 
 参考：[阿里云](https://www.aliyun.com/ )  [学习路径](https://help.aliyun.com/learn/learningpath/oss.html?spm=5176.7933691.1309819.8.7f392a66swxJkC&aly_as=3eLSnC9NS)
 
+> 服务端签名后直传(不需要文件经过自己的服务端，而是前端吧请求自己的服务端返回签名)
+
+```
+前端
+ ↓
+自己的服务器(使用oss账号密码生成防伪签名，返回给前端)
+ ↓
+前端拿到签名，上传文件给阿里云并携带签名
+ ↓
+阿里云会验证签名，符合才会保存文件
+```
+
+#### 直接使用SDK
+
+> 导入pom
+
+```xml
+<!-- 阿里云OSS -->
+<dependency>
+    <groupId>com.aliyun.oss</groupId>
+    <artifactId>aliyun-sdk-oss</artifactId>
+    <version>3.10.2</version>
+</dependency>
+```
+
+> 实例代码
+
 ```java
-//解决Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured.
-@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@Test
+void testOSS() throws FileNotFoundException { 
+	// Endpoint以杭州为例，其它Region请按实际情况填写。
+    String endpoint = "https://oss-cn-shanghai.aliyuncs.com";
+    // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录RAM控制台创建RAM账号。
+    String accessKeyId = "";
+    String accessKeySecret = "";
+
+    // 创建OSSClient实例。
+    OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+
+    // 获取文件流
+    InputStream inputStream = new FileInputStream("C:\\Users\\peish\\Pictures\\Camera Roll\\头像3.JPG");
+
+    // bucket、fileName、fileStream
+    ossClient.putObject("gulimall-ferris", "头像.jpg", inputStream);
+
+    // 关闭OSSClient。
+    ossClient.shutdown();
+
+    System.out.println("上传成功...");
+}
+```
+
+
+
+#### spring-cloud阿里巴巴集成OSS
+
+> 导入pom
+
+```xml
+<!-- springcloud阿里巴巴集成OSS -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alicloud-oss</artifactId>
+</dependency>
+```
+
+> 配置OSS
+
+```properties
+spring.cloud.alicloud.access-key=your-ak # 账号
+spring.cloud.alicloud.secret-key=your-sk # 密钥
+spring.cloud.alicloud.oss.endpoint=***   # 域名
+```
+
+> 实例代码
+
+```java
+@Autowired
+private OSSClient ossClient;
+
+@Test
+void testSpringCloudAlibabaOSS() throws FileNotFoundException {
+    // 获取文件流
+    InputStream inputStream = new FileInputStream("C:\\Users\\peish\\Pictures\\Camera Roll\\头像3.JPG");
+
+    // bucket、fileName、fileStream
+    ossClient.putObject("gulimall-ferris", "头像2.jpg", inputStream);
+
+    // 关闭OSSClient。
+    ossClient.shutdown();
+
+    System.out.println("上传成功...");
+}
 ```
 
 
