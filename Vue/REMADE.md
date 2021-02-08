@@ -793,6 +793,32 @@ searchUser () {
 			"</style>"
 		],
 		"description": "生成vue模板"
+	},
+	"http-get 请求": {
+		"prefix": "httpget",
+		"body": [
+			"this.\\$http({",
+			"  url: this.\\$http.adornUrl(''),",
+			"  method: 'get',",
+			"  params: this.\\$http.adornParams({})",
+			"}).then(({data}) => {",
+			"",
+			"})"
+		],
+		"description": "httpGET 请求"
+	},
+	"http-post 请求": {
+		"prefix": "httppost",
+		"body": [
+			"this.\\$http({",
+			"  url: this.\\$http.adornUrl(''),",
+			"  method: 'post',",
+			"  data: this.\\$http.adornData(data, false)",
+			"}).then(({ data }) => {",
+			"",
+			"});"
+		],
+		"description": "httpPOST 请求"
 	}
 }
 ```
