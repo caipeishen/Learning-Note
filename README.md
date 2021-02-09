@@ -864,7 +864,7 @@ public void export(@RequestBody JSONObject data){
 
 ### 跨域 预检请求
 
-参考：[options预检请求](https://www.jianshu.com/p/f69e38ca6465)
+参考：[options预检请求](https://blog.csdn.net/ayqy42602/article/details/107663187) 
 
 ```
 options是预检请求，在真正的请求发送出去之前，
@@ -1643,18 +1643,6 @@ fun2();
 
 参考：[阿里云](https://www.aliyun.com/ )  [学习路径](https://help.aliyun.com/learn/learningpath/oss.html?spm=5176.7933691.1309819.8.7f392a66swxJkC&aly_as=3eLSnC9NS)
 
-> 服务端签名后直传(不需要文件经过自己的服务端，而是前端吧请求自己的服务端返回签名)
-
-```
-前端
- ↓
-自己的服务器(使用oss账号密码生成防伪签名，返回给前端)
- ↓
-前端拿到签名，上传文件给阿里云并携带签名
- ↓
-阿里云会验证签名，符合才会保存文件
-```
-
 #### 直接使用SDK
 
 > 导入pom
@@ -1735,6 +1723,76 @@ void testSpringCloudAlibabaOSS() throws FileNotFoundException {
     ossClient.shutdown();
 
     System.out.println("上传成功...");
+}
+```
+
+
+
+#### 服务端签名后直传
+
+```
+前端
+ ↓
+自己的服务器(使用oss账号密码生成防伪签名，返回给前端)
+ ↓
+前端拿到签名，上传文件给阿里云并携带签名
+ ↓
+阿里云会验证签名，符合才会保存文件
+```
+
+>基于spring-cloud阿里巴巴
+
+```java
+@Autowired
+private OSS ossClient; // 这里要写接口名，OSSClient是它的实现类
+
+@Value("${spring.cloud.alicloud.oss.endpoint}")
+private String endpoint;
+@Value("${spring.cloud.alicloud.oss.bucket}")
+private String bucket;
+
+@Value("${spring.cloud.alicloud.access-key}")
+private String accessId;
+
+@RequestMapping("/policy")
+public R policy() {
+    //https://gulimall-ferris.oss-cn-shanghai.aliyuncs.com/hahaha.jpg
+    String host = "https://" + bucket + "." + endpoint; // host的格式为 bucketname.endpoint
+    // callbackUrl为 上传回调服务器的URL，请将下面的IP和Port配置为您自己的真实信息。
+    //        String callbackUrl = "http://88.88.88.88:8888";
+    String format = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+    String dir = format + File.separator; // 用户上传文件时指定的前缀。
+
+    Map<String, String> respMap = null;
+    try {
+        long expireTime = 30;
+        long expireEndTime = System.currentTimeMillis() + expireTime * 1000;
+        Date expiration = new Date(expireEndTime);
+        PolicyConditions policyConds = new PolicyConditions();
+        policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000);
+        policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir);
+
+        String postPolicy = ossClient.generatePostPolicy(expiration, policyConds);
+        byte[] binaryData = postPolicy.getBytes("utf-8");
+        String encodedPolicy = BinaryUtil.toBase64String(binaryData);
+        String postSignature = ossClient.calculatePostSignature(postPolicy);
+
+        respMap = new LinkedHashMap<String, String>();
+        respMap.put("accessid", accessId);
+        respMap.put("policy", encodedPolicy);
+        respMap.put("signature", postSignature);
+        respMap.put("dir", dir);
+        respMap.put("host", host);
+        respMap.put("expire", String.valueOf(expireEndTime / 1000));
+        // respMap.put("expire", formatISO8601Date(expiration));
+
+
+    } catch (Exception e) {
+        // Assert.fail(e.getMessage());
+        System.err.println(e.getMessage());
+    }
+
+    return R.ok().put("data",respMap);
 }
 ```
 
@@ -2585,6 +2643,14 @@ public void stock() {
 }
 
 ```
+
+
+
+
+
+### 疑难杂症
+
+> 如果导入了nacos的配置中心，需要进行nacos.config配置，不然会报错
 
 
 
