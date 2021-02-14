@@ -134,7 +134,7 @@ sudo systemctl restart docker
 
 > Docker 镜像命令
 
-```
+```shell
 systemctl start docker 启动docker
 
 docker --hple	docker常用命令
@@ -204,6 +204,14 @@ docker ps 查看当前正在进行的docker进程
     -q :静默模式，只显示容器编号。
     --no-trunc :不截断输出。
 
+#可以设置占用内存空间
+docker run --name elasticsearch -p 9200:9200 -p 9300:9300 \
+-e  "discovery.type=single-node" \
+-e ES_JAVA_OPTS="-Xms64m -Xmx512m" \
+-v /mydata/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml \
+-v /mydata/elasticsearch/data:/usr/share/elasticsearch/data \
+-v  /mydata/elasticsearch/plugins:/usr/share/elasticsearch/plugins \
+-d elasticsearch:7.6.2 
 
 docker restart 容器ID  返回容器信息以JSON字符串方式
 
