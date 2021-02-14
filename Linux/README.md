@@ -112,6 +112,9 @@ cat -n 文件 | less
 #查看磁盘占用情况
 df -h
 
+#查看内存使用
+free -m
+
 #查看磁盘占用情况
 du -ach --max-depth=1 /opt
 
