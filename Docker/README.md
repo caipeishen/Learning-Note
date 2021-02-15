@@ -179,7 +179,7 @@ docker commit -m=“提交的描述信息” -a=“作者” 容器ID 要创建�
 
 > Docker 容器命令
 
-```
+```shell
 有镜像才能创建容器
 
 
