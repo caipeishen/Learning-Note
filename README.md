@@ -529,6 +529,17 @@ Nginx可以作为一个HTTP服务器进行网站的发布处理，另外Nginx可
 
 
 
+> 设置请求Host地址(默认Nginx会不要很多信息)
+
+```
+location / {
+	proxy_set_header Host $host;
+	proxy_pass http://gulimalll;
+}
+```
+
+
+
 ### Lvs + Keeplived + Nginx
 
 > Lvs
