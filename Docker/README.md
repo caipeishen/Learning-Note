@@ -236,6 +236,9 @@ docker rm 容器ID 删除已停止的容器
 #自动启动	
 docker update mysql --restart=always	
 
+#查看使用情况
+docker stats
+
 docker run -d xxx 启动守护式容器	
     问题：然后docker ps -a 进行查看, 会发现容器已经退出
     很重要的要说明的一点: Docker容器后台运行,就必须有一个前台进程.
