@@ -254,6 +254,160 @@ public class RedisConfig extends CachingConfigurerSupport {
 
 
 
-### Redis+RabbitMQ 实现订单秒杀
+### 高并发三种情况
 
-参考：[秒杀思路](
+> + 缓存穿透 -> 布隆过滤器/设置null和过期时间
+> + 缓存击穿 -> 加锁，只让一个人查
+> + 缓存雪崩 -> 过期时间+随机时长
+
+#### 布隆过滤器
+
+参考：[布隆过滤器](https://www.cnblogs.com/luxianyu-s/p/12686466.html)  [删除布隆元素](https://www.jianshu.com/p/3caa28a14019)
+
+> 使用场景
+
+```
+判断给定数据是否存在：
+	比如判断一个数字是否在于包含大量数字的数字集中（数字集很大，5亿以上！）
+	防止缓存穿透（判断请求的数据是否有效避免直接绕过缓存请求数据库）
+	邮箱的垃圾邮件过滤
+	黑名单功能
+去重：比如爬给定网址的时候对已经爬取过的 URL去重。
+```
+
+> 删除布隆元素
+
+> 上面的布隆过滤器我们知道，判断一个元素存在就是判断对应位置是否为1来确定的，但是如果要删除掉一个元素是不能直接把1改成0的，因为这个位置可能存在其他元素，所以如果要支持删除，那我们应该怎么做呢？最简单的做法就是加一个计数器，就是说位数组的每个位如果不存在就是0，存在几个元素就存具体的数字，而不仅仅只是存1，那么这就有一个问题，本来存1就是一位就可以满足了，但是如果要存具体的数字比如说2，那就需要2位了，所以带有计数器的布隆过滤器会占用更大的空间。
+>
+> ```xml
+> <dependency>
+>  <groupId>com.baqend</groupId>
+>  <artifactId>bloom-filter</artifactId>
+>  <version>1.0.7</version>
+> </dependency>
+> ```
+>
+> ```java
+> import orestes.bloomfilter.FilterBuilder;
+> 
+> public class CountingBloomFilter {
+>  public static void main(String[] args) {
+>      orestes.bloomfilter.CountingBloomFilter<String> cbf = new FilterBuilder(10000,
+>              0.01).countingBits(8).buildCountingBloomFilter();
+> 
+>      cbf.add("zhangsan");
+>      cbf.add("lisi");
+>      cbf.add("wangwu");
+>      System.out.println("是否存在王五：" + cbf.contains("wangwu")); //true
+>      cbf.remove("wangwu");
+>      System.out.println("是否存在王五：" + cbf.contains("wangwu")); //false
+>  }
+> }
+> ```
+>
+> 构建布隆过滤器前面2个参数一个就是期望的元素数，一个就是fpp值，后面的countingBits参数就是计数器占用的大小，这里传了一个8位，即最多允许255次重复，如果不传的话这里默认是16位大小，即允许65535次重复。
+
+
+
+### Redis分布式锁实现抢票
+
+#### 使用redis
+
+> 业务代码
+
+```java
+public void stock() {
+    String lockKey = "product_001";
+    // 防止高并发引起当前请求还未走到delete(lockKey)方法，但下一次请求已经发送过来，下次请求setIfAbsent()会失败
+	String cliendId = UUID.randomUUID().toString();
+    try{
+        int n = 10;
+        // 如果不存在再赋值，同时n秒的存活时间(防止应用程序重启时，造成死锁)
+        Boolean result = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, clientId, n, TimeUnit.SECONDS);
+        if (!result){
+            return "error";
+        }
+        
+        // 如果害怕方法执行时间过长，需要开启子线程定时器，检查锁，并给锁续命
+        // 步骤繁琐，所以可以采用redisson解决，入下方模块
+        
+        int stock = Integer.parseInt(stringRedisTemplate.opsForValue().get("stock"));// jedis.get("stock")
+        if (stock > 0){
+            int realStock = stock - 1;
+            stringRedisTemplate.opsForValue().set("stock", realStock + "");// jiedis.set(key, value)
+            System.out.println("扣减成功，剩余库存:" +realStock +"");
+        }else {
+            System.out.println("扣减失败,库存不足");
+        }
+    } finally {
+        if (clientId.equals(stringfedisTemplate.opsForValue().get(lockKey))){
+        	//释放锁
+        	stringRedisTemplate.delete(lockKey);
+        }
+    }
+    return "end";
+}
+
+```
+
+
+
+#### 使用redisson
+
+<img src="C:/Users/Ferris/Desktop/Learning-Note/images/redisson加锁流程.png" style="zoom:50%;" />
+
+> pom依赖
+
+```xml
+<dependency>
+	<groupId>org.redisson</groupId>
+    <artifactId>redisson</artifactId>
+    <version>3.6.5</vesion>
+</dependency>
+```
+
+
+
+> 配置中心
+
+```java
+@Bean
+public Redisson redisson(){
+    //此为单机模式
+    Config config = new Config();
+    config.useSingleServer().setAddress("redirs://127.0.0.1:6379").setDatabase(O);
+    return (Redisson) Redisson.create(config);
+}
+```
+
+
+
+> 业务代码
+
+```java
+@Autowired
+private Redisson redisson;
+
+public void stock() {
+    String lockKey = "product_001";
+    // 防止高并发引起当前请求还未走到delete(lockKey)方法，但下一次请求已经发送过来，下次请求setIfAbsent()会失败
+	String cliendId = UUID.randomUUID().toString();
+	RLock redissonLock = redisson.getLock(lockKey):
+    try{
+        redissonLock.lock(30, TimeUnit.SECONDS);
+        int stock = Integer.parseInt(stringRedisTemplate.opsForValue().get("stock"));// jedis.get("stock")
+        if (stock > 0){
+            int realStock = stock - 1;
+            stringRedisTemplate.opsForValue().set("stock", realStock + "");// jiedis.set(key, value)
+            System.out.println("扣减成功，剩余库存:" +realStock +"");
+        }else {
+            System.out.println("扣减失败,库存不足");
+        }
+    } finally {
+        redissonLock.lock(lockKey);
+    }
+    return "end";
+}
+
+```
+
