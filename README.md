@@ -176,7 +176,7 @@ GC一共分三种：MinorGC,Major GC 和Full GC。Full GC是清理整个堆空�
 
 ### JVM调优
 
-参考：[JVM调优](https://youzhixueyuan.com/jvm-performance-optimization.html)
+参考：[JVM调优](https://youzhixueyuan.com/jvm-performance-optimization.html)  // TODO 还有查看dump文件
 
 
 
