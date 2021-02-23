@@ -1514,6 +1514,8 @@ WHERE a IN (...) ORDER BY b, c;  /* 对于排序来说，多个相等条件(a=1 
 
 # 13.慢查询日志
 
+参考：[如何使用慢查询日志](https://www.cnblogs.com/zjxiang/p/9157398.html)
+
 ## 13.1.基本介绍
 
 > 慢查询日志是什么？
