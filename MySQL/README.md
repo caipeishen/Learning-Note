@@ -2197,6 +2197,8 @@ INSERT INTO `test_innodb_lock`(`a`, `b`) VALUES(8, '9000');
 CREATE INDEX idx_test_a ON `test_innodb_lock`(a);
 CREATE INDEX idx_test_b ON `test_innodb_lock`(b);
 
+# 锁定一行
+SELECT ..... FOR UPDATE
 ```
 
 ## 17.2.行锁案例

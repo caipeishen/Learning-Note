@@ -260,7 +260,7 @@ public class RedisConfig extends CachingConfigurerSupport {
 > + 缓存击穿 -> 加锁，只让一个人查
 > + 缓存雪崩 -> 过期时间+随机时长
 
-#### 布隆过滤器
+#### 缓存穿透->布隆过滤器
 
 参考：[布隆过滤器](https://www.cnblogs.com/luxianyu-s/p/12686466.html)  [删除布隆元素](https://www.jianshu.com/p/3caa28a14019)
 
@@ -281,9 +281,9 @@ public class RedisConfig extends CachingConfigurerSupport {
 >
 > ```xml
 > <dependency>
->  <groupId>com.baqend</groupId>
->  <artifactId>bloom-filter</artifactId>
->  <version>1.0.7</version>
+>      <groupId>com.baqend</groupId>
+>      <artifactId>bloom-filter</artifactId>
+>      <version>1.0.7</version>
 > </dependency>
 > ```
 >
@@ -291,17 +291,17 @@ public class RedisConfig extends CachingConfigurerSupport {
 > import orestes.bloomfilter.FilterBuilder;
 > 
 > public class CountingBloomFilter {
->  public static void main(String[] args) {
->      orestes.bloomfilter.CountingBloomFilter<String> cbf = new FilterBuilder(10000,
->              0.01).countingBits(8).buildCountingBloomFilter();
+>      public static void main(String[] args) {
+>          orestes.bloomfilter.CountingBloomFilter<String> cbf = new FilterBuilder(10000,
+>                  0.01).countingBits(8).buildCountingBloomFilter();
 > 
->      cbf.add("zhangsan");
->      cbf.add("lisi");
->      cbf.add("wangwu");
->      System.out.println("是否存在王五：" + cbf.contains("wangwu")); //true
->      cbf.remove("wangwu");
->      System.out.println("是否存在王五：" + cbf.contains("wangwu")); //false
->  }
+>          cbf.add("zhangsan");
+>          cbf.add("lisi");
+>          cbf.add("wangwu");
+>          System.out.println("是否存在王五：" + cbf.contains("wangwu")); //true
+>          cbf.remove("wangwu");
+>          System.out.println("是否存在王五：" + cbf.contains("wangwu")); //false
+>      }
 > }
 > ```
 >
@@ -309,9 +309,9 @@ public class RedisConfig extends CachingConfigurerSupport {
 
 
 
-### Redis分布式锁实现抢票
+#### 缓存击穿->加锁
 
-#### 使用redis
+##### 使用redis
 
 > 业务代码
 
@@ -352,9 +352,12 @@ public void stock() {
 
 
 
-#### 使用redisson
+##### 使用redisson
 
-<img src="C:/Users/Ferris/Desktop/Learning-Note/images/redisson加锁流程.png" style="zoom:50%;" />
+> + 保证操作的原子性：Lua脚本
+> + 看门狗机制：自动续期
+
+<img src="images/redisson加锁流程.png" style="zoom:50%;" />
 
 > pom依赖
 
@@ -388,6 +391,15 @@ public Redisson redisson(){
 @Autowired
 private Redisson redisson;
 
+/**
+	* RLock锁有看门狗机制 会自动帮我们续期，默认30s自动过期
+	* lock.lock(10,TimeUnit.SECONDS); 设置过期时间不会自动续期，同时锁的时间一定要大于业务的时间 否则会出现没有锁住（当前业务没有执行完，锁自动过期了，并发请求就会出现没有锁住）
+	* <p>
+	* 1.如果我们传递了锁的超时时间就给redis发送超时脚本 默认超时时间就是我们指定的
+	* 2.如果我们未指定，就使用 30 * 1000 [LockWatchdogTimeout]
+    *   只要占锁成功 就会启动一个定时任务 任务就是重新给锁设置过期时间 这个时间还是 [LockWatchdogTimeout] 的时间 1/3 看门狗的时间续期一次 续成满时间
+	*   最佳实战：lock.lock(30,TimeUnit.SECONDS);省掉了整个续期操作，超30秒肯定数据库或者代码有问题
+	*/
 public void stock() {
     String lockKey = "product_001";
     // 防止高并发引起当前请求还未走到delete(lockKey)方法，但下一次请求已经发送过来，下次请求setIfAbsent()会失败
