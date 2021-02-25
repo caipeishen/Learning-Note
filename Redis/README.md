@@ -425,7 +425,11 @@ public void stock() {
 
 
 
-### 缓存一致性
+### 缓存数据一致性
+
+> 最终一致性：都设置下过期时间
+
+
 
 #### 双写模式
 
@@ -437,6 +441,14 @@ public void stock() {
 
 ![](images/缓存一致性-失效模式.png)
 
+
+
+#### 强一致性(读写锁)
+
+> RReadWriteLock
+
+
+
 #### Canal中间件
 
 ![](images/缓存一致性-Canal中间件.png)
@@ -446,3 +458,56 @@ public void stock() {
 > 分局binlog，分析购物车表，浏览记录表，计算出用户推荐表(首页浏览)
 
 ![](images/Canal解决数据异构.png)
+
+
+
+
+
+### SpringCache+Redis简化缓存开发
+
+```
+1)、引入依赖
+        spring-boot-starter-cache、 spring-boot-starter-data-redis
+2) 、写配置
+        2.1、自动配置了哪些
+            CacheAutoConfiguration会导入RedisCacheConfiguration;自动配好了缓存管理器RedisCacheManager
+        2.2、配置使用redis作为缓存
+            spring.cache.type=redis
+3)、测试使用缓存
+        @Cacheable:Triggers cache population.:触发将数据保存到缓存的操作
+        @CacheEvict:Triggers cache eviction.:触发将数据从缓存删除的操作
+        @CachePut: Updates the cache without interfering with the method execution.:不影响方法执行更
+        @Caching:Regroups multiple cache operations to be applied on a method.:组合以上多个操作
+        @CacheConfig: Shares some common cache-related settings at class-Level.:在类级别共享缓存的福
+        3.1、开启缓存功能
+        3.2、只需要使用注解就可以完成缓存操作
+4)、原理:
+        CacheAutoConfiguration ->RedisCacheConfiguration ->
+        自动配置了RedisCacheManager -> 初始化所有的缓存 -> 每个缓存决定使用什么配置
+        ->如果RedisCacheConfiguration有就用已有的,没有就用默认配置
+        ->想改缓存的配置，只需要给容器中放一个RedisCacheConfiguration即可
+        ->就会应用到当前RedisCacheManager管理的所有缓存分区中
+5）、Spring-Cache的不足;
+        1)、读模式:
+            缓存穿透:查询一个null数据。解决:缓存空数据;ache-null-values=true
+            缓存击穿:大量并发进来同时查询一个正好过期的数据。解决:加锁;?默认是无加锁的;sync = true
+            缓存雪崩:大量的key同时过期。解决。加随机时间。加上过期时间。: spring.cache.redis.time-to-live
+        2)、写模式:(缓存与数据库一致)
+            1)、读写加锁。
+            2)、引入Canal，感知到MysQL的更新去更新数据库
+            3)、读多写多,直接去数据库查询就行
+        总结:
+            常规数据（读多写少，即时性，一致性要求不高的数据）﹔完全可以使用spring-cache
+            特殊数据:特殊设计
+        原理:
+            CacheManager(RedisCacheManager)->cache(RedisCache)->cache负责缓存的读写
+```
+
+
+
+
+
+
+
+
+
