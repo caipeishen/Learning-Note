@@ -1514,6 +1514,8 @@ WHERE a IN (...) ORDER BY b, c;  /* 对于排序来说，多个相等条件(a=1 
 
 # 13.慢查询日志
 
+参考：[如何使用慢查询日志](https://www.cnblogs.com/zjxiang/p/9157398.html)
+
 ## 13.1.基本介绍
 
 > 慢查询日志是什么？
@@ -2195,6 +2197,8 @@ INSERT INTO `test_innodb_lock`(`a`, `b`) VALUES(8, '9000');
 CREATE INDEX idx_test_a ON `test_innodb_lock`(a);
 CREATE INDEX idx_test_b ON `test_innodb_lock`(b);
 
+# 锁定一行
+SELECT ..... FOR UPDATE
 ```
 
 ## 17.2.行锁案例

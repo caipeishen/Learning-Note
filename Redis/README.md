@@ -260,7 +260,7 @@ public class RedisConfig extends CachingConfigurerSupport {
 > + 缓存击穿 -> 加锁，只让一个人查
 > + 缓存雪崩 -> 过期时间+随机时长
 
-#### 布隆过滤器
+#### 缓存穿透->布隆过滤器
 
 参考：[布隆过滤器](https://www.cnblogs.com/luxianyu-s/p/12686466.html)  [删除布隆元素](https://www.jianshu.com/p/3caa28a14019)
 
@@ -281,9 +281,9 @@ public class RedisConfig extends CachingConfigurerSupport {
 >
 > ```xml
 > <dependency>
->  <groupId>com.baqend</groupId>
->  <artifactId>bloom-filter</artifactId>
->  <version>1.0.7</version>
+>      <groupId>com.baqend</groupId>
+>      <artifactId>bloom-filter</artifactId>
+>      <version>1.0.7</version>
 > </dependency>
 > ```
 >
@@ -291,17 +291,17 @@ public class RedisConfig extends CachingConfigurerSupport {
 > import orestes.bloomfilter.FilterBuilder;
 > 
 > public class CountingBloomFilter {
->  public static void main(String[] args) {
->      orestes.bloomfilter.CountingBloomFilter<String> cbf = new FilterBuilder(10000,
->              0.01).countingBits(8).buildCountingBloomFilter();
+>      public static void main(String[] args) {
+>          orestes.bloomfilter.CountingBloomFilter<String> cbf = new FilterBuilder(10000,
+>                  0.01).countingBits(8).buildCountingBloomFilter();
 > 
->      cbf.add("zhangsan");
->      cbf.add("lisi");
->      cbf.add("wangwu");
->      System.out.println("是否存在王五：" + cbf.contains("wangwu")); //true
->      cbf.remove("wangwu");
->      System.out.println("是否存在王五：" + cbf.contains("wangwu")); //false
->  }
+>          cbf.add("zhangsan");
+>          cbf.add("lisi");
+>          cbf.add("wangwu");
+>          System.out.println("是否存在王五：" + cbf.contains("wangwu")); //true
+>          cbf.remove("wangwu");
+>          System.out.println("是否存在王五：" + cbf.contains("wangwu")); //false
+>      }
 > }
 > ```
 >
@@ -309,9 +309,9 @@ public class RedisConfig extends CachingConfigurerSupport {
 
 
 
-### Redis分布式锁实现抢票
+#### 缓存击穿->加锁
 
-#### 使用redis
+##### 使用redis
 
 > 业务代码
 
@@ -352,9 +352,12 @@ public void stock() {
 
 
 
-#### 使用redisson
+##### 使用redisson
 
-<img src="C:/Users/Ferris/Desktop/Learning-Note/images/redisson加锁流程.png" style="zoom:50%;" />
+> + 保证操作的原子性：Lua脚本
+> + 看门狗机制：自动续期
+
+<img src="images/redisson加锁流程.png" style="zoom:50%;" />
 
 > pom依赖
 
@@ -388,6 +391,15 @@ public Redisson redisson(){
 @Autowired
 private Redisson redisson;
 
+/**
+	* RLock锁有看门狗机制 会自动帮我们续期，默认30s自动过期
+	* lock.lock(10,TimeUnit.SECONDS); 设置过期时间不会自动续期，同时锁的时间一定要大于业务的时间 否则会出现没有锁住（当前业务没有执行完，锁自动过期了，并发请求就会出现没有锁住）
+	* <p>
+	* 1.如果我们传递了锁的超时时间就给redis发送超时脚本 默认超时时间就是我们指定的
+	* 2.如果我们未指定，就使用 30 * 1000 [LockWatchdogTimeout]
+    *   只要占锁成功 就会启动一个定时任务 任务就是重新给锁设置过期时间 这个时间还是 [LockWatchdogTimeout] 的时间 1/3 看门狗的时间续期一次 续成满时间
+	*   最佳实战：lock.lock(30,TimeUnit.SECONDS);省掉了整个续期操作，超30秒肯定数据库或者代码有问题
+	*/
 public void stock() {
     String lockKey = "product_001";
     // 防止高并发引起当前请求还未走到delete(lockKey)方法，但下一次请求已经发送过来，下次请求setIfAbsent()会失败
@@ -410,4 +422,92 @@ public void stock() {
 }
 
 ```
+
+
+
+### 缓存数据一致性
+
+> 最终一致性：都设置下过期时间
+
+
+
+#### 双写模式
+
+![1614220233409](images/缓存一致性-双写模式.png)
+
+
+
+#### 失效模式
+
+![](images/缓存一致性-失效模式.png)
+
+
+
+#### 强一致性(读写锁)
+
+> RReadWriteLock
+
+
+
+#### Canal中间件
+
+![](images/缓存一致性-Canal中间件.png)
+
+##### Canal解决数据异构
+
+> 分局binlog，分析购物车表，浏览记录表，计算出用户推荐表(首页浏览)
+
+![](images/Canal解决数据异构.png)
+
+
+
+
+
+### SpringCache+Redis简化缓存开发
+
+```
+1)、引入依赖
+        spring-boot-starter-cache、 spring-boot-starter-data-redis
+2) 、写配置
+        2.1、自动配置了哪些
+            CacheAutoConfiguration会导入RedisCacheConfiguration;自动配好了缓存管理器RedisCacheManager
+        2.2、配置使用redis作为缓存
+            spring.cache.type=redis
+3)、测试使用缓存
+        @Cacheable:Triggers cache population.:触发将数据保存到缓存的操作
+        @CacheEvict:Triggers cache eviction.:触发将数据从缓存删除的操作
+        @CachePut: Updates the cache without interfering with the method execution.:不影响方法执行更
+        @Caching:Regroups multiple cache operations to be applied on a method.:组合以上多个操作
+        @CacheConfig: Shares some common cache-related settings at class-Level.:在类级别共享缓存的福
+        3.1、开启缓存功能
+        3.2、只需要使用注解就可以完成缓存操作
+4)、原理:
+        CacheAutoConfiguration ->RedisCacheConfiguration ->
+        自动配置了RedisCacheManager -> 初始化所有的缓存 -> 每个缓存决定使用什么配置
+        ->如果RedisCacheConfiguration有就用已有的,没有就用默认配置
+        ->想改缓存的配置，只需要给容器中放一个RedisCacheConfiguration即可
+        ->就会应用到当前RedisCacheManager管理的所有缓存分区中
+5）、Spring-Cache的不足;
+        1)、读模式:
+            缓存穿透:查询一个null数据。解决:缓存空数据;ache-null-values=true
+            缓存击穿:大量并发进来同时查询一个正好过期的数据。解决:加锁;?默认是无加锁的;sync = true
+            缓存雪崩:大量的key同时过期。解决。加随机时间。加上过期时间。: spring.cache.redis.time-to-live
+        2)、写模式:(缓存与数据库一致)
+            1)、读写加锁。
+            2)、引入Canal，感知到MysQL的更新去更新数据库
+            3)、读多写多,直接去数据库查询就行
+        总结:
+            常规数据（读多写少，即时性，一致性要求不高的数据）﹔完全可以使用spring-cache
+            特殊数据:特殊设计
+        原理:
+            CacheManager(RedisCacheManager)->cache(RedisCache)->cache负责缓存的读写
+```
+
+
+
+
+
+
+
+
 
