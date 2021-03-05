@@ -2581,6 +2581,28 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 
 
+### Sublime Text3添加到右键快捷菜单
+
+参考：[Sublime Text3添加到右键快捷菜单](https://www.cnblogs.com/leime/p/9441169.html)
+
+> 新建sublime_addright.reg文件 编辑后双击打开就OK 
+>
+>  注意：括号内是**C:\\**开头是安装路径，**Sublime Text3** 是提示文字 
+
+```
+Windows Registry Editor Version 5.00
+[HKEY_CLASSES_ROOT\*\shell\SublimeText3]
+@="Sublime Text3"
+"Icon"="C:\Program Files\\Sublime Text 3\sublime_text.exe,0"
+[HKEY_CLASSES_ROOT\*\shell\SublimeText3\command]
+@="C:\Program Files\Sublime Text 3\sublime_text.exe %1"
+[HKEY_CLASSES_ROOT\Directory\shell\SublimeText3]
+@="Sublime Text3"
+"Icon"="C:\Program Files\Sublime Text 3\sublime_text.exe,0"
+[HKEY_CLASSES_ROOT\Directory\shell\SublimeText3\command]
+@="C:\Program Files\Sublime Text 3\sublime_text.exe %1"
+```
+
 
 
 ***
