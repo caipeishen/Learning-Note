@@ -2581,6 +2581,17 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 
 
+### Sublime Text3禁止打开上次文件
+
+参考：[Sublime Text3禁止打开上次文件](https://jingyan.baidu.com/article/73c3ce2847a638e50343d932.html)
+
+>+ 打开Sublime，点击：Preference->设置 
+>+ 弹出窗口就是设置界面，都是代码配置的方式，对功能就行修改 
+>+ 左侧是默认的系统设置，右侧才是用户设置。只要右侧配置完毕，即覆盖左侧。这样很好的备份了系统设置，清晰展现了用户自定义的部分。 
+>+ 与退出记忆/启动恢复相关的设置项本来有两个，但Sublime Text3现在只有一个了。但还是建议两项对进行修改。在右侧填入"remember_open_files": false,"hot_exit": false,即可 
+
+
+
 ### Sublime Text3添加到右键快捷菜单
 
 参考：[Sublime Text3添加到右键快捷菜单](https://www.cnblogs.com/leime/p/9441169.html)
