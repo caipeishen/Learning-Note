@@ -252,6 +252,8 @@ public class Demo3 {
 
 #### ThreadPoolExecutor原生线程池
 
+> new ThreadPoolExecutor(corePoolSize,maximumPoolSize,keepAliveTime,TimeUnitunit,workQueue, threadFactory, handler);
+
 >七大参数
 >
 >+ corePoolSize：[5]核心线程数[一直存在除非(allowCoreThreadTimeOut) ];线程池，创建好以后就准备就绪  5个Thread thread = new Thread();thread.start();
