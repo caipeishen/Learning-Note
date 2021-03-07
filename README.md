@@ -2587,6 +2587,12 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 
 
+### Sublime Text3乱码问题
+
+参考：[Sublime Text3乱码问题](https://jingyan.baidu.com/article/eb9f7b6d4fe666869264e844.html)
+
+
+
 ### Sublime Text3禁止打开上次文件
 
 参考：[Sublime Text3禁止打开上次文件](https://jingyan.baidu.com/article/73c3ce2847a638e50343d932.html)
