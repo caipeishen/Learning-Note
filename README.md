@@ -2616,7 +2616,7 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\*\shell\SublimeText3]
 @="Sublime Text3"
-"Icon"="C:\Program Files\\Sublime Text 3\sublime_text.exe,0"
+"Icon"="C:\Program Files\Sublime Text 3\sublime_text.exe,0"
 [HKEY_CLASSES_ROOT\*\shell\SublimeText3\command]
 @="C:\Program Files\Sublime Text 3\sublime_text.exe %1"
 [HKEY_CLASSES_ROOT\Directory\shell\SublimeText3]
