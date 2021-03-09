@@ -2565,6 +2565,24 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 
 
+### SQL执行顺序
+
+参考：[SQL执行顺序](https://www.cnblogs.com/xqzt/p/4972789.html)
+
+```
+FROM
+ON
+JOIN
+WHERE
+GROUP BY
+WITH CUBE or WITH ROLLUP
+HAVING
+SELECT
+DISTINCT
+ORDER BY
+TOP
+```
+
 
 
 ### 疑难杂症
@@ -2625,6 +2643,12 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Directory\shell\SublimeText3\command]
 @="C:\Program Files\Sublime Text 3\sublime_text.exe %1"
 ```
+
+
+
+
+
+
 
 
 
