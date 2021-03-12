@@ -1787,11 +1787,12 @@ public R policy() {
 > 2. 服务端tomcat配置session共享（内存限制，10个用户各自1G，100台tomcat，每个tomcat存100G）
 > 3. nginx配置hash一致性（固定IP访问固定服务器，服务器压力不平衡，某台服务器宕机，则无法访问）
 > 4. redis存储（安全，可扩展，tomcat宕机也没问题，但会增加一次网络调用，修改代码，SpringSession可以解决：JSSESSIONID放在redis中，作用域为父域名下）
-> 5. token+redis（最佳解决方案，不属于session共享，属于下方的单点登录）
 
 
 
 #### spring-session
+
+> 能解决父子域名session问题，不同域名需要使用token
 
 > 1. ```xml
 >    <!-- spring-session  -->
@@ -1845,6 +1846,23 @@ public R policy() {
 >        }
 >    }
 >    ```
+>
+> 5. 核心原理
+>
+>    + @EnableRedisHttpSession导入RedisHttpSessionConfiguration配置
+>
+>      1. 给容器中添加了一个组件
+>
+>         SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
+>
+>      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
+>
+>         + 创建的时候，就自动从容器中获取到了sessionRepository;
+>         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
+>         + 以后获取session。request.getSession();
+>         + wrappedRequest.getSession( ) -> SessionRepository中获取到的。
+>
+>    
 
 
 
