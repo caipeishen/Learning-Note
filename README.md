@@ -940,24 +940,6 @@ FastJson在复杂类型的Bean转换Json上会出现一些问题，可能会出�
 
 参考：[官方文档](https://alibaba-easyexcel.github.io/quickstart/read.html)  [Excel导入导出](http://www.pianshen.com/article/4672412475/)  [读取excel读复杂表头文件](https://blog.csdn.net/qq_35219282/article/details/108593454)  [操作详解](https://blog.csdn.net/weixin_46146269/article/details/108287892)  [复杂导出合并单元格](https://blog.csdn.net/Violet_201903027/article/details/105724907)
 
- 
-
-### 前后端分离 - JWT用户认证
-
-参考：[JWT用户认证](https://www.cnblogs.com/wenqiangit/p/9592132.html)
-
-
-
-**传统方式**
-
-```
-前后端分离通过Restful API进行数据交互时，如何验证用户的登录信息及权限。在原来的项目中，使用的是最传统也是最简单的方式，前端登录，后端根据用户信息生成一个token，并保存这个 token 和对应的用户id到数据库或Session中，接着把 token 传给用户，存入浏览器 cookie，之后浏览器请求带上这个cookie，后端根据这个cookie值来查询用户，验证是否过期。
-
-但这样做问题就很多，如果我们的页面出现了 XSS 漏洞，由于 cookie 可以被 JavaScript 读取，XSS 漏洞会导致用户 token 泄露，而作为后端识别用户的标识，cookie 的泄露意味着用户信息不再安全。尽管我们通过转义输出内容，使用 CDN 等可以尽量避免 XSS 注入，但谁也不能保证在大型的项目中不会出现这个问题。
-```
-
-
-
 
 
 ### Restful风格
@@ -1238,118 +1220,6 @@ this.lr.peopleData.push(...newUser)
 ### 过滤器与拦截器的区别
 
 参考：[过滤器与拦截器的区别](https://blog.csdn.net/zxd1435513775/article/details/80556034)
-
-
-
-### Session共享
-
-> cookie受域名限制；子域名共享：JSSESSIONID存放在父域名下（SpringSession更方便解决）
-
-> 1. 客户端cookie存储信息（不安全，传输受限制）
-> 2. 服务端tomcat配置session共享（内存限制，10个用户各自1G，100台tomcat，每个tomcat存100G）
-> 3. nginx配置hash一致性（固定IP访问固定服务器，服务器压力不平衡，某台服务器宕机，则无法访问）
-> 4. redis存储（安全，可扩展，tomcat宕机也没问题，但会增加一次网络调用，修改代码，SpringSession可以解决：JSSESSIONID放在redis中，作用域为父域名下）
-> 5. token+redis（最佳解决方案，不属于session共享，属于下方的单点登录）
-
-
-
-> spring-session
-
-> 1. ```xml
->    <!-- spring-session  -->
->    <dependency>
->        <groupId>org.springframework.session</groupId>
->        <artifactId>spring-session-data-redis</artifactId>
->    </dependency>
->    ```
->
-> 2. ```yml
->    # spring-session整合
->    spring: 
->      session:
->        store-type: redis
->    ```
->
-> 3. ```java
->    // 开启redis 存储session
->    @EnableRedisHttpSession
->    public class Application {
->        public static void main(String[] args) {
->            SpringApplication.run(Application.class, args);
->        }
->    }
->    ```
->
-> 4. ```java
->    /**
->     * @Author: Cai Peishen
->     * @Date: 2021/3/11 22:41
->     * @Description: 配置cookie作用域和持久化
->     **/
->    @Configuration
->    public class MySessionConfig {
->    
->        @Bean
->        public CookieSerializer cookieSerializer(){
->            DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->            // 明确的指定Cookie的作用域
->            cookieSerializer.setDomainName("gulimall.com");
->            cookieSerializer.setCookieName("GULIMALL_SESSION");
->            return cookieSerializer;
->        }
->    
->        /**
->         * 自定义序列化机制
->         * 这里方法名必须是：springSessionDefaultRedisSerializer
->         */
->        @Bean
->        public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
->            return new GenericJackson2JsonRedisSerializer();
->        }
->    
->    }
->    
->    ```
-
-
-
-### 单点登录
-
-参考：[单点登录](https://www.jianshu.com/p/75edcc05acfd)
-
-> Token+Redis流程
-
-> 1. 每次访问服务端，需要携带token，没有token，提示登陆
-> 2. 登陆过后，生成token，设置存活时间，存放在redis中，并且返回前端
-> 3. 下次发请求再携带token，从redis取数据，校验是否有效，有效则进行下方操作
-
-
-
-> SSO流程
-
-> 1. 用户访问app系统，app系统是需要登录的，但用户现在没有登录。
->
-> 2. 跳转到CAS server，即SSO登录系统，以后图中的CAS Server我们统一叫做SSO系统。 SSO系统也没有登录，弹出用户登录页。
->
-> 3. 用户填写用户名、密码，SSO系统进行认证后，将登录状态写入SSO的session，浏览器（Browser）中写入SSO域下的Cookie。
->
-> 4. SSO系统登录完成后会生成一个ST（Service Ticket），然后跳转到app系统，同时将ST作为参数传递给app系统。
->
-> 5. app系统拿到ST后，从后台向SSO发送请求，验证ST是否有效。
->
-> 6. 验证通过后，app系统将登录状态写入session并设置app域下的Cookie。
->
->    
->
->    至此，跨域单点登录就完成了。以后我们再访问app系统时，app就是登录的。接下来，我们再看看访问app2系统时的流程。
->
->    
->
-> 1. 用户访问app2系统，app2系统没有登录，跳转到SSO。
-> 2. 由于SSO已经登录了，不需要重新登录认证。
-> 3. SSO生成ST，浏览器跳转到app2系统，并将ST作为参数传递给app2。
-> 4. app2拿到ST，后台访问SSO，验证ST是否有效。
-> 5. 验证成功后，app2将登录状态写入session，并在app2域下写入Cookie。
 
 
 
@@ -1746,6 +1616,10 @@ fun2();
 
 
 
+
+
+
+
 ### 阿里云OSS 云存储
 
 参考：[阿里云](https://www.aliyun.com/ )  [学习路径](https://help.aliyun.com/learn/learningpath/oss.html?spm=5176.7933691.1309819.8.7f392a66swxJkC&aly_as=3eLSnC9NS)
@@ -1905,15 +1779,112 @@ public R policy() {
 
 
 
-### 阿里云短信验证
+### Session共享
 
-参考：[阿里云](https://www.aliyun.com/ )  
+> cookie受域名限制；子域名共享：JSSESSIONID存放在父域名下（SpringSession更方便解决）
+
+> 1. 客户端cookie存储信息（不安全，传输受限制）
+> 2. 服务端tomcat配置session共享（内存限制，10个用户各自1G，100台tomcat，每个tomcat存100G）
+> 3. nginx配置hash一致性（固定IP访问固定服务器，服务器压力不平衡，某台服务器宕机，则无法访问）
+> 4. redis存储（安全，可扩展，tomcat宕机也没问题，但会增加一次网络调用，修改代码，SpringSession可以解决：JSSESSIONID放在redis中，作用域为父域名下）
+> 5. token+redis（最佳解决方案，不属于session共享，属于下方的单点登录）
 
 
 
-### 阿里云ICON
+#### spring-session
 
-参考：[阿里云ICON](https://www.iconfont.cn/)
+> 1. ```xml
+>    <!-- spring-session  -->
+>    <dependency>
+>     <groupId>org.springframework.session</groupId>
+>     <artifactId>spring-session-data-redis</artifactId>
+>    </dependency>
+>    ```
+>
+> 2. ```yml
+>    # spring-session整合
+>    spring: 
+>      session:
+>        store-type: redis
+>    ```
+>
+> 3. ```java
+>    // 开启redis 存储session
+>    @EnableRedisHttpSession
+>    public class Application {
+>     public static void main(String[] args) {
+>         SpringApplication.run(Application.class, args);
+>     }
+>    }
+>    ```
+>
+> 4. ```java
+>    /**
+>        * @Author: Cai Peishen
+>        * @Date: 2021/3/11 22:41
+>        * @Description: 配置cookie作用域和持久化
+>     **/
+>    @Configuration
+>    public class MySessionConfig {
+>        @Bean
+>        public CookieSerializer cookieSerializer(){
+>            DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+>            // 明确的指定Cookie的作用域
+>            cookieSerializer.setDomainName("gulimall.com");
+>            cookieSerializer.setCookieName("GULIMALL_SESSION");
+>            return cookieSerializer;
+>        }
+>    
+>        /**
+>            * 自定义序列化机制
+>            * 这里方法名必须是：springSessionDefaultRedisSerializer
+>         */
+>        @Bean
+>        public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
+>            return new GenericJackson2JsonRedisSerializer();
+>        }
+>    }
+>    ```
+
+
+
+### 单点登录
+
+参考：[单点登录](https://www.jianshu.com/p/75edcc05acfd)
+
+#### Token+Redis流程
+
+> 1. 每次访问服务端，需要携带token，没有token，提示登陆
+> 2. 登陆过后，生成token，设置存活时间，存放在redis中，并且返回前端
+> 3. 下次发请求再携带token，从redis取数据，校验是否有效，有效则进行下方操作
+
+
+
+#### SSO流程
+
+> 1. 用户访问app系统，app系统是需要登录的，但用户现在没有登录。
+>
+> 2. 跳转到CAS server，即SSO登录系统，以后图中的CAS Server我们统一叫做SSO系统。 SSO系统也没有登录，弹出用户登录页。
+>
+> 3. 用户填写用户名、密码，SSO系统进行认证后，将登录状态写入SSO的session，浏览器（Browser）中写入SSO域下的Cookie。
+>
+> 4. SSO系统登录完成后会生成一个ST（Service Ticket），然后跳转到app系统，同时将ST作为参数传递给app系统。
+>
+> 5. app系统拿到ST后，从后台向SSO发送请求，验证ST是否有效。
+>
+> 6. 验证通过后，app系统将登录状态写入session并设置app域下的Cookie。
+>
+> 
+>
+> 至此，跨域单点登录就完成了。以后我们再访问app系统时，app就是登录的。接下来，我们再看看访问app2系统时的流程。
+>
+> 
+>
+> 1. 用户访问app2系统，app2系统没有登录，跳转到SSO。
+> 2. 由于SSO已经登录了，不需要重新登录认证。
+> 3. SSO生成ST，浏览器跳转到app2系统，并将ST作为参数传递给app2。
+> 4. app2拿到ST，后台访问SSO，验证ST是否有效。
+> 5. 验证成功后，app2将登录状态写入session，并在app2域下写入Cookie。
 
 
 
@@ -2041,42 +2012,6 @@ redirecturl: http://guli.shop/api/ucenter/wx/callback
   第二步：B服务返回token给A服务。
 
 - 使用场景A服务本身需要B服务资源，与用户无关。
-
-
-
-### SSO单点登陆
-
-参考：[springBoot+redis 实现session共享理解，应用场景单点登录](https://blog.csdn.net/qq_33251859/article/details/79972551 )
-
-> 1.session广播
-
-```
-session复制
-```
-
-
-
-> 2.cookie+redis
-
-```
-1.在项目中任何一个模块进行登录，賽录之后，把数据放到两个地方
-(1) redis,在key生成唯一随机值(ip、用户id等等)。在value获取用户数据
-(2) cookie;把redis里面生成key值放到cookie里面
-2、访问项目中其他模块，发送请求带着cookie进行发送。获取cookie值，拿着cookie做事情
-(1)把cookie获取值，到redis进行查询，根据key进行查询，如果查询数据就是登录
-```
-
-
-
-> 3.使用token
-
-```
-token：按照一定规则生成字符串，字符串可以包含用户信息
-1.在项目某个模块进行查录，查录之后，按照规则生成字符串，把登录之后用户包含到生成字符串里面，把字符串返回
-(1)可以把字符串通过cookie返回
-(2)把字符串通过地址栏返回
-2、再去访问项目其他模块，每次访问在地址栏带着生成字符串，在访问模块里面获取地址栏字符串,根据字符串获取用户信息。如何可以获取到，就是登录
-```
 
 
 
