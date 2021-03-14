@@ -1223,6 +1223,10 @@ this.lr.peopleData.push(...newUser)
 
 
 
+过滤器
+
+
+
 ### 异步和同步、非阻塞和阻塞
 
 > 异步和同步、非阻塞和阻塞区别是什么？
@@ -1795,57 +1799,59 @@ public R policy() {
 > 能解决父子域名session问题，不同域名需要使用token
 
 > 1. ```xml
->    <!-- spring-session  -->
->    <dependency>
->     <groupId>org.springframework.session</groupId>
->     <artifactId>spring-session-data-redis</artifactId>
->    </dependency>
->    ```
->
+>   <!-- spring-session  -->
+>   <dependency>
+>    <groupId>org.springframework.session</groupId>
+>    <artifactId>spring-session-data-redis</artifactId>
+>   </dependency>
+>   ```
+> ```
+> 
 > 2. ```yml
->    # spring-session整合
->    spring: 
->      session:
->        store-type: redis
->    ```
+> # spring-session整合
+> spring: 
+>   session:
+>     store-type: redis
+> ```
 >
 > 3. ```java
->    // 开启redis 存储session
->    @EnableRedisHttpSession
->    public class Application {
->     public static void main(String[] args) {
->         SpringApplication.run(Application.class, args);
->     }
+>   // 开启redis 存储session
+>   @EnableRedisHttpSession
+>   public class Application {
+>    public static void main(String[] args) {
+>     SpringApplication.run(Application.class, args);
 >    }
->    ```
->
+>   }
+>   ```
+> ```
+> 
 > 4. ```java
->    /**
+> /**
 >        * @Author: Cai Peishen
 >        * @Date: 2021/3/11 22:41
 >        * @Description: 配置cookie作用域和持久化
->     **/
->    @Configuration
->    public class MySessionConfig {
->        @Bean
->        public CookieSerializer cookieSerializer(){
->            DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->            // 明确的指定Cookie的作用域
->            cookieSerializer.setDomainName("gulimall.com");
->            cookieSerializer.setCookieName("GULIMALL_SESSION");
->            return cookieSerializer;
->        }
->    
->        /**
+>  **/
+> @Configuration
+> public class MySessionConfig {
+>     @Bean
+>     public CookieSerializer cookieSerializer(){
+>         DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+>         // 明确的指定Cookie的作用域
+>         cookieSerializer.setDomainName("gulimall.com");
+>         cookieSerializer.setCookieName("GULIMALL_SESSION");
+>         return cookieSerializer;
+>     }
+> 
+>     /**
 >            * 自定义序列化机制
 >            * 这里方法名必须是：springSessionDefaultRedisSerializer
->         */
->        @Bean
->        public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
->            return new GenericJackson2JsonRedisSerializer();
->        }
->    }
->    ```
+>      */
+>     @Bean
+>     public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
+>         return new GenericJackson2JsonRedisSerializer();
+>     }
+> }
+> ```
 >
 > 5. 核心原理
 >
@@ -1853,7 +1859,7 @@ public R policy() {
 >
 >      1. 给容器中添加了一个组件
 >
->         SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
+>      SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
 >
@@ -1862,7 +1868,7 @@ public R policy() {
 >         + 以后获取session。request.getSession();
 >         + wrappedRequest.getSession( ) -> SessionRepository中获取到的。
 >
->    
+> 
 
 
 
@@ -1870,39 +1876,35 @@ public R policy() {
 
 参考：[单点登录](https://www.jianshu.com/p/75edcc05acfd)
 
-#### Token+Redis流程
-
-> 1. 每次访问服务端，需要携带token，没有token，提示登陆
-> 2. 登陆过后，生成token，设置存活时间，存放在redis中，并且返回前端
-> 3. 下次发请求再携带token，从redis取数据，校验是否有效，有效则进行下方操作
-
 
 
 #### SSO流程
 
-> 1. 用户访问app系统，app系统是需要登录的，但用户现在没有登录。
+>1. client1访问受保护资源，通过token从redis中获取信息(没有token)，也就获取不到
 >
-> 2. 跳转到CAS server，即SSO登录系统，以后图中的CAS Server我们统一叫做SSO系统。 SSO系统也没有登录，弹出用户登录页。
+>2. 这时跳转到ssoserver认证中心，并且携带参数redirect_url(访问client1的url)
 >
-> 3. 用户填写用户名、密码，SSO系统进行认证后，将登录状态写入SSO的session，浏览器（Browser）中写入SSO域下的Cookie。
+>3. 认证中心判断当前是否曾登录过(认证服务中心的cookie[ssoserver.com域名的cookie])，如果没有跳转到登录界面
 >
-> 4. SSO系统登录完成后会生成一个ST（Service Ticket），然后跳转到app系统，同时将ST作为参数传递给app系统。
+>4. 登录完成后，生成token存入redis并跳转到redirect_url(client1)同时拼接参数 ?token=
 >
-> 5. app系统拿到ST后，从后台向SSO发送请求，验证ST是否有效。
+>5. 跳到了client1，然后再通过token从redis获取，发现有，则执行业务
 >
-> 6. 验证通过后，app系统将登录状态写入session并设置app域下的Cookie。
+>6. client2访问受保护资源，通过token从redis中获取信息(没有token，因为上面的步骤token是返回给client1的)，也就获取不到
 >
-> 
+>7. 这时跳转到ssoserver认证中心，并且携带参数redirect_url(访问client2的url)
 >
-> 至此，跨域单点登录就完成了。以后我们再访问app系统时，app就是登录的。接下来，我们再看看访问app2系统时的流程。
+>8. 认证中心判断当前是否曾登录过(认证服务中心的cookie[ssoserver.com域名的cookie])，如果没有跳转到登录界面，如果有则表示曾登陆过，再通过cookie从redis中获取，获取到则表示没有过期
 >
-> 
+>9. 再跳转到client2同时拼接参数 ?token
 >
-> 1. 用户访问app2系统，app2系统没有登录，跳转到SSO。
-> 2. 由于SSO已经登录了，不需要重新登录认证。
-> 3. SSO生成ST，浏览器跳转到app2系统，并将ST作为参数传递给app2。
-> 4. app2拿到ST，后台访问SSO，验证ST是否有效。
-> 5. 验证成功后，app2将登录状态写入session，并在app2域下写入Cookie。
+>   
+>
+>核心： 
+>
+>	1. 给登录服务器留下登录痕迹 
+> 	2. 登录服务器重定向url的时候，要将token信息带上 
+> 	3. 其他系统要处理url上的关键token，去redis验证得到登录的信息
 
 
 
