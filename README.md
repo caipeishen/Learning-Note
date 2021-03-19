@@ -2668,6 +2668,12 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 
 
+### IDEA安装插件时搜索不到
+
+参考：[IDEA安装插件时搜索不到,一直在转圈刷新,无法安装](https://blog.csdn.net/qq_41170600/article/details/108537715)
+
+
+
 ### Sublime Text3乱码问题
 
 参考：[Sublime Text3乱码问题](https://jingyan.baidu.com/article/eb9f7b6d4fe666869264e844.html)
