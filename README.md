@@ -1094,6 +1094,16 @@ private List<CategoryEntity> getChildrens(CategoryEntity root,List<CategoryEntit
 
 
 
+> GitHub访问慢
+
+> 1. 打开hosts文件：C:\Windows\System32\drivers\etc\hosts
+> 2. 用记事本等打开都行.粘贴代码保存即可(140.82.112.3 github.com)  [查询域名对应的 IP 地址](https://www.ipaddress.com/) 
+> 3. 刷新DNS缓存(ipconfig /flushdns)
+
+
+
+
+
 ### 时间转换多少分钟前、几天前
 
 ```js
@@ -1801,28 +1811,32 @@ public R policy() {
 > 1. ```xml
 >   <!-- spring-session  -->
 >   <dependency>
->    <groupId>org.springframework.session</groupId>
->    <artifactId>spring-session-data-redis</artifactId>
+>   <groupId>org.springframework.session</groupId>
+>   <artifactId>spring-session-data-redis</artifactId>
 >   </dependency>
 >   ```
 > ```
 > 
-> 2. ```yml
-> # spring-session整合
-> spring: 
->   session:
->     store-type: redis
 > ```
 >
+> 2. ```yml
+>    
+>    ```
+> # spring-session整合
+> spring: 
+> session:
+>  store-type: redis
+> ```
+> 
 > 3. ```java
->   // 开启redis 存储session
->   @EnableRedisHttpSession
->   public class Application {
->    public static void main(String[] args) {
->     SpringApplication.run(Application.class, args);
->    }
->   }
->   ```
+> // 开启redis 存储session
+> @EnableRedisHttpSession
+> public class Application {
+> public static void main(String[] args) {
+>  SpringApplication.run(Application.class, args);
+> }
+> }
+> ```
 > ```
 > 
 > 4. ```java
@@ -1830,26 +1844,26 @@ public R policy() {
 >        * @Author: Cai Peishen
 >        * @Date: 2021/3/11 22:41
 >        * @Description: 配置cookie作用域和持久化
->  **/
+> **/
 > @Configuration
 > public class MySessionConfig {
->     @Bean
->     public CookieSerializer cookieSerializer(){
->         DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->         // 明确的指定Cookie的作用域
->         cookieSerializer.setDomainName("gulimall.com");
->         cookieSerializer.setCookieName("GULIMALL_SESSION");
->         return cookieSerializer;
->     }
+>  @Bean
+>  public CookieSerializer cookieSerializer(){
+>      DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+>      // 明确的指定Cookie的作用域
+>      cookieSerializer.setDomainName("gulimall.com");
+>      cookieSerializer.setCookieName("GULIMALL_SESSION");
+>      return cookieSerializer;
+>  }
 > 
->     /**
+>  /**
 >            * 自定义序列化机制
 >            * 这里方法名必须是：springSessionDefaultRedisSerializer
->      */
->     @Bean
->     public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
->         return new GenericJackson2JsonRedisSerializer();
->     }
+>   */
+>  @Bean
+>  public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
+>      return new GenericJackson2JsonRedisSerializer();
+>  }
 > }
 > ```
 >
@@ -1859,10 +1873,10 @@ public R policy() {
 >
 >      1. 给容器中添加了一个组件
 >
->      SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
+>   SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->
+>     
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
