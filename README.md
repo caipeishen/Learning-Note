@@ -2674,6 +2674,12 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 
 
+### IDEA格式化代码
+
+参考：[IDEA格式化代码](https://jingyan.baidu.com/article/17bd8e529d627185ab2bb8eb.html) save-action
+
+
+
 ### Sublime Text3乱码问题
 
 参考：[Sublime Text3乱码问题](https://jingyan.baidu.com/article/eb9f7b6d4fe666869264e844.html)
