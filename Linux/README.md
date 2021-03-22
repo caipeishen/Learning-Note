@@ -132,6 +132,10 @@ tail -99f text.txt
 
 #查看所有的网络服务
 netstat -anp | more
+#window查看端口
+netstat -ano | findstr 9000
+#window查看进程
+tasklist | findstr 19796
 
 #网络服务tcp，udp的端口和进程等相关情况
 netstat -tunplp
