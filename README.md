@@ -1819,13 +1819,15 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 > # spring-session整合
 > spring: 
 > session:
->  store-type: redis
+> store-type: redis
 > ```
 > 
 > 3. ```java
@@ -1833,7 +1835,7 @@ public R policy() {
 > @EnableRedisHttpSession
 > public class Application {
 > public static void main(String[] args) {
->  SpringApplication.run(Application.class, args);
+> SpringApplication.run(Application.class, args);
 > }
 > }
 > ```
@@ -1847,23 +1849,23 @@ public R policy() {
 > **/
 > @Configuration
 > public class MySessionConfig {
->  @Bean
->  public CookieSerializer cookieSerializer(){
->      DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->      // 明确的指定Cookie的作用域
->      cookieSerializer.setDomainName("gulimall.com");
->      cookieSerializer.setCookieName("GULIMALL_SESSION");
->      return cookieSerializer;
->  }
+> @Bean
+> public CookieSerializer cookieSerializer(){
+>   DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+>   // 明确的指定Cookie的作用域
+>   cookieSerializer.setDomainName("gulimall.com");
+>   cookieSerializer.setCookieName("GULIMALL_SESSION");
+>   return cookieSerializer;
+> }
 > 
->  /**
+> /**
 >            * 自定义序列化机制
 >            * 这里方法名必须是：springSessionDefaultRedisSerializer
->   */
->  @Bean
->  public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
->      return new GenericJackson2JsonRedisSerializer();
->  }
+> */
+> @Bean
+> public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
+>   return new GenericJackson2JsonRedisSerializer();
+> }
 > }
 > ```
 >
@@ -1873,10 +1875,10 @@ public R policy() {
 >
 >      1. 给容器中添加了一个组件
 >
->   SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
+> SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->     
+>      
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2628,58 +2630,6 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 
 
-### SQL执行顺序
-
-参考：[SQL执行顺序](https://www.cnblogs.com/xqzt/p/4972789.html)
-
-```
-FROM
-ON
-JOIN
-WHERE
-GROUP BY
-WITH CUBE or WITH ROLLUP
-HAVING
-SELECT
-DISTINCT
-ORDER BY
-TOP
-```
-
-
-
-### 疑难杂症
-
-> 如果导入了nacos的配置中心，需要进行nacos.config配置，不然会报错，但不影响程序运行
-
-
-
-> spring-boot-data-redis 可能出现的堆外内存移除
-
-```
-产生堆外内存溢出:OutOfDirectMemoryError 
-
-springboot2.0以后默认使用Lettuce作为操作redis的客户端。它使用netty进行网络通信
-lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆外内存，默认使用-Xm×300m 可以通过-Dio.netty.maxDirectMemory进行设置
-解决方案:不能使用-Dio.netty.maxDirectMemory只去调大堆外内存。
-  升级Lettuce客户端
-  切换使用jedis
-```
-
-
-
-### IDEA安装插件时搜索不到
-
-参考：[IDEA安装插件时搜索不到,一直在转圈刷新,无法安装](https://blog.csdn.net/qq_41170600/article/details/108537715)
-
-
-
-### IDEA格式化代码
-
-参考：[IDEA格式化代码](https://jingyan.baidu.com/article/17bd8e529d627185ab2bb8eb.html) save-action
-
-
-
 ### Sublime Text3乱码问题
 
 参考：[Sublime Text3乱码问题](https://jingyan.baidu.com/article/eb9f7b6d4fe666869264e844.html)
@@ -2703,7 +2653,7 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 > 新建sublime_addright.reg文件 编辑后双击打开就OK 
 >
->  注意：括号内是**C:\\**开头是安装路径，**Sublime Text3** 是提示文字 
+> 注意：括号内是**C:\\**开头是安装路径，**Sublime Text3** 是提示文字 
 
 ```
 Windows Registry Editor Version 5.00
@@ -2718,6 +2668,87 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Directory\shell\SublimeText3\command]
 @="C:\Program Files\Sublime Text 3\sublime_text.exe %1"
 ```
+
+
+
+
+
+
+
+### 疑难杂症
+
+> 如果导入了nacos的配置中心，需要进行nacos.config配置，不然会报错，但不影响程序运行
+
+
+
+#### spring-boot-data-redis 
+
+#### 可能出现的堆外内存移除
+
+```
+产生堆外内存溢出:OutOfDirectMemoryError 
+
+springboot2.0以后默认使用Lettuce作为操作redis的客户端。它使用netty进行网络通信
+lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆外内存，默认使用-Xm×300m 可以通过-Dio.netty.maxDirectMemory进行设置
+解决方案:不能使用-Dio.netty.maxDirectMemory只去调大堆外内存。
+  升级Lettuce客户端
+  切换使用jedis
+```
+
+
+
+#### Feign远程调用丢失请求头问题
+
+![](/images/Feign远程调用丢失请求头问题.png)
+
+
+
+> 加上feign远程调用的请求拦截
+
+![](/images/Feign远程调用丢失请求头解决方案.png)
+
+```java
+/**
+ * @Author: Cai Peishen
+ * @Date: 2021/3/23 11:02
+ * @Description: 解决openfeign丢失请求头
+ */
+@Configuration
+public class GuliFeignConfig {
+	@Bean("requestInterceptor")
+	public RequestInterceptor requestInterceptor(){
+		// Feign在远程调用之前都会先经过这个方法
+		return new RequestInterceptor() {
+			@Override
+			public void apply(RequestTemplate template) {
+				// RequestContextHolder拿到刚进来这个请求
+				ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+				if(attributes != null){
+					HttpServletRequest request = attributes.getRequest(); // 老请求
+					if(request != null){
+						// 同步请求头数据
+						String cookie = request.getHeader("Cookie");
+						// 给新请求同步Cookie
+						template.header("Cookie", cookie);
+					}
+				}
+			}
+		};
+	}
+}
+```
+
+
+
+### IDEA安装插件时搜索不到
+
+参考：[IDEA安装插件时搜索不到,一直在转圈刷新,无法安装](https://blog.csdn.net/qq_41170600/article/details/108537715)
+
+
+
+### IDEA格式化代码
+
+参考：[IDEA格式化代码](https://jingyan.baidu.com/article/17bd8e529d627185ab2bb8eb.html) save-action
 
 
 

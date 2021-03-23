@@ -551,6 +551,49 @@ logging:
 
 
 
+#### Feign远程调用丢失请求头问题
+
+![](/images/Fegin远程调用丢失请求头问题.png)
+
+
+
+> 加上feign远程调用的请求拦截
+
+![](/images/Feign远程调用丢失请求头解决方案.png)
+
+```java
+/**
+ * @Author: Cai Peishen
+ * @Date: 2021/3/23 11:02
+ * @Description: 解决openfeign丢失请求头
+ */
+@Configuration
+public class GuliFeignConfig {
+	@Bean("requestInterceptor")
+	public RequestInterceptor requestInterceptor(){
+		// Feign在远程调用之前都会先经过这个方法
+		return new RequestInterceptor() {
+			@Override
+			public void apply(RequestTemplate template) {
+				// RequestContextHolder拿到刚进来这个请求
+				ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+				if(attributes != null){
+					HttpServletRequest request = attributes.getRequest(); // 老请求
+					if(request != null){
+						// 同步请求头数据
+						String cookie = request.getHeader("Cookie");
+						// 给新请求同步Cookie
+						template.header("Cookie", cookie);
+					}
+				}
+			}
+		};
+	}
+}
+```
+
+
+
 ### Hystrix断路器
 
 > Hystrix是一个用于处理分布式系统的延迟和容错的开源库,在分布式系统里,许多依赖不可避免的会调用失败,比如超时、异常等，Hystrix能够保证在一个依赖出问题的情况下，不会导致整体服务失败,避免级联故障,以提高分布式系统的弹性。

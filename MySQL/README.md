@@ -272,6 +272,8 @@ mysql> show variables like 'default_storage_engine%';
 
 # 5.SQL执行顺序
 
+参考：[SQL执行顺序](https://www.cnblogs.com/xqzt/p/4972789.html)
+
 ```shell
 select              # 5
 	... 
@@ -289,6 +291,8 @@ limit               # 7
 	[offset]
 
 ```
+
+
 
 # 6.七种JOIN理论
 
