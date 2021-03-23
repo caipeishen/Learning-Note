@@ -95,18 +95,6 @@ public class SingleTon{
 
 
 
-### Git
-
-参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)   [配置SSH](https://blog.csdn.net/fighting_tl/article/details/76009639)
-
-
-
-### IDEA修改java文件后 不用重启Tomcat服务便可自动更新
-
-参考：[IDEA修改java文件后 不用重启Tomcat服务便可自动更新](https://blog.csdn.net/u010865136/article/details/80392212)  [TortoiseGit的ssh key和Git的ssh key](https://www.cnblogs.com/achigwwblog/p/8204572.html)
-
-
-
 ### CRM与ERP
 
 参考：[CRM与ERP](http://baijiahao.baidu.com/s?id=1653409772927548267&wfr=spider&for=pc)
@@ -1071,7 +1059,7 @@ private List<CategoryEntity> getChildrens(CategoryEntity root,List<CategoryEntit
 
 ### Git
 
-参考：[如何理解集中式与分布式](https://blog.csdn.net/weixin_42476601/article/details/82290902)   [Git vs SVN 与Git命令](https://www.cnblogs.com/qcloud1001/archive/2018/10/31/9884576.html) [GitHub访问慢](https://blog.csdn.net/bowei026/article/details/107106503/)
+参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)   [配置SSH](https://blog.csdn.net/fighting_tl/article/details/76009639) [如何理解集中式与分布式](https://blog.csdn.net/weixin_42476601/article/details/82290902)   [Git vs SVN 与Git命令](https://www.cnblogs.com/qcloud1001/archive/2018/10/31/9884576.html) [GitHub访问慢](https://blog.csdn.net/bowei026/article/details/107106503/)Git
 
 .git目录中的config文件
 
@@ -1821,70 +1809,78 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > 2. ```yml
-> 
+>    
+>    ```
+>
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
-> 
+>
 > 3. ```java
-> // 开启redis 存储session
-> @EnableRedisHttpSession
-> public class Application {
-> public static void main(String[] args) {
-> SpringApplication.run(Application.class, args);
-> }
-> }
-> ```
+>   // 开启redis 存储session
+>   @EnableRedisHttpSession
+>   public class Application {
+>   public static void main(String[] args) {
+>   SpringApplication.run(Application.class, args);
+>   }
+>   }
+>   ```
 > ```
 > 
+> ```
+>
 > 4. ```java
-> /**
->        * @Author: Cai Peishen
->        * @Date: 2021/3/11 22:41
->        * @Description: 配置cookie作用域和持久化
-> **/
-> @Configuration
-> public class MySessionConfig {
-> @Bean
-> public CookieSerializer cookieSerializer(){
+>   /**
+>       * @Author: Cai Peishen
+>       * @Date: 2021/3/11 22:41
+>       * @Description: 配置cookie作用域和持久化
+>   **/
+>   @Configuration
+>   public class MySessionConfig {
+>   @Bean
+>   public CookieSerializer cookieSerializer(){
 >   DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
 >   // 明确的指定Cookie的作用域
 >   cookieSerializer.setDomainName("gulimall.com");
 >   cookieSerializer.setCookieName("GULIMALL_SESSION");
 >   return cookieSerializer;
-> }
-> 
+>   }
+>   ```
+>
 > /**
 >            * 自定义序列化机制
 >            * 这里方法名必须是：springSessionDefaultRedisSerializer
 > */
 > @Bean
 > public RedisSerializer<Object> springSessionDefaultRedisSerializer(){
->   return new GenericJackson2JsonRedisSerializer();
+> return new GenericJackson2JsonRedisSerializer();
 > }
 > }
 > ```
->
+> 
 > 5. 核心原理
->
+> 
 >    + @EnableRedisHttpSession导入RedisHttpSessionConfiguration配置
->
+> 
 >      1. 给容器中添加了一个组件
->
+> 
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
->
+> 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->      
+>   
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
 >         + wrappedRequest.getSession( ) -> SessionRepository中获取到的。
->
 > 
+> 
+> ```
 
 
 
@@ -2752,7 +2748,9 @@ public class GuliFeignConfig {
 
 
 
+### IDEA修改java文件后 不用重启Tomcat服务便可自动更新
 
+参考：[IDEA修改java文件后 不用重启Tomcat服务便可自动更新](https://blog.csdn.net/u010865136/article/details/80392212)  [TortoiseGit的ssh key和Git的ssh key](https://www.cnblogs.com/achigwwblog/p/8204572.html)
 
 
 
