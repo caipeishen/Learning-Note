@@ -21,91 +21,95 @@ RabbitMQ严格的遵循AMQP协议，高级消息队列协议，帮助我们在�
 
 
 
+#### 使用RabbitMQ
+
+> 1. 引入pom，RabbitAutoConfiguration就会自动生效
+>
+>    ```xml
+>    <!-- AMQP -->
+>    <dependency>
+>        <groupId>org.springframework.boot</groupId>
+>        <artifactId>spring-boot-starter-amqp</artifactId>
+>    </dependency>
+>    ```
+>
+> 2. 给容器中自动配置了
+>
+>    RabbitTemplate、AmqpAdmin、CachingConnectionFactory、RabbitlessagingTemplate;
+>
+>    所有的属性都是 spring.rabbitmq
+>    @ConfigurationProperties(prefix = "spring.rabbitmq")
+>
+>    pubLic class RabbitProperties{ }
+>
+> 3. 给配置文件配置 spring.rabbitmq 信息
+>
+>    ```yml
+>    # rabbitMQ
+>    spring:
+>      rabbitmq:
+>        host: 192.168.181.130
+>        port: 5672
+>        virtual-host: /
+>        username: guest
+>        password: guest
+>    ```
+>
+> 4. @EnbaleRabbit：开启监听功能
+>
+>    ```java
+>    @EnableRabbit
+>    public class Application {
+>    
+>    }
+>    ```
+>
+> 5. 自定义序列化
+>
+>    ```java
+>    @Slf4j
+>    @Configuration
+>    public class MyRabbitConfig {
+>        // 序列化配置
+>        @Bean
+>        public MessageConverter messageConverter() {
+>            return new Jackson2JsonMessageConverter();
+>        }
+>    }
+>    ```
+>
+>    
+>
+> 6. 监听消息：使用@RabbitListener；必须有@EnableRabbit
+>
+>    @RabbitListener：类+方法上（监听那些队列）
+>
+>    @RabbitHandler：标在方法上（重载区分不同的方法）
+>
+>    监听消息，使用@RabbitListener：必须有@EnableRabbit
+
+
+
+
+
 #### Exchange类型
 
-```
-Direct Exchange 路由模式：默认类型，根据路由键（Routing Key）将消息投递给对应队列。
-Topic Exchange 通配符模式：通过对消息的路由键（Routing Key）和绑定到交换机的队列，将消息路由给队列。符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
-Fanout Exchange 发布/订阅：将消息路由给绑定到它身上的所有队列，而不理会绑定的路由键（Routing Key）。
-Headers Exchange 直连交换机：发送消息时匹配 Header 而非 Routing Key，性能很差，几乎不用。
-```
+> + Headers Exchange 直连交换机：发送消息时匹配 Header 而非 Routing Key，性能很差，几乎不用
+> + Direct Exchange 路由模式：默认类型，根据路由键（Routing Key）将消息投递给对应队列
+> + Topic Exchange 通配符模式：通过对消息的路由键（Routing Key）和绑定到交换机的队列，将消息路由给队列。符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
+> + Fanout Exchange 发布/订阅：将消息路由给绑定到它身上的所有队列，而不理会绑定的路由键（Routing Key）
 
 
 
 #### 消息可靠性
 
-```
-1.消费者在消费消息时，如果执行一般，消费者宕机了怎么办?手动ACK。
-2.如果消息已经到达了RabbitMQ，但是RabbitMQ宕机了，消息是不是就丢了?Exchange、消息、Queue有持久化机制。
-3.生产者发送消息时，由于网络问题，导致消息没发送到RabbitMQ? RabbitMQ提供了事务操作，和Confirm(生产者发送消息到exchange)
-4.exchange→queue Return机制(捕捉丢失的消息)
-```
-
-
-
-##### Ack
+![](/images/RabbitMQ确认机制.png)
 
 ```
-只需要在消费者端，添加Qos能力以及更改为手动ack即可让消费者，
-根据自己的能力去消费指定的消息，而不是默认情况下由RabbitMQ平均分配了
-生产者不变，正常发布消息到默认的exchange，并指定routing
-```
-
-> 消费者指定Qos和手动ack
-
-```java
-//指定当前消费者，一次消费多少个消息
-channel.basicQos(1);
-//开启监听Queue
-DefaultConsumer consume = new DefaultConsumer(channel){
-    @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-        Jedis jedis = new Jedis("192.168.199.109",6379);
-        String messageId = properties.getMessageId();
-        //1. setnx到Redis中，默认指定value-0
-        String result = jedis.set(messageId, "0", "NX", "EX", 10);
-        if(result != null && result.equalsIgnoreCase("OK")) {
-            System.out.println("接收到消息：" + new String(body, "UTF-8"));
-            //2. 消费成功，set messageId 1
-            jedis.set(messageId,"1");
-            channel.basicAck(envelope.getDeliveryTag(),false);
-        }else {
-            //3. 如果1中的setnx失败，获取key对应的value，如果是0，return，如果是1
-            String s = jedis.get(messageId);
-            if("1".equalsIgnoreCase(s)){
-                channel.basicAck(envelope.getDeliveryTag(),false);
-            }
-        }
-    }
-};
-//手动ack
-//参数1：queue - 指定消费哪个队列
-//参数2：autoAck - 指定是否自动ACK （true，接收到消息后，会立即告诉RabbitMQ）
-//参数3：consumer - 指定消费回调
-channel.basicConsume("HelloWorld",false,consume);
-```
-
-
-
->SpringBoot手动Ack
-
-```yml
-//配置文件
-spring:
-  rabbitmq:
-    listener:
-    simple:
-      acknowledge-mode: manual
-```
-
-```java
-//手动ack
-@RabbitListener(queues = "boot-queue")
-public void getMessage(String msg, Channel channel, Message message) throws IOException {
-    System.out.println("接收到消息：" + msg);
-    //手动ack
-    channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
-}
+持久化：如果消息已经到达了RabbitMQ，但是RabbitMQ宕机了，消息是不是就丢了?Exchange、消息、Queue有持久化机制。
+confirm：生产者发送消息时，由于网络问题，导致消息没发送到RabbitMQ? RabbitMQ提供了事务操作，和Confirm(生产者发送消息到exchange)
+return：exchange→queue Return机制(捕捉丢失的消息)
+ACK：消费者在消费消息时，如果执行一般，消费者宕机了怎么办?手动ACK。
 ```
 
 
@@ -122,66 +126,115 @@ RabbitMQ除了事务，还提供了Confirm的确认机制，这个效率比事�
 
 
 
-> 1.普通confirm
+> 消息正确抵达交换机进行回调
 
-```java
-//1.开启confirm
-channel.confirmseleCt();
-//2.判断消息发送是否成功
-if(channel.waitForConfirms(）{
-	System.out.println("消息发送成功"):
-}else{
-	System.out.println("发送消息失败"）;
-}
-```
-
-
-
-> 2.批量confirm
-
-```java
-//1.开启confirm
-channel.confirmSelect();
-//2.批量发送消息
-for (int i = a; i<1000; i++）{
-	String msg ="Hello-World!" + i;
-	channel.basicPublish("","HelloWorld" ,null,msg.getBytes());
-}
-//3.确定批量操作是否成功
-channel.waitForConfirmsOrDie(); //当你发送的全部消息，有一个失败的时候，就直接全部失败抛出异常IOException
-```
-
-
-
-> 3.异步confirm
-
-```java
-//1. 发布消息到exchange
-channel.confirmSelect();
-//2.批量发送消息
-for (int i = a; i<1000; i++）{
-	String msg ="Hello-World!" + i;
-	channe1 .basicPublish("","HelloWorld" ,null,msg.getBytes());
-}
-//3.开启异步回调
-channel.addConfirmListener(new ConfirmListener() {
-    @Override
-    public void handleAck(long deliveryTag, boolean multiple) throws IOException {
-        System.out.println("消息发送成功，标识：" + deliveryTag + ",是否是批量" + multiple);
-    }
-
-    @Override
-    public void handleNack(long deliveryTag, boolean multiple) throws IOException {
-        System.out.println("消息发送失败，标识：" + deliveryTag + ",是否是批量" + multiple);
-    }
-});
-```
+> 1. 开启发送端确认
+>
+>    ```yml
+>    # rabbitMQ
+>    spring:
+>      rabbitmq:
+>        host: 192.168.181.130
+>        port: 5672
+>        virtual-host: /
+>        publisher-confirms: true #发送端确认
+>    ```
+>
+> 2. 设置确认回调(设置消息抵达exchange回调) confirmCallback
+>
+>    ```java
+>    @Slf4j
+>    @Configuration
+>    public class MyRabbitConfig {
+>        
+>        @Autowired
+>        private RabbitTemplate rabbitTemplate;
+>        
+>        /**
+>         * 定制RabbitTemplate
+>         * 1.消息正确抵达交换机进行回调
+>         *      1.spring.rabbitmq.publisher-confirms=true
+>         *      2.设置确认回调(设置消息抵达exchange回调) confirmCallback
+>         */
+>        @PostConstruct // MyRabbitConfig对象创建完成以后，执行这个方法
+>        public void initRabbitTemplate() {
+>            // 设置确认回调
+>            rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+>                /**
+>                 * 1、只要消息抵达Broker就acle=true
+>                 * @param correlationData 当前消息的唯一关联（唯一id）
+>                 * @param ack 消息是否收到
+>                 * @param cause 失败原因
+>                 */
+>                @Override
+>                public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+>                    log.info("confirm...correlationData[{}]==>ack[{}]==>cause[{}]", correlationData, ack, cause);
+>                }
+>            });
+>        }
+>    }
+>    ```
 
 
 
+> spring模式
+
+> 1. 普通confirm
+>
+>    ```java
+>    //1.开启confirm
+>    channel.confirmseleCt();
+>    //2.判断消息发送是否成功
+>    if(channel.waitForConfirms(）{
+>    	System.out.println("消息发送成功"):
+>    }else{
+>    	System.out.println("发送消息失败"）;
+>    }
+>    ```
+>
+> 2. 批量confirm
+>
+>    ```java
+>    //1.开启confirm
+>    channel.confirmSelect();
+>    //2.批量发送消息
+>    for (int i = a; i<1000; i++）{
+>    	String msg ="Hello-World!" + i;
+>    	channel.basicPublish("","HelloWorld" ,null,msg.getBytes());
+>    }
+>    //3.确定批量操作是否成功
+>    channel.waitForConfirmsOrDie(); //当你发送的全部消息，有一个失败的时候，就直接全部失败抛出异常IOException
+>    ```
+>
+> 3. 异步confirm
+>
+>    ```java
+>    //1. 发布消息到exchange
+>    channel.confirmSelect();
+>    //2.批量发送消息
+>    for (int i = a; i<1000; i++）{
+>    	String msg ="Hello-World!" + i;
+>    	channe1 .basicPublish("","HelloWorld" ,null,msg.getBytes());
+>    }
+>    //3.开启异步回调
+>    channel.addConfirmListener(new ConfirmListener() {
+>        @Override
+>        public void handleAck(long deliveryTag, boolean multiple) throws IOException {
+>            System.out.println("消息发送成功，标识：" + deliveryTag + ",是否是批量" + multiple);
+>        }
+>    
+>        @Override
+>        public void handleNack(long deliveryTag, boolean multiple) throws IOException {
+>            System.out.println("消息发送失败，标识：" + deliveryTag + ",是否是批量" + multiple);
+>        }
+>    });
+>    ```
 
 
-##### Return 机制
+
+
+
+##### Return
 
 ```
 解决Exchange到Queue消息丢失
@@ -193,7 +246,51 @@ Confirm只能保证消息到达cxchange，无法保证消息可以被exchange分
 
 
 
-> 开启Return机制，并在发送消息时，指定mandatory为true
+> 消息正确抵达队列进行回调
+
+> 1. 开启Return机制，并在发送消息时，指定mandatory为true
+>
+>    ```yml
+>    spring:
+>      rabbitmq:
+>        publisher-returns: true #开启发送端消息抵达队列的确认
+>        template:
+>          mandatory: true # 只要抵达队列，以异步发送优先回调我们这个returnConfirm
+>    ```
+>
+> 2. 设置返回回调(设置消息抵达queue回调) returnCallback
+>
+>    ```java
+>    /**
+>    * 定制RabbitTemplate
+>    * 2.消息正确抵达队列进行回调
+>    *      1. spring.rabbitmq.publisher-returns=true、spring.rabbitmq.template.mandatory=true
+>    *      2.设置返回回调(设置消息抵达queue回调) returnCallback
+>    */
+>    @PostConstruct // MyRabbitConfig对象创建完成以后，执行这个方法
+>    public void initRabbitTemplate() {
+>        // 设置消息抵达queue回调
+>        this.rabbitTemplate.setReturnCallback(new RabbitTemplate.ReturnCallback() {
+>            /**
+>                 * 只要消息没有投递给指定的队列,就触发这个失败回调
+>                 * @param message 投递失败的消息详细信息
+>                 * @param replyCode 回复状态吗
+>                 * @param replyText 回复文本内容
+>                 * @param exchange 当时消息发给哪个交换机
+>                 * @param routingKey 当时消息用哪个路由键
+>                 */
+>            @Override
+>            public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
+>                log.info("Fail...message[{}]==>replyCode[{}]==>replyText[{}]==>exchange[{}]==>routingKey[{}]", message, replyCode, replyText, exchange, routingKey);
+>            }
+>        });
+>    
+>    }
+>    ```
+
+
+
+> spring模式，开启Return机制，并在发送消息时，指定mandatory为true
 
 ```java
 // 开启return机制
@@ -210,46 +307,114 @@ channel.basicPublish("","HelloWorld",true,properties,msg.getBytes());
 
 
 
-> SpringBoot实现Return机制
 
-```yml
-spring:
-  rabbitmq:
-    publisher-confirm-type: simple
-    publisher-returns: true
-```
 
-```java
-//开启Confirm和Return
-
-@Component
-public class PublisherConfirmAndReturnConfig implements RabbitTemplate.ConfirmCallback ,RabbitTemplate.ReturnCallback {
-
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @PostConstruct  // init-method
-    public void initMethod(){
-        rabbitTemplate.setConfirmCallback(this);
-        rabbitTemplate.setReturnCallback(this);
-    }
-
-    @Override
-    public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-        if(ack){
-            System.out.println("消息已经送达到Exchange");
-        }else{
-            System.out.println("消息没有送达到Exchange");
-        }
-    }
-
-    @Override
-    public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
-        System.out.println("消息没有送达到Queue");
-    }
-}
+##### Ack
 
 ```
+解决Queue到消费者消息丢失
+```
+
+
+
+> 消费端确认（保证每个消息被正确消费，此时才可以broker删除这个消息）
+
+> 1. 开启手动确认消息机制(默认自动确认)
+>
+>    ```yml
+>    spring:
+>      rabbitmq:
+>        listener:
+>          direct:
+>            acknowledge-mode: manual # 手动ack确认消息
+>    ```
+>
+> 2. 如何签收:
+>
+>    1. 签收: channel.basicAck(deliveryTag, false);
+>    2. 拒签: channel.basicNack(deliveryTag, false,true);
+>
+>    ```java
+>    @RabbitListener(queues = { MyRabbitConfig.queue })
+>    @Service("orderItemService")
+>    public class OrderItemServiceImpl {
+>        /**
+>         * 	1.Message message: 原生消息类型 详细信息
+>         * 	2.T<发送消息的类型> OrderEntity orderEntity  [Spring自动帮我们转换]
+>         * 	3.Channel channel: 当前传输数据的通道
+>         *
+>         * 	// 同一个消息只能被一个人收到(这里是DirectExchange)
+>         *
+>         * 	@RabbitListener： 只能标注在类、方法上 配合 @RabbitHandler
+>         * 	@RabbitHandler: 只能标注在方法上 [重载区分不同的消息]
+>         */
+>        @RabbitHandler
+>        public void receiveMessageA(Message message, OrderEntity orderEntity, Channel channel){
+>            System.out.println("接受到消息: " + message + "\n内容：" + orderEntity);
+>            try {
+>                Thread.sleep(200);
+>            } catch (InterruptedException e) { }
+>            // 这个是一个数字 通道内自增
+>            long deliveryTag = message.getMessageProperties().getDeliveryTag();
+>            try {
+>                // 只签收当前货物 不批量签收
+>                channel.basicAck(deliveryTag, false);
+>    
+>                // deliveryTag: 货物的标签  	multiple: 是否批量拒收 requeue: 是否重新入队
+>                //			channel.basicNack(deliveryTag, false,true);
+>                //			批量拒绝
+>                //			channel.basicReject();
+>            } catch (IOException e) {
+>                System.out.println("网络中断");
+>            }
+>            System.out.println(orderEntity.getReceiverName() + " 消息处理完成");
+>        }
+>    }
+>    ```
+
+
+
+
+
+> spring默认，消费者指定Qos和手动ack
+>
+> ```
+> 只需要在消费者端，添加Qos能力以及更改为手动ack即可让消费者，
+> 根据自己的能力去消费指定的消息，而不是默认情况下由RabbitMQ平均分配了
+> 生产者不变，正常发布消息到默认的exchange，并指定routing
+> ```
+>
+> ```java
+> //指定当前消费者，一次消费多少个消息
+> channel.basicQos(1);
+> //开启监听Queue
+> DefaultConsumer consume = new DefaultConsumer(channel){
+>     @Override
+>     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+>         Jedis jedis = new Jedis("192.168.199.109",6379);
+>         String messageId = properties.getMessageId();
+>         //1. setnx到Redis中，默认指定value-0
+>         String result = jedis.set(messageId, "0", "NX", "EX", 10);
+>         if(result != null && result.equalsIgnoreCase("OK")) {
+>             System.out.println("接收到消息：" + new String(body, "UTF-8"));
+>             //2. 消费成功，set messageId 1
+>             jedis.set(messageId,"1");
+>             channel.basicAck(envelope.getDeliveryTag(),false);
+>         }else {
+>             //3. 如果1中的setnx失败，获取key对应的value，如果是0，return，如果是1
+>             String s = jedis.get(messageId);
+>             if("1".equalsIgnoreCase(s)){
+>                 channel.basicAck(envelope.getDeliveryTag(),false);
+>             }
+>         }
+>     }
+> };
+> //手动ack
+> //参数1：queue - 指定消费哪个队列
+> //参数2：autoAck - 指定是否自动ACK （true，接收到消息后，会立即告诉RabbitMQ）
+> //参数3：consumer - 指定消费回调
+> channel.basicConsume("HelloWorld",false,consume);
+> ```
 
 
 
