@@ -110,11 +110,11 @@ User user = (User)class.newInstance();//创建实例
 
 
 
-![](C:/Users/peish/Desktop/Knowledge/images/动态代理有接口情况原理.png)
+![](images/动态代理有接口情况原理.png)
 
 
 
-![](C:/Users/peish/Desktop/Knowledge/images/动态代理没有接口情况原理.png)
+![](images/动态代理没有接口情况原理.png)
 
 
 
