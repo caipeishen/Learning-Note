@@ -184,6 +184,9 @@ public void a() {
 >+ @EnableAspectJAutoProxy;开启aspectj动态代理功能。以后所有的动态代理都是aspectj创建的(即使没有接口也可以动态代理)。
 >
 >+ ```java
+>  // 启动类启用aop代理
+>  @EnableAspectAutoProxy(exposeProxy = true)
+>  
 >  // 引入了aspectj 这样调用本类的service方法事务隔离传播性才生效
 >  OrderServiceImpl orderService = (OrderServiceImpl)AopContext.currentProxy();
 >  orderService.b();

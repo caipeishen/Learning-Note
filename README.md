@@ -1813,26 +1813,30 @@ public R policy() {
 >
 > ```
 > 
-> 2. ```yml
-> 
 > ```
 >
+> 2. ```yml
+>    
+>    ```
+>
+> ```
+> 
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
->
+> 
 > 3. ```java
->   // 开启redis 存储session
->   @EnableRedisHttpSession
->   public class Application {
->   public static void main(String[] args) {
->   SpringApplication.run(Application.class, args);
->   }
->   }
->   ```
+> // 开启redis 存储session
+> @EnableRedisHttpSession
+> public class Application {
+> public static void main(String[] args) {
+> SpringApplication.run(Application.class, args);
+> }
+> }
+> ```
 > ```
 > 
 > ```
@@ -2502,6 +2506,12 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 
 
+### 分布式系统一致性Raft算法
+
+分布式系统中实现一致性的raft算法：[paxos](http://thesecretlivesofdata.com/raft/)
+
+
+
 #### token机制
 
 > 1. 服务端提供了发送token的接口。我们在分析业务的时候，哪些业务是存在幂等问题的，就必须在执行业务前，先去获取token，服务器会把token保存到redis中。
@@ -2705,7 +2715,7 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 ### Sublime Text3乱码问题
 
-参考：[Sublime Text3乱码问题](https://jingyan.baidu.com/article/eb9f7b6d4fe666869264e844.html)
+参考：[Sublime Text3乱码问题](https://blog.csdn.net/yanjiangdi/article/details/77869696)
 
 
 
