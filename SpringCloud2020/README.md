@@ -2360,6 +2360,12 @@ feign:
 
 
 
+#### sentinel限流集成与使用-gateway限流篇
+
+参考：[限流集成与使用-gateway限流篇](https://blog.csdn.net/u013078871/article/details/115553102)
+
+
+
 ### Seata分布式事务
 
 参考：[Seata](http://seata.io/zh-cn/)
