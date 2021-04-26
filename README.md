@@ -1,5 +1,9 @@
 
 
+>
+
+
+
 ## 设计模式
 
 ### 单例模式
@@ -171,6 +175,27 @@ GC一共分三种：MinorGC,Major GC 和Full GC。Full GC是清理整个堆空�
 ### JAVA8 的Stream API使用
 
 参考：[JAVA8 的Stream API使用](https://www.cnblogs.com/jimoer/p/10995574.html)
+
+
+
+### JAVA静态资源什么时候加载和执行
+
+当类第一次被调用时加载（静态方法，静态属性的加载就是类加载）。 
+
+>1. 类中的静态属性会被加入到类对象（也可以叫做类的模板，是类的描述） 的构造器中，静态方法也会被加入到类对象中。 
+>2. 当第一次使用类时，JVM会通过类加载器，加载类对象，从而初始化静态属性，并装入类的方法，包括静态方法和实例方法（方法不会被调用，只是加载，从这个意义上来说，静态方法和实例方法是类似的）。 
+>3. 当创建类的实例对象时，JVM会调用类的构造器，从而初始化类的属性。
+
+ 类（包括静态方法、属性）加载过程： 
+
+> 1. 加载： 将class字节码文件加载到内存中，并将这些数据转换成方法区中的运行时数据（静态变量、静态代码块、常量池等），在堆中生成一个Class类对象代表这个类（反射原理），作为方法区类数据的访问入口。 
+> 2. 连接： 将Java类的二进制代码合并到JVM的运行状态之中。
+>    1. 验证：确保加载的类信息符合JVM规范，没有安全方面的问题。 
+>    2. 准备：正式为类变量(static变量)分配内存并设置类变量初始值的阶段，这些内存都将在方法区中进行分配。注意此时的设置初始值为默认值，具体赋值在初始化阶段完成。 
+>    3. 解析：虚拟机常量池内的符号引用替换为直接引用（地址引用）的过程。 
+> 3. 初始化： 初始化阶段是执行类构造器<clinit>()方法的过程。类构造器<clinit>()方法是由编译器自动收集类中的所有类变量的**赋值**动作和**静态语句块(static块)**中的语句合并产生的。 
+>    1. 当初始化一个类的时候，如果发现其父类还没有进行过初始化、则需要先初始化其父类。
+>    2. 虚拟机会保证一个类的<clinit>()方法在多线程环境中被正确加锁和同步。
 
 
 
@@ -1836,9 +1861,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
@@ -1868,23 +1895,25 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 4. ```java
->   /**
+> /**
 >      * @Author: Cai Peishen
 >      * @Date: 2021/3/11 22:41
 >      * @Description: 配置cookie作用域和持久化
->   **/
->   @Configuration
->   public class MySessionConfig {
->   @Bean
->   public CookieSerializer cookieSerializer(){
->   DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->   // 明确的指定Cookie的作用域
->   cookieSerializer.setDomainName("gulimall.com");
->   cookieSerializer.setCookieName("GULIMALL_SESSION");
->   return cookieSerializer;
->   }
->   ```
+> **/
+> @Configuration
+> public class MySessionConfig {
+> @Bean
+> public CookieSerializer cookieSerializer(){
+> DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+> // 明确的指定Cookie的作用域
+> cookieSerializer.setDomainName("gulimall.com");
+> cookieSerializer.setCookieName("GULIMALL_SESSION");
+> return cookieSerializer;
+> }
+> ```
 > ```
 > 
 > /**
@@ -1907,7 +1936,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->     
+>      
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
