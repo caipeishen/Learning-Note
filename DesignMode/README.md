@@ -2387,7 +2387,7 @@ Java中的代理按照代理类生成时机不同又分为静态代理和动态�
 
 如果要买火车票的话，需要去火车站买票，坐车到火车站，排队等一系列的操作，显然比较麻烦。而火车站在多个地方都有代售点，我们去代售点买票就方便很多了。这个例子其实就是典型的代理模式，火车站是目标对象，代售点是代理对象。类图如下：
 
-<img src="img\静态代理.png" style="zoom:80%;" />
+<img src="images\静态代理.png" style="zoom:80%;" />
 
 代码如下：
 
@@ -2787,7 +2787,7 @@ public class Client {
 
 如果去欧洲国家去旅游的话，他们的插座如下图最左边，是欧洲标准。而我们使用的插头如下图最右边的。因此我们的笔记本电脑，手机在当地不能直接充电。所以就需要一个插座转换器，转换器第1面插入当地的插座，第2面供我们充电，这样使得我们的插头在当地能使用。生活中这样的例子很多，手机充电器（将220v转换为5v的电压），读卡器等，其实就是使用到了适配器模式。
 
-![](img\转接头.png)
+![](images\转接头.png)
 
 **定义：**
 
@@ -2911,7 +2911,7 @@ public class Client {
 
 我们使用对象适配器模式将读卡器的案例进行改写。类图如下：
 
-<img src="img\对象适配器模式.png" style="zoom:80%;" />
+<img src="images\对象适配器模式.png" style="zoom:80%;" />
 
 代码如下：
 
@@ -2983,7 +2983,7 @@ public int read(char cbuf[], int offset, int length) throws IOException {
 
 如上代码中的sd（StreamDecoder类对象），在Sun的JDK实现中，实际的方法实现是对sun.nio.cs.StreamDecoder类的同名方法的调用封装。类结构图如下：
 
-![](img\适配器模式-jdk源码解析.png)
+![](images\适配器模式-jdk源码解析.png)
 
 从上图可以看出：
 
@@ -3004,7 +3004,7 @@ public int read(char cbuf[], int offset, int length) throws IOException {
 
 快餐店有炒面、炒饭这些快餐，可以额外附加鸡蛋、火腿、培根这些配菜，当然加配菜需要额外加钱，每个配菜的价钱通常不太一样，那么计算总价就会显得比较麻烦。
 
-<img src="D:/传智播客/专题/设计模式/成品/笔记/assets/装饰者模式-使用前.png" style="zoom:80%;" />
+<img src="images/装饰者模式-使用前.png" style="zoom:80%;" />
 
 使用继承的方式存在的问题：
 
@@ -3027,7 +3027,7 @@ public int read(char cbuf[], int offset, int length) throws IOException {
 * 抽象装饰（Decorator）角色 ： 继承或实现抽象构件，并包含具体构件的实例，可以通过其子类扩展具体构件的功能。
 * 具体装饰（ConcreteDecorator）角色 ：实现抽象装饰的相关方法，并给具体构件对象添加附加的责任。
 
-
+ 
 
 ### 5.3.3 案例
 
@@ -3224,7 +3224,7 @@ public class Demo {
 
 使用起来感觉确实像是装饰者模式，接下来看它们的结构：
 
-<img src="img\装饰者模式-jdk源码.png" style="zoom:80%;" />
+<img src="images\装饰者模式-jdk源码.png" style="zoom:80%;" />
 
 > <font color="red">小结：</font>
 >
@@ -3256,7 +3256,7 @@ public class Demo {
 
 现在有一个需求，需要创建不同的图形，并且每个图形都有可能会有不同的颜色。我们可以利用继承的方式来设计类的关系：
 
-![](img\image-20200207194617620.png)
+![](images\image-20200207194617620.png)
 
 我们可以发现有很多的类，假如我们再增加一个形状或再增加一种颜色，就需要创建更多的类。
 
@@ -3287,7 +3287,7 @@ public class Demo {
 
 类图如下：
 
-<img src="img\桥接模式.png" style="zoom:80%;" />
+<img src="images\桥接模式.png" style="zoom:80%;" />
 
 代码如下：
 
@@ -3385,7 +3385,7 @@ public class Client {
 
 ​	外观（Facade）模式是“迪米特法则”的典型应用
 
-![](img\外观模式引入.jpg)
+![](images\外观模式引入.jpg)
 
 
 
