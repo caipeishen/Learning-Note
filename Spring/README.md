@@ -43,6 +43,11 @@ User user = (User)class.newInstance();//创建实例
 > 参考：[bean 生命周期](https://www.cnblogs.com/zrtqsk/p/3735273.html) [bean生命周期](https://www.jb51.net/article/154487.htm)
 
 ```xml
+0、
+   	1).扫描xml文件，封装成BeanDefinition对象存储在BeanDefinitionRegistry
+	2).使用BeanDefinitionReader解析在注册表BeanDefinitionRegistry中bean信息
+	3).通过反射创建对象存放在AbstractApplicationContext里面的bean容器中
+
 1、生命周期
 	1).从对象创建到对象销毁的过程
 	
@@ -186,12 +191,16 @@ public void a() {
 >+ ```java
 >  // 启动类启用aop代理
 >  @EnableAspectAutoProxy(exposeProxy = true)
->  
->  // 引入了aspectj 这样调用本类的service方法事务隔离传播性才生效
->  OrderServiceImpl orderService = (OrderServiceImpl)AopContext.currentProxy();
->  orderService.b();
->  orderService.c();
 >  ```
+>
+>// 引入了aspectj 这样调用本类的service方法事务隔离传播性才生效
+>OrderServiceImpl orderService = (OrderServiceImpl)AopContext.currentProxy();
+>orderService.b();
+>orderService.c();
+>
+>```
+>
+>```
 
 
 
