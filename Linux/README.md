@@ -209,13 +209,76 @@ source /etc/profile
 
 ### Linux安装MySQL
 
-参考：[Linux安装MySQL](https://www.jianshu.com/p/4587e9429702)  [MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)   [Windows安装MySQL8](https://www.cnblogs.com/tangyb/p/8971658.html)
+参考：[MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)   [Windows安装MySQL8](https://www.cnblogs.com/tangyb/p/8971658.html)
 
-```
-2.2修改MySQL8.0的密码的编码方式
-由于MySQL8.0修改了他的编码方式,而Navicat没有这个编码方式的密码,因此,就只能将密码的编码方式修改为原来的编码方式了,不然就登录不了。
-ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'Abcd@1234';
+```sh
+参考：https://blog.csdn.net/qq_41570658/article/details/107508998
+
+准备安装包：
+https://dev.mysql.com/downloads/mysql/
+
+解压：
+tar -xvf mysql-8.0.19-linux-glibc2.12-x86_64.tar.xz
+
+更改名称并移动到目录：
+mv mysql-8.0.19-linux-glibc2.12-x86_64 /usr/local/mysql
+
+创建data目录：
+cd /usr/local/mysql
+mkdir data
+
+创建用户及用户组：
+groupadd mysql
+useradd -r -g mysql mysql
+
+用户组和用户权限：
+chown -R mysql:mysql /usr/local/mysql
+chmod -R 755 /usr/local/mysql
+
+编辑/etc/my.cnf：
+vim /etc/my.cnf
+
+编辑my.cnf内容：
+[mysqld]
+port = 3306
+socket = /tmp/mysql.sock
+basedir = /usr/local/mysql
+datadir = /usr/local/mysql/data
+pid-file = /usr/local/mysql/data/mysqld.pid
+log-error = /usr/local/mysql/data/error.log
+lower-case-table-names = 1
+character-set-server = utf8
+
+
+初始化mysql获取临时密码：(/usr/local/mysql/bin下)
+./mysqld --initialize --user=mysql --datadir=/usr/local/mysql/data --basedir=/usr/local/mysql
+
+启动mysql服务：
+/usr/local/mysql/support-files/mysql.server start
+
+添加软连接，并重启mysql服务：
+ln -s /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
+ln -s /usr/local/mysql/bin/mysql /usr/bin/mysql
+
+登录mysql，修改自动生成的临时密码：
+mysql -u root -p
+*****
+ALTER USER 'root'@localhost IDENTIFIED WITH mysql_native_password BY 'a9530.A.';
+
+开放远程连接：
+use mysql;
+update user set user.Host='%' where user.User='root';
 FLUSH PRIVILEGES;
+
+设置开机自动启动：
+将服务文件拷贝到init.d下，并重命名为mysql
+cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld
+赋予可执行权限
+chmod +x /etc/init.d/mysqld
+添加服务
+chkconfig --add mysqld
+显示服务列表
+chkconfig --list
 ```
 
 
