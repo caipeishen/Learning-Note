@@ -97,6 +97,48 @@ public class SingleTon{
 
 ## Windows
 
+### bit byte 
+
+> **bit：音译为“比特”，指二进制位，由0、1组成；bit 是计算机内存中的最小单位（也称原子单位）；在二进计算机系统中，每 bit 可以代表 0 或 1 的数位讯号。** 
+
+> **Byte：译为“字节”，是计算机系统中最小的存储单位。Byte 是计算机记忆体储存资料的基本单位。当记忆体容量过大时，Byte 这个单位就不够用，因此就有KB\MB\GB等出现。** 
+>
+> - Byte 可以存储 0-256 范围内的所有整数。
+>
+>   ```
+>   1 Byte 由 8 bits 组成；
+>   8 bits 有 256 （2^8）种组合；
+>   每种组合分别表示 [0, 255] 范围内的一个整数数字；
+>   
+>   所以 1Byte 可以存储 [0, 255] 的整数字。
+>   ```
+>
+> - **1个英文字母**(不分大小写)或者 **1个阿拉伯数字(0~9)**通常占1个字节；
+>
+>   ```
+>   1byte，如 01001000 表示英文字母 H 。
+>   ```
+>
+> + **1个中文汉字**通常占2个字节； 
+>
+> - **标点符号：英文标点符号**占1个字节，**中文标点符号**占2个字节。
+
+
+
+### 为什么int 8的取值范围是-128 - 127
+
+```
+int8占1个字节,1字节(byte)占8位(bit)
+
+[正负号][][][][][][][]
+
+其中最高位代表符号位 1-负号；0-正号，所以还有7位，2^7=128
+本应该 -128 ~ 128，但是0算在了正数里面，所以 -128 ~ 127
+
+如果是uint8(8bit无符号-没有负数) 2^8 = 256
+0 占一个数 ，所以最大是255
+```
+
 
 
 ### CRM与ERP
@@ -1865,6 +1907,10 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
+> ```
+> 
 > 2. ```yml
 > 
 > ```
@@ -1874,21 +1920,23 @@ public R policy() {
 > ```
 >
 > ```
+> 
+> ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
->
+> 
 > 3. ```java
->   // 开启redis 存储session
->   @EnableRedisHttpSession
->   public class Application {
->   public static void main(String[] args) {
->   SpringApplication.run(Application.class, args);
->   }
->   }
->   ```
+> // 开启redis 存储session
+> @EnableRedisHttpSession
+> public class Application {
+> public static void main(String[] args) {
+> SpringApplication.run(Application.class, args);
+> }
+> }
+> ```
 > ```
 > 
 > ```
@@ -1938,7 +1986,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->      
+>        
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
