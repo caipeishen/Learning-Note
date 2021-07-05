@@ -553,13 +553,13 @@ logging:
 
 #### Feign远程调用丢失请求头问题
 
-![](/images/Fegin远程调用丢失请求头问题.png)
+![](./images/Feign远程调用丢失请求头问题.png)
 
 
 
 > 加上feign远程调用的请求拦截
 
-![](/images/Feign远程调用丢失请求头解决方案.png)
+![](./images/Feign远程调用丢失请求头解决方案.png)
 
 ```java
 /**
