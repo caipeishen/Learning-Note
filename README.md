@@ -1,102 +1,3 @@
-
-
->
-
-
-
-## 设计模式
-
-### 单例模式
-
-> 懒汉
-
-```java
-public class SingleTon{
-   private static SingleTon  INSTANCE = null;
-   private SingleTon(){}
-   public static SingleTon getInstance() {  
-   if(INSTANCE == null){
-      INSTANCE = new SingleTon(); 
-    } 
-    return INSTANCE；
-  }
-}
-//懒汉模式在方法被调用后才创建对象，以时间换空间，在多线程环境下存在风险。
-```
-
-
-
-> 饿汉
-
-```java
-public class SingleTon{
-	private static SingleTon INSTANCE = new SingleTon();
-	private SingleTon(){
-	
-	}
-	public static SingleTon getInstance(){ 
-		return INSTANCE; 
-	}
-}
-//饿汉模式在类被初始化时就已经在内存中创建了对象，以空间换时间，故不存在线程安全问题。
-```
-
-
-
-> 静态内部类
-
-```java
-public class SingleTon{
-  private SingleTon(){}
- 
-  private static class SingleTonHoler{
-     private static SingleTon INSTANCE = new SingleTon();
- }
- 
-  public static SingleTon getInstance(){
-    return SingleTonHoler.INSTANCE;
-  }
-}
-//静态内部类的优点是：外部类加载时并不需要立即加载内部类，内部类不被加载则不去初始化INSTANCE，故而不占内存。即当SingleTon第一次被加载时，并不需要去加载SingleTonHoler，只有当getInstance()方法第一次被调用时，才会去初始化INSTANCE,第一次调用getInstance()方法会导致虚拟机加载SingleTonHoler类，这种方法不仅能确保线程安全，也能保证单例的唯一性，同时也延迟了单例的实例化。
-```
-
-
-
-### 工厂模式
-
-参考：[工厂模式](https://www.runoob.com/design-pattern/factory-pattern.html)
-
-
-
-### 策略模式
-
-参考：[策略模式](https://www.runoob.com/design-pattern/strategy-pattern.html)
-
-
-
-### 工厂模式与策略模式
-
-```
-工厂模式中只管生产实例，具体怎么使用工厂实例由调用方决定，策略模式是将生成实例的使用策略放在策略类中配置后才提供调用方使用。 
-工厂模式调用方可以直接调用工厂实例的方法属性等，策略模式不能直接调用实例的方法属性，需要在策略类中封装策略后调用。
-```
-
-
-
-### 观察者与监听器
-
-参考：[监听者模式和观察者模式的区别与联系](https://blog.csdn.net/lovexiaotaozi/article/details/102579360)   [Spring监听模式实例](https://www.cnblogs.com/dubhlinn/p/10725636.html)
-
-```
-重点：理解事件与事件源的关系
-```
-
-
-
-
-
-## Windows
-
 ### 取模
 
 ```
@@ -1920,9 +1821,11 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > 2. ```yml
-> 
-> ```
+>    
+>    ```
 >
 > ```
 > 
@@ -1930,22 +1833,28 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
-> 
+>
 > 3. ```java
-> // 开启redis 存储session
-> @EnableRedisHttpSession
-> public class Application {
-> public static void main(String[] args) {
-> SpringApplication.run(Application.class, args);
-> }
-> }
+>   // 开启redis 存储session
+>   @EnableRedisHttpSession
+>   public class Application {
+>   public static void main(String[] args) {
+>   SpringApplication.run(Application.class, args);
+>   }
+>   }
+>   ```
 > ```
+> 
+> ```
+>
 > ```
 > 
 > ```
@@ -1954,27 +1863,27 @@ public R policy() {
 > 
 > ```
 >
-> ```
-> 
 > 4. ```java
-> /**
->      * @Author: Cai Peishen
->      * @Date: 2021/3/11 22:41
->      * @Description: 配置cookie作用域和持久化
-> **/
-> @Configuration
-> public class MySessionConfig {
-> @Bean
-> public CookieSerializer cookieSerializer(){
-> DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
-> // 明确的指定Cookie的作用域
-> cookieSerializer.setDomainName("gulimall.com");
-> cookieSerializer.setCookieName("GULIMALL_SESSION");
-> return cookieSerializer;
-> }
-> ```
+>   /**
+>     * @Author: Cai Peishen
+>     * @Date: 2021/3/11 22:41
+>     * @Description: 配置cookie作用域和持久化
+>   **/
+>   @Configuration
+>   public class MySessionConfig {
+>   @Bean
+>   public CookieSerializer cookieSerializer(){
+>   DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+>   // 明确的指定Cookie的作用域
+>   cookieSerializer.setDomainName("gulimall.com");
+>   cookieSerializer.setCookieName("GULIMALL_SESSION");
+>   return cookieSerializer;
+>   }
+>   ```
 > ```
 > 
+> ```
+>
 > /**
 >            * 自定义序列化机制
 >            * 这里方法名必须是：springSessionDefaultRedisSerializer
@@ -1985,22 +1894,24 @@ public R policy() {
 > }
 > }
 > ```
->
+> 
 > 5. 核心原理
->
+> 
 >    + @EnableRedisHttpSession导入RedisHttpSessionConfiguration配置
->
+> 
 >      1. 给容器中添加了一个组件
->
+> 
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
->
+> 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->        
+>     
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
 >         + wrappedRequest.getSession( ) -> SessionRepository中获取到的。
->
+> 
+> 
+> ```
 >
 > ```
 > 
@@ -2888,15 +2799,7 @@ Windows Registry Editor Version 5.00
 
 
 
-### 疑难杂症
-
-> 如果导入了nacos的配置中心，需要进行nacos.config配置，不然会报错，但不影响程序运行
-
-
-
-#### spring-boot-data-redis 
-
-#### 可能出现的堆外内存移除
+### spring-boot-data-redis 可能出现的堆外内存移除
 
 ```
 产生堆外内存溢出:OutOfDirectMemoryError 
@@ -2909,47 +2812,6 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 ```
 
 
-
-#### Feign远程调用丢失请求头问题
-
-![](/images/Feign远程调用丢失请求头问题.png)
-
-
-
-> 加上feign远程调用的请求拦截
-
-![](/images/Feign远程调用丢失请求头解决方案.png)
-
-```java
-/**
- * @Author: Cai Peishen
- * @Date: 2021/3/23 11:02
- * @Description: 解决openfeign丢失请求头
- */
-@Configuration
-public class GuliFeignConfig {
-	@Bean("requestInterceptor")
-	public RequestInterceptor requestInterceptor(){
-		// Feign在远程调用之前都会先经过这个方法
-		return new RequestInterceptor() {
-			@Override
-			public void apply(RequestTemplate template) {
-				// RequestContextHolder拿到刚进来这个请求
-				ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-				if(attributes != null){
-					HttpServletRequest request = attributes.getRequest(); // 老请求
-					if(request != null){
-						// 同步请求头数据
-						String cookie = request.getHeader("Cookie");
-						// 给新请求同步Cookie
-						template.header("Cookie", cookie);
-					}
-				}
-			}
-		};
-	}
-}
-```
 
 
 
