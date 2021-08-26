@@ -559,14 +559,14 @@ fetch next @pageSize rows only;
 UPDATE `ana` a 
 INNER JOIN `user` b ON a.user_id = b.id
 SET a.comment_num = 66
-WHERE b.user_nick_name = '采先生i'
+WHERE b.user_nick_name = 'Cai Peishen'
 
 
 -- 联表删除
 DELETE a
 FROM `ana` a
 INNER JOIN `user` b ON a.user_id = b.id
-WHERE b.user_nick_name = '采先生i'
+WHERE b.user_nick_name = 'Cai Peishen'
 
 -- 联表插入
 INSERT INTO ana_new(id,title)
