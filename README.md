@@ -1040,6 +1040,12 @@ private List<CategoryEntity> getChildrens(CategoryEntity root,List<CategoryEntit
 
 参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)   [配置SSH](https://blog.csdn.net/fighting_tl/article/details/76009639) [如何理解集中式与分布式](https://blog.csdn.net/weixin_42476601/article/details/82290902)   [Git vs SVN 与Git命令](https://www.cnblogs.com/qcloud1001/archive/2018/10/31/9884576.html) [GitHub访问慢](https://blog.csdn.net/bowei026/article/details/107106503/)Git
 
+> git撤销上次commit的命令方法 
+
+```
+git reset --soft HEAD~
+```
+
 .git目录中的config文件
 
 ```
@@ -1823,9 +1829,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
@@ -1863,23 +1871,25 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 4. ```java
->   /**
+> /**
 >     * @Author: Cai Peishen
 >     * @Date: 2021/3/11 22:41
 >     * @Description: 配置cookie作用域和持久化
->   **/
->   @Configuration
->   public class MySessionConfig {
->   @Bean
->   public CookieSerializer cookieSerializer(){
->   DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->   // 明确的指定Cookie的作用域
->   cookieSerializer.setDomainName("gulimall.com");
->   cookieSerializer.setCookieName("GULIMALL_SESSION");
->   return cookieSerializer;
->   }
->   ```
+> **/
+> @Configuration
+> public class MySessionConfig {
+> @Bean
+> public CookieSerializer cookieSerializer(){
+> DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+> // 明确的指定Cookie的作用域
+> cookieSerializer.setDomainName("gulimall.com");
+> cookieSerializer.setCookieName("GULIMALL_SESSION");
+> return cookieSerializer;
+> }
+> ```
 > ```
 > 
 > ```
@@ -1904,7 +1914,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->     
+>  
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
