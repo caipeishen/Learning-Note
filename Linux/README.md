@@ -150,6 +150,9 @@ vim 文件名 #编辑文件
 #动态查询
 tail -99f text.txt
 
+#筛选时间
+cat sinochem-esp-service.log |sed -n '/2021-09-07 13:26/,/2021-09-07 13:28/p'
+
 #查看所有的网络服务
 netstat -anp | more
 #window查看端口
