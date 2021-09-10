@@ -151,7 +151,8 @@ vim 文件名 #编辑文件
 tail -99f text.txt
 
 #筛选时间
-cat sinochem-esp-service.log |sed -n '/2021-09-07 13:26/,/2021-09-07 13:28/p'
+cat sinochem-esp-service.log | grep -n '出现异常'
+cat sinochem-esp-service.log | sed -n '/2021-09-09 14:39/,/2021-09-09 14:41/p'
 
 #查看所有的网络服务
 netstat -anp | more
