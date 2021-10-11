@@ -1038,7 +1038,7 @@ private List<CategoryEntity> getChildrens(CategoryEntity root,List<CategoryEntit
 
 ### Git
 
-参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)   [配置SSH](https://blog.csdn.net/fighting_tl/article/details/76009639) [如何理解集中式与分布式](https://blog.csdn.net/weixin_42476601/article/details/82290902)   [Git vs SVN 与Git命令](https://www.cnblogs.com/qcloud1001/archive/2018/10/31/9884576.html) [GitHub访问慢](https://blog.csdn.net/bowei026/article/details/107106503/)Git
+参考：[Git](https://blog.csdn.net/hellow__world/article/details/72529022)   [配置SSH](https://blog.csdn.net/fighting_tl/article/details/76009639) [如何理解集中式与分布式](https://blog.csdn.net/weixin_42476601/article/details/82290902)   [Git vs SVN 与Git命令](https://www.cnblogs.com/qcloud1001/archive/2018/10/31/9884576.html) [GitHub访问慢](https://blog.csdn.net/bowei026/article/details/107106503/) [SwitchHosts](https://www.cnblogs.com/xiaodongxier/p/tui-jian-yi-gegithub-guo-nei-fang-wen-jia-su-shen.html) Git
 
 > git撤销上次commit的命令方法 
 
@@ -1831,9 +1831,11 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > 2. ```yml
-> 
-> ```
+>    
+>    ```
 >
 > ```
 > 
@@ -1843,22 +1845,24 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
->
+> 
 > 3. ```java
->   // 开启redis 存储session
->   @EnableRedisHttpSession
->   public class Application {
->   public static void main(String[] args) {
->   SpringApplication.run(Application.class, args);
->   }
->   }
->   ```
+> // 开启redis 存储session
+> @EnableRedisHttpSession
+> public class Application {
+> public static void main(String[] args) {
+> SpringApplication.run(Application.class, args);
+> }
+> }
+> ```
 > ```
 > 
 > ```
@@ -1914,7 +1918,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->  
+> 
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
