@@ -1046,6 +1046,18 @@ private List<CategoryEntity> getChildrens(CategoryEntity root,List<CategoryEntit
 git reset --soft HEAD~
 ```
 
+
+
+> git恢复到指定版本
+
+```
+git reset --hard 7e1b1626
+
+git push -f origin devpay
+```
+
+
+
 .git目录中的config文件
 
 ```
@@ -1833,9 +1845,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
