@@ -603,3 +603,76 @@ imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
 ```
 
 详情：https://blog.csdn.net/yztezhl/article/details/80451046
+
+
+
+### MySQL分组取每组前几条记录(排序)
+
+参考：[分组取每组前几条记录](https://www.cnblogs.com/duhuo/p/4385642.html)   [每组的前几条记录的方法和理解](https://blog.csdn.net/junzi528/article/details/84404412)
+
+
+
+> 初始化数据
+
+```sql
+CREATE TABLE `mygoods` (  
+  `goods_id` int(11) unsigned NOT NULL AUTO_INCREMENT,  
+  `cat_id` int(11) NOT NULL DEFAULT '0',  
+  `price` tinyint(3) NOT NULL DEFAULT '0',  
+  `status` tinyint(3) DEFAULT '1',  
+  PRIMARY KEY (`goods_id`),  
+  KEY `icatid` (`cat_id`)  
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;  
+  
+INSERT INTO `mygoods` VALUES (1, 101, 90, 0);  
+INSERT INTO `mygoods` VALUES (2, 101, 99, 1);  
+INSERT INTO `mygoods` VALUES (3, 102, 98, 0);  
+INSERT INTO `mygoods` VALUES (4, 103, 96, 0);  
+INSERT INTO `mygoods` VALUES (5, 102, 95, 0);  
+INSERT INTO `mygoods` VALUES (6, 102, 94, 1);  
+INSERT INTO `mygoods` VALUES (7, 102, 93, 1);  
+INSERT INTO `mygoods` VALUES (8, 103, 99, 1);  
+INSERT INTO `mygoods` VALUES (9, 103, 98, 1);  
+INSERT INTO `mygoods` VALUES (10, 103, 97, 1);  
+INSERT INTO `mygoods` VALUES (11, 104, 96, 1);  
+INSERT INTO `mygoods` VALUES (12, 104, 95, 1);  
+INSERT INTO `mygoods` VALUES (13, 104, 94, 1);  
+INSERT INTO `mygoods` VALUES (15, 101, 92, 1);  
+INSERT INTO `mygoods` VALUES (16, 101, 93, 1);  
+INSERT INTO `mygoods` VALUES (17, 101, 94, 0);  
+INSERT INTO `mygoods` VALUES (18, 102, 99, 1);  
+INSERT INTO `mygoods` VALUES (19, 105, 85, 1);  
+INSERT INTO `mygoods` VALUES (20, 105, 89, 0);  
+INSERT INTO `mygoods` VALUES (21, 105, 99, 1);
+```
+
+
+
+> 每个分类找出价格最高的有效的两个商品 
+
+```sql
+select a.* 
+from mygoods a 
+where (
+	select count(1) from mygoods 
+	where cat_id = a.cat_id and price > a.price and status=1  
+	) < 2 
+and status=1 
+order by a.cat_id,a.price desc ;
+```
+
+
+
+> 每个分类找出价格最高的有效的两个商品 
+
+```sql
+select a.* 
+from mygoods a 
+left join mygoods b 
+on a.cat_id = b.cat_id and a.price < b.price and b.status=1
+where a.status=1
+group by a.goods_id,a.cat_id,a.price
+having count(b.goods_id) < 2
+order by a.cat_id,a.price desc;
+```
+
