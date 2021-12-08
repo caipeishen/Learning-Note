@@ -102,7 +102,7 @@ services:
 POST _analyze 
 {
   "analyzer": "ik_max_word",
-  "text": "千锋教育"
+  "text": "中国人"
 }
 ```
 

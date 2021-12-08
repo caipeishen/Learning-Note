@@ -92,7 +92,7 @@ yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/d
 
 ```sh
 #依然采用yum的方式安装
-yum makacache
+yum makecache
 yum -y install docker-ce
 ```
 
