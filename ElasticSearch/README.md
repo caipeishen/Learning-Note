@@ -61,7 +61,7 @@
 
 #### 3.1安装ES&Kibana
 
-> ocker-compose.yml
+> docker-compose.yml
 
 在docker-compose.yml同目录下执行 `docker-compose up -d`
 
@@ -90,7 +90,7 @@ services:
 
 #### 3.2.安装IK分词器
 
->下载K分词器的地址: https:/[github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.5.4/elasticsearch-analysis-ik-6.5.4.zip
+>下载K分词器的地址: https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.5.4/elasticsearch-analysis-ik-6.5.4.zip
 >
 >由于网络问题，采用国内的路径去下载: http:/tomcato1.qfjava.cn:31/elasticsearch-analysis-ik-6.5.4.zip
 >进去到ES容器内部，跳转到bin目录下，执行bin目录下的脚本文件: ./elasticsearch-plugin install http://tomcat01.qfjava.cn:81/elasticsearch-analysis-ik-6.5.4.zip
