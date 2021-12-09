@@ -167,10 +167,11 @@ POST _analyze
 
 >- **GET请求：**
 >  ip:port/index：查询索引信息
+>
 >  ip:port/index/type/doc_id：查询指定的文档信息
 >
 >- **POST请求：**
->  ip:port/index/type/_search：查询文档，可以在请求体中添加json字符串来代表查询条件
+>  ip:port/index/type/_search：查询文档，可以在请求体中添加json字符串来代表查询条件_
 >
 >  ip:port/index/type/doc_id/_update：修改文档，在请求体中指定json字符串代表修改的具体信息
 >
@@ -183,6 +184,7 @@ POST _analyze
 >  ip:port/index：删除索引
 >
 >  ip:port/index/type/doc_id：删除指定的文档
+>
 
 
 
@@ -197,8 +199,8 @@ POST _analyze
 PUT /person
 {
     "settings": {
-    	"number of_ shards": 5,
-    	"number_ of_ replicas": 1
+    	"number_of_shards": 5,
+    	"number_of_replicas": 1
     }
 }
 ```
@@ -232,34 +234,34 @@ DELETE /person
 #### 4.4 ES中Filed可以指定的类型
 
 >- 字符串类型：
->  - text：把被用于全文检索。将当前Field进行分词。
->  - keyword：当前Filed不会被分词
+>    - text：把被用于全文检索。将当前Field进行分词。
+>    - keyword：当前Filed不会被分词
 >- 数值类型：
->  - long：
->  - integer：
->  - short：
->  - byte：
+>    - long：
+>    - integer：
+>    - short：
+>    - byte：
 >  - double：
->  - float：
->  - half_ float：精度比float小-半。
->  - scaled_ float：根据一个long和scaled来表达一 个浮点型，long-345， scaled-100 -> 3.45
+>     - float：
+>     - half_ float：精度比float小-半。
+>     - scaled_ float：根据一个long和scaled来表达一 个浮点型，long-345， scaled-100 -> 3.45
 >- 时间类型：
->  - date：针对时间类型指定具体格式
+>    - date：针对时间类型指定具体格式
 >- 布尔类型：
->  - boolean：表达ture和false
+>    - boolean：表达ture和false
 >- 二进制类型：
->  - binary：暂时支持Base64 encode string
+>    - binary：暂时支持Base64 encode string
 >- 范围类型：
->  - long_range：赋值时，无需指定具体的内容，只需要存储一个范围即可， 指定gt, It, gte, Ite
->  - integer_range：同上
->  - double_ range：同上
->  - float_range：同上
->  - date_range：同上
->  - ip_range：同上
+>    - long_range：赋值时，无需指定具体的内容，只需要存储一个范围即可， 指定gt, It, gte, Ite
+>    - integer_range：同上
+>    - double_ range：同上
+>    - float_range：同上
+>    - date_range：同上
+>    - ip_range：同上
 >- 经纬度类型：
->  - geo_point：用来存储经纬度的
+>    - geo_point：用来存储经纬度的
 >- ip类型：
->  - ip：可以存储IPV4和IPV6
+>    - ip：可以存储IPV4和IPV6
 >
 >[其他的数据类型参考官网](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/mapping types.html)
 
@@ -287,11 +289,11 @@ PUT /book
     		"properties": {
     			# Field属性名
     			"name": {
-    				# 类型
+    				# Field类型
     				"type": "text",
     				# 指定分词器
     				"analyzer": "ik_max_word",
-    				# 指定当前Field可以被作为查询的条件		
+    				# 指定当前Field可以被作为检索条件		
     				"index": true,
     				# 是否需要额外存储
     				"store": false
@@ -371,6 +373,8 @@ PUT /book/novel/1
     "descr": "一个是阆苑仙葩，一个是美玉无瑕"
 }
 ```
+
+
 
 > doc修改方式
 
