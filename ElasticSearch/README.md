@@ -16,7 +16,7 @@
 
 
 
-### 二、ES概述*
+### 二、ES概述
 
 #### 2.1.介绍
 
@@ -113,7 +113,7 @@ POST _analyze
 
 
 
-### 四、ElasticSearch基本操作*
+### 四、ElasticSearch基本操作
 
 #### 4.1 ES的结构
 
@@ -401,7 +401,7 @@ DELETE /book/nove1/_id
 
 
 
-### 五、Java操作ElasticSearch
+### 五、Java操作ElasticSearch【重点】
 
 
 
@@ -750,7 +750,7 @@ public void bulkDeleteDoc() throws IOException {
 
 
 
-###  六、ElasticSearch的各种查询*
+###  六、ElasticSearch的各种查询
 
 #### 6.1 term&terms查询(重点)
 
@@ -1394,14 +1394,13 @@ public void findByRegexp() throws IOException {
 >    
 >
 >+ scroll+tsize在ES查 询数据的方式:
->
->  + 第一步现将用户指定的关键进行分词。
->  + 第二步将词汇去分词库中进行检索，得到多个文档的id。
+> + 第一步现将用户指定的关键进行分词。
+>  + 第二步将词汇去分词库中进行检索，得到所有的文档的id。
 >  + 第三步将文档的id存放在一 个ES的上下文中。
->  + 第四步根据你指定的size的个数去ES中检索指定个数的数据，拿完数据的文档id,会从上下文中移除。
->  + 第五步如果需要下一-页数据，直接去ES的上下文中，找后续内容。
+>  + 第四步在上下文中获取指定size个数的文档id，去ES中检索数据，拿完数据的文档id,会从上下文中移除。
+>  + 第五步如果需要下一页数据，直接去ES的上下文中，找后续内容。
 >  + 第六步循环第四步和第五步
->
+> 
 >Scroll查询方式，不适合做实时的查询  [ElasticSearch scroll查询原理](https://blog.csdn.net/zc19921215/article/details/108823733)
 
 ```json
