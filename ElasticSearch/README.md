@@ -16,7 +16,7 @@
 
 
 
-### 二、ES概述
+### 二、ES概述*
 
 #### 2.1.介绍
 
@@ -113,7 +113,7 @@ POST _analyze
 
 
 
-### 四、ElasticSearch基本操作
+### 四、ElasticSearch基本操作*
 
 #### 4.1 ES的结构
 
@@ -401,7 +401,7 @@ DELETE /book/nove1/_id
 
 
 
-### 五、Java操作ElasticSearch【重点】
+### 五、Java操作ElasticSearch
 
 
 
@@ -734,6 +734,8 @@ public void bulkDeleteDoc() throws IOException {
 
 #### 5.5 ElasticSearch练习
 
+> 代码参考：[GitHub](git@github.com:caipeishen/es.git)
+
 > 创建索引，指定数据结构
 >
 > 索引名：sms-logs-index
@@ -746,7 +748,9 @@ public void bulkDeleteDoc() throws IOException {
 
 
 
-###  六、ElasticSearch的各种查询
+
+
+###  六、ElasticSearch的各种查询*
 
 #### 6.1 term&terms查询(重点)
 
