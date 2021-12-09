@@ -1553,7 +1553,7 @@ public void deleteByQuery() throws IOException {
 
 
 
-#### 6.6 符合查询
+#### 6.6 复合查询
 
 ##### 6.6.1 bool查询
 
