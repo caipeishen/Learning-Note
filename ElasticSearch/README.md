@@ -1807,9 +1807,9 @@ POST /sms-logs-index/sms-logs-type/_search
         "fields": {
         	"smsContent": {}
         },
-        "pre_ tags": "<font color='red'>",
-        "post_ tags": "</font>",
-        "fragment_ size": 10
+        "pre_tags": "<font color='red'>",
+        "post_tags": "</font>",
+        "fragment_size": 10
     }
 }
 ```
