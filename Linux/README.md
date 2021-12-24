@@ -6,6 +6,8 @@
 
 参考：[Vagrant安装CentOS7](https://blog.csdn.net/weixin_43456598/article/details/100827301)
 
+配置一个NAT，配置一个hostonly
+
 > 开启密码访问
 
 ```shell
