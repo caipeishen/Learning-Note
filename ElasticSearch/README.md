@@ -91,6 +91,31 @@ services:
 
 
 
+> es7：7.16.2
+
+```
+version: "3.1"
+services: 
+  elasticsearch: 
+    image: elasticsearch:7.16.2
+    restart: always
+    container_name: elasticsearch
+    ports:
+     - 9200:9200
+  kibana: 
+    image: kibana:7.16.2
+    restart: always
+    container_name: kibana
+    ports: 
+     - 5601:5601
+    environment: 
+     - elasticsearch_url=http://192.168.181.22:9200
+    depends_on:
+     - elasticsearch
+```
+
+
+
 #### 3.2.安装IK分词器
 
 >下载K分词器的地址: https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.5.4/elasticsearch-analysis-ik-6.5.4.zip
