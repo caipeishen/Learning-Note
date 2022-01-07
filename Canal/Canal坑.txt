@@ -1,0 +1,4 @@
+
+Load canal adapter: es7 failed
+
+https://www.cnblogs.com/mijino/p/14874765.html
