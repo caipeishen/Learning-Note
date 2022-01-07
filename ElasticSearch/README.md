@@ -93,23 +93,26 @@ services:
 
 > es7：7.16.2
 
-```
+```yml
 version: "3.1"
-services: 
-  elasticsearch: 
+services:
+  elasticsearch:
     image: elasticsearch:7.16.2
     restart: always
+    environment:
+     - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+     - discovery.type=single-node
     container_name: elasticsearch
     ports:
      - 9200:9200
-  kibana: 
+  kibana:
     image: kibana:7.16.2
     restart: always
     container_name: kibana
-    ports: 
+    ports:
      - 5601:5601
-    environment: 
-     - elasticsearch_url=http://192.168.181.22:9200
+    environment:
+     - elasticsearch_url=http://192.168.56.117:9200
     depends_on:
      - elasticsearch
 ```
