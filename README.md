@@ -1849,9 +1849,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
@@ -1897,23 +1899,25 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 4. ```java
->   /**
+> /**
 >    * @Author: Cai Peishen
 >    * @Date: 2021/3/11 22:41
 >    * @Description: 配置cookie作用域和持久化
->   **/
->   @Configuration
->   public class MySessionConfig {
->   @Bean
->   public CookieSerializer cookieSerializer(){
->   DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->   // 明确的指定Cookie的作用域
->   cookieSerializer.setDomainName("gulimall.com");
->   cookieSerializer.setCookieName("GULIMALL_SESSION");
->   return cookieSerializer;
->   }
->   ```
+> **/
+> @Configuration
+> public class MySessionConfig {
+> @Bean
+> public CookieSerializer cookieSerializer(){
+> DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+> // 明确的指定Cookie的作用域
+> cookieSerializer.setDomainName("gulimall.com");
+> cookieSerializer.setCookieName("GULIMALL_SESSION");
+> return cookieSerializer;
+> }
+> ```
 > ```
 > 
 > ```
@@ -1940,7 +1944,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->     
+>      
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2816,6 +2820,12 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Directory\shell\SublimeText3\command]
 @="C:\\Program Files\\Sublime Text 3\\sublime_text.exe %1"
 ```
+
+
+
+### Sublime Text3右键打开带空格中文路径文件异常解决
+
+
 
 
 
