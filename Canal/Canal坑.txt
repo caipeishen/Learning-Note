@@ -1,4 +1,4 @@
 
-Load canal adapter: es7 failed
+com.alibaba.druid.pool.DruidDataSource
 
 https://www.cnblogs.com/mijino/p/14874765.html
