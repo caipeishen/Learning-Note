@@ -91,22 +91,23 @@ services:
 
 
 
-> es7：7.16.2
+> es7：7.3.0
 
 ```yml
 version: "3.1"
 services:
   elasticsearch:
-    image: elasticsearch:7.16.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
     restart: always
     environment:
-     - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+     - cluster.name=elasticsearch
      - discovery.type=single-node
+     - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     container_name: elasticsearch
     ports:
      - 9200:9200
   kibana:
-    image: kibana:7.16.2
+    image: docker.elastic.co/kibana/kibana:7.3.0
     restart: always
     container_name: kibana
     ports:
