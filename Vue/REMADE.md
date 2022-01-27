@@ -526,9 +526,11 @@ Object.defineProperty(obj2, "x", {
 
 - 功能:让组件接收外部传过来的数据
   - 传递数据:
+    
     - `<Demo name="xxx"/>`
   - 接收数据:
     - 第一种方式（只接收）:
+      
       - `props: ["name"]`
     - 第二种方式(限制类型):
       - ```vue
@@ -710,7 +712,7 @@ Object.defineProperty(obj2, "x", {
 
 - **方法一**
 
-​ 在 vue.config.js 中添加如下配置：
+ 在 vue.config.js 中添加如下配置：
 
 ```js
 devServer: {
@@ -726,7 +728,7 @@ devServer: {
 
 - **方法二**
 
-​ 编写 vue.config.js 配置具体代理规则：
+ 编写 vue.config.js 配置具体代理规则：
 
 ```js
 module.exports = {
@@ -848,9 +850,10 @@ module.exports = {
           }
         </script>
         ``
-
-   ```
-
+     ```
+   
+```
+   
    ```
 
 ## Vuex
@@ -1341,7 +1344,7 @@ module.exports = {
 
 ### 路由的 props 配置
 
-​ 作用：让路由组件更方便的收到参数
+ 作用：让路由组件更方便的收到参数
 
 ```js
 {
