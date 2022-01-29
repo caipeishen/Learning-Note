@@ -345,7 +345,6 @@ npm run dev
 
 
 
-
 1
 
 - Vue3.0中可以继续使用Vue2.x中的生命周期钩子，但有有两个被更名：
@@ -379,6 +378,15 @@ npm run dev
 
 
 - 扩展：```toRefs``` 与```toRef```功能一致，但可以批量创建多个 ref 对象，语法：```toRefs(person)```
+
+
+
+
+
+
+
+
+
 
 
 # 三、其它 Composition API
