@@ -676,3 +676,31 @@ having count(b.goods_id) < 2
 order by a.cat_id,a.price desc;
 ```
 
+
+
+### MySQL内查询构造动态日期表
+
+```sql
+#		startDate	  endDate
+# 有条件：day1 		- 	day2
+# 无条件：now()-7 	- 	now()
+# java进行处理过后，向dao层串，startDate, endDate
+ 
+-- SELECT
+-- 	DATE( date ) signtime 
+-- FROM
+-- 	(#           构造当前日期之前31天的日期表
+-- 	SELECT @cdate := date_add(@cdate, INTERVAL - 1 DAY) date
+--                  FROM (SELECT @cdate := date_add(CURRENT_DATE, INTERVAL 1 DAY) FROM ana LIMIT datediff('2018-06-26','2018-06-25')) a
+-- 	) t_date 
+ 
+SELECT
+	DATE( date ) signtime 
+FROM
+	(#           构造动态日期表
+	SELECT @cdate := date_add(@cdate, INTERVAL - 1 DAY) date
+                 FROM (SELECT @cdate := date_add(endDate, INTERVAL 1 DAY) FROM ana LIMIT datediff(startDate,endDate)) a
+	) t_date
+
+```
+

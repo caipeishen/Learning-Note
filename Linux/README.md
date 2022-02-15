@@ -115,6 +115,8 @@ gunzip 文件 #解压
 tar -zcvf 123.tar file1 file2 #压缩
 tar -zxvf 文件名 #解压
 
+rpm -ivh xxx.rpm #rpm安装
+
 ps -aux | grep file #查看进程信息
 ps -ef | grep tomcat #同时查看父进程
 kill -9 #关闭进程号
