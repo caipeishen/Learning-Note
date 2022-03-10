@@ -1604,6 +1604,24 @@ public class ItalyDessertFactory implements DessertFactory {
 }
 ```
 
+Client:
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        //创建的是意大利风味甜品工厂对象
+        //ItalyDessertFactory factory = new ItalyDessertFactory();
+        AmericanDessertFactory factory = new AmericanDessertFactory();
+        //获取拿铁咖啡和提拉米苏甜品
+        Coffee coffee = factory.createCoffee();
+        Dessert dessert = factory.createDessert();
+
+        System.out.println(coffee.getName());
+        dessert.show();
+    }
+}
+```
+
 如果要加同一个产品族的话，只需要再加一个对应的工厂类即可，不需要修改其他的类。
 
 #### 4.2.4.3 优缺点
@@ -1614,7 +1632,7 @@ public class ItalyDessertFactory implements DessertFactory {
 
 **缺点：**
 
-当产品族中需要增加一个新的产品时，所有的工厂类都需要进行修改。
+新加产品族还好，当产品族中需要增加一个新的产品时，所有的工厂类都需要进行修改。
 
 #### 4.2.4.4 使用场景
 
@@ -1627,6 +1645,116 @@ public class ItalyDessertFactory implements DessertFactory {
 如：输入法换皮肤，一整套一起换。生成不同操作系统的程序。
 
 
+
+抽象工厂：
+
+```java
+/**
+ * 超级工厂，定义同个产品族的其他相关子工厂
+ */
+public interface OrderFactory {
+    PayFactory createPay();
+
+    RefundFactory createRefund();
+}
+```
+
+
+
+具体工厂：
+
+```java
+public class AliOrderFactory implements OrderFactory {
+
+    @Override
+    public PayFactory createPay() {
+        return new AliPay();
+    }
+
+    @Override
+    public RefundFactory createRefund() {
+        return new AliRefund();
+    }
+}
+```
+
+```java
+public class WechatOrderFactory implements OrderFactory {
+    @Override
+    public PayFactory createPay() {
+        return new WechatPay();
+    }
+
+    @Override
+    public RefundFactory createRefund() {
+        return new WechatRefund();
+    }
+}
+```
+
+
+
+抽象产品：
+
+```java
+public interface PayFactory {
+
+    /**
+     * 统一下单
+     */
+    void unifiedorder();
+}
+```
+
+```java
+public interface RefundFactory {
+
+    /**
+     * 退款
+     */
+    void refund();
+}
+```
+
+
+
+具体产品：
+
+```java
+public class AliPay implements PayFactory {
+    @Override
+    public void unifiedorder() {
+        System.out.println("支付宝支付 统一下单接口");
+    }
+}
+```
+
+```java
+public class AliRefund implements RefundFactory {
+    @Override
+    public void refund() {
+        System.out.println("支付宝 退款");
+    }
+}
+```
+
+```java
+public class WechatPay implements PayFactory {
+    @Override
+    public void unifiedorder() {
+        System.out.println("微信支付支付 统一下单接口");
+    }
+}
+```
+
+```java
+public class WechatRefund implements RefundFactory {
+    @Override
+    public void refund() {
+        System.out.println("微信支付 退款");
+    }
+}
+```
 
 
 
