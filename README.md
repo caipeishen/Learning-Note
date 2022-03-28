@@ -957,21 +957,18 @@ Connect By Prior ID = PID
 
 
 
+> Java 8处理
+
 ```java
-//递归查找所有菜单的子菜单
-private List<CategoryEntity> getChildrens(CategoryEntity root,List<CategoryEntity> all){
-    
-    List<CategoryEntity> children = all.stream().filter(categoryEntity -> {
-    	return categoryEntity.getParentCid() == root.getCatId();
-    }).map(categoryEntity ->
-        categoryEntity.setChildren(getChildrens(categoryEntity,all));
-        return categoryEntity;
-    }).sorted((menu1,menu2)->{
-    	return menu1.getSort() - menu2.getSort();
-    }).collect(Collectors.tolist());
-    
-    return children;
+List<SagAreaInfoVO> areaList = this.areaService.selectAreaList(new SagAreaInfoVO());
+if (CollectionUtils.isEmpty(areaList)) {
+    return null;
 }
+
+Map<String, List<SagAreaInfoVO>> sub = areaList.stream().filter(node -> !"-1".equals(node.getAreaPid())).collect(Collectors.groupingBy(node -> node.getAreaPid()));
+areaList.forEach(node -> node.setChildren(sub.get(node.getAreaId())));
+
+areaList = areaList.stream().filter(node -> "-1".equals(node.getAreaPid())).collect(Collectors.toList());
 ```
 
 
@@ -1853,9 +1850,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
@@ -1948,7 +1947,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->       
+>        
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
