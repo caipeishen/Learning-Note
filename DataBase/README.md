@@ -576,6 +576,9 @@ FROM ana
 -- 复制表数据创建新表
 CREATE TABLE ana_back 
 SELECT * FROM ana
+
+-- 查询字段(strlist)中是否包含(str)的结果，返回结果为null或记录的位置
+SELECT FIND_IN_SET('b', 'a,b,c,d');
 ```
 
 
