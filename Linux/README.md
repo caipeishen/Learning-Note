@@ -6,6 +6,19 @@
 
 参考：[Vagrant安装CentOS7](https://blog.csdn.net/weixin_43456598/article/details/100827301)
 
+> 那添加box的本地地址就是 E:/VirtuaBox-VMs/centos-7.0-x86_64.box
+
+1. 创建1个空目录，按住 shift + 右键 ，打开 powershell 窗口
+2. 输入： vagrant box add centos7 E:/VirtuaBox-VMs/centos-7.0-x86_64.box ，添加本地box
+3. 添加成功后输入 vagrant box list 可以查看本地的box
+4. 初始化centos7文件： vagrant init centos7， 注意名字要跟本地的box名字一样，不然vagrant会去官方仓库找和下载，速度很慢
+5. 启动centos7系统： vagrant up 启动
+6. 之后打开virtual-box，能看到新加了一个centos7的虚拟机
+7. 回到powershell终端，输入 vagrant ssh ，即可连接centos7，输入yum version 查看版本
+   
+
+
+
 配置一个NAT，配置一个hostonly
 
 > 开启密码访问
