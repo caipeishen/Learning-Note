@@ -15,7 +15,40 @@
 5. 启动centos7系统： vagrant up 启动
 6. 之后打开virtual-box，能看到新加了一个centos7的虚拟机
 7. 回到powershell终端，输入 vagrant ssh ，即可连接centos7，输入yum version 查看版本
-   
+
+
+
+> Vagrantfile
+
+```yml
+Vagrant.configure("2") do |config|
+   (1..3).each do |i|
+        config.vm.define "k8s-node#{i}" do |node|
+            # 设置虚拟机的Box
+            node.vm.box = "centos/7"
+
+            # 设置虚拟机的主机名
+            node.vm.hostname="k8s-node#{i}"
+
+            # 设置虚拟机的IP
+            node.vm.network "private_network", ip: "192.168.56.#{99+i}", netmask: "255.255.255.0"
+
+            # 设置主机与虚拟机的共享目录
+            # node.vm.synced_folder "~/Documents/vagrant/share", "/home/vagrant/share"
+
+            # VirtaulBox相关配置
+            node.vm.provider "virtualbox" do |v|
+                # 设置虚拟机的名称
+                v.name = "k8s-node#{i}"
+                # 设置虚拟机的内存大小
+                v.memory = 4096
+                # 设置虚拟机的CPU个数
+                v.cpus = 4
+            end
+        end
+   end
+end
+```
 
 
 
@@ -204,7 +237,7 @@ nohup java -jar weChat.jar &
 #编辑etc/profile文件
 ---------------------------------
 #JAVA的JDK配置
-export JAVA_HOME=/usr/local/java/jdk1.8.0_251
+export JAVA_HOME=/usr/local/software/java/jdk1.8.0_251
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 #将JDK配置到环境变量中，如果还有其他变量 在其后面使用:隔开
 export PATH=$PATH:$JAVA_HOME/bin
