@@ -1854,6 +1854,10 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
+> ```
+>
 > 2. ```yml
 >    
 >    ```
@@ -1875,21 +1879,23 @@ public R policy() {
 > ```
 >
 > ```
+> 
+> ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
->
+> 
 > 3. ```java
->   // 开启redis 存储session
->   @EnableRedisHttpSession
->   public class Application {
->   public static void main(String[] args) {
->   SpringApplication.run(Application.class, args);
->   }
->   }
->   ```
+> // 开启redis 存储session
+> @EnableRedisHttpSession
+> public class Application {
+> public static void main(String[] args) {
+> SpringApplication.run(Application.class, args);
+> }
+> }
+> ```
 > ```
 > 
 > ```
@@ -1910,23 +1916,25 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 4. ```java
->   /**
+> /**
 >   * @Author: Cai Peishen
 >   * @Date: 2021/3/11 22:41
 >   * @Description: 配置cookie作用域和持久化
->   **/
->   @Configuration
->   public class MySessionConfig {
->   @Bean
->   public CookieSerializer cookieSerializer(){
->   DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
->   // 明确的指定Cookie的作用域
->   cookieSerializer.setDomainName("gulimall.com");
->   cookieSerializer.setCookieName("GULIMALL_SESSION");
->   return cookieSerializer;
->   }
->   ```
+> **/
+> @Configuration
+> public class MySessionConfig {
+> @Bean
+> public CookieSerializer cookieSerializer(){
+> DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+> // 明确的指定Cookie的作用域
+> cookieSerializer.setDomainName("gulimall.com");
+> cookieSerializer.setCookieName("GULIMALL_SESSION");
+> return cookieSerializer;
+> }
+> ```
 > ```
 > 
 > ```
@@ -1955,7 +1963,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->     
+> 
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2883,6 +2891,18 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 参考：[什么是分库分表](https://blog.csdn.net/qq_35349114/article/details/90484450)
 
 
+
+### JetBrains全家桶
+
+> 链接：[工具和破解码](https://jetbra.in/s)  [教程](https://www.jiweichengzhu.com/article/c9a9145dc905413ca6d4b4d02cdc6f07)
+
+> 注意：输入激活码请选择**安装路径**的exe文件，激活成功需要重启
+
+![](./images/JetBrains破解-2.png)
+
+
+
+![](./images/JetBrains破解.png)
 
 
 
