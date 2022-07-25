@@ -1858,9 +1858,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
@@ -2896,7 +2898,7 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 > 链接：[工具和破解码](https://jetbra.in/s)  [教程](https://www.jiweichengzhu.com/article/c9a9145dc905413ca6d4b4d02cdc6f07)
 
-> 注意：输入激活码请选择**安装路径**的exe文件，激活成功需要重启
+> 注意：请选择**安装路径**的exe文件打开，输入激活码，激活成功需要重启
 
 ![](./images/JetBrains破解-2.png)
 
