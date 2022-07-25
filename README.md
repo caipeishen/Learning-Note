@@ -1860,9 +1860,11 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > 2. ```yml
-> 
-> ```
+>    
+>    ```
 >
 > ```
 > 
@@ -1882,26 +1884,24 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
-> 
+>
 > 3. ```java
-> // 开启redis 存储session
-> @EnableRedisHttpSession
-> public class Application {
-> public static void main(String[] args) {
-> SpringApplication.run(Application.class, args);
-> }
-> }
-> ```
-> ```
-> 
-> ```
->
+>   // 开启redis 存储session
+>   @EnableRedisHttpSession
+>   public class Application {
+>   public static void main(String[] args) {
+>   SpringApplication.run(Application.class, args);
+>   }
+>   }
+>   ```
 > ```
 > 
 > ```
@@ -1920,8 +1920,15 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
+> ```
+> 
+> ```
+>
 > 4. ```java
-> /**
+>   /**
+>   ```
 >   * @Author: Cai Peishen
 >   * @Date: 2021/3/11 22:41
 >   * @Description: 配置cookie作用域和持久化
@@ -1937,7 +1944,6 @@ public R policy() {
 > return cookieSerializer;
 > }
 > ```
-> ```
 > 
 > ```
 >
@@ -1945,6 +1951,8 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > /**
 >            * 自定义序列化机制
 >            * 这里方法名必须是：springSessionDefaultRedisSerializer
@@ -1955,22 +1963,24 @@ public R policy() {
 > }
 > }
 > ```
-> 
+>
 > 5. 核心原理
-> 
+>
 >    + @EnableRedisHttpSession导入RedisHttpSessionConfiguration配置
-> 
+>
 >      1. 给容器中添加了一个组件
-> 
+>
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
-> 
+>
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
-> 
+>     
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
 >         + wrappedRequest.getSession( ) -> SessionRepository中获取到的。
-> 
+>
+>
+> ```
 > 
 > ```
 >
@@ -2850,9 +2860,15 @@ Windows Registry Editor Version 5.00
 
 
 
-### VS Code 舒适的代码颜色
+### VS Code 舒适代码颜色
 
 > Luke Dark Theme 
+
+
+
+### IDEA 舒适代码颜色
+
+> Xcode-Dark 
 
 
 
