@@ -10,9 +10,15 @@ type Person struct {
 	Age  int    `json:"age"`
 }
 
+func (p Person) String() string {
+	str := fmt.Sprintf("---------name:%v, age:%v---------", p.Name, p.Age)
+	return str
+}
+
 func main() {
 	//方式1
-
+	p1 := Person{}
+	fmt.Printf("&name=%v, &age=%v", &p1.Name, &p1.Age)
 	//方式2
 	p2 := Person{"mary", 20}
 	// p2.Name = "tom"
@@ -39,6 +45,8 @@ func main() {
 
 	marshal, _ := json.Marshal(p3)
 	fmt.Printf("marshal:%v\n", string(marshal))
+
+	fmt.Printf("p3:%v\n", p3)
 
 	//方式4-{}
 	//案例: var person *Person = &Person{}
