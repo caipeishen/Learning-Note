@@ -1,12 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
 type Person struct {
-	Name string
-	Age  int
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
 
 func main() {
@@ -33,6 +34,11 @@ func main() {
 	(*p3).Age = 30
 	p3.Age = 100
 	fmt.Println(*p3)
+	change(p3)
+	fmt.Println(*p3)
+
+	marshal, _ := json.Marshal(p3)
+	fmt.Printf("marshal:%v\n", string(marshal))
 
 	//方式4-{}
 	//案例: var person *Person = &Person{}
@@ -52,4 +58,8 @@ func main() {
 	person.Age = 10
 	fmt.Println(*person)
 
+}
+
+func change(person *Person) {
+	person.Age = 200
 }

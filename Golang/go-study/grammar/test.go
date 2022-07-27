@@ -79,12 +79,12 @@ func testClass() {
 	//fmt.Printf("所有班级平均分:%v", sum/15)
 }
 
-func main() {
-	//dome3()
-
+func sliceMap() {
 	var soces []int
-	soces = append(soces, 100)
-	fmt.Println(soces)
+	if soces == nil {
+		fmt.Println("为空")
+	}
+	fmt.Println(soces, " ", len(soces), " ", cap(soces))
 
 	var nameMap map[string]string = make(map[string]string, 2)
 	nameMap["CaiPeishen"] = "身高182，体重140"
@@ -97,5 +97,14 @@ func main() {
 	}
 
 	fmt.Println(nameMap)
+}
+
+func main() {
+	//dome3()
+
+	var num *int = new(int)
+
+	*num = 200
+	fmt.Printf("str=%d, *str=%v", *num, num)
 
 }
