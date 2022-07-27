@@ -53,9 +53,7 @@ func func1(int) {
 	fmt.Println()
 }
 
-func main() {
-	//dome3()
-
+func point() {
 	//var num int = 1
 	//fmt.Printf("num = %v, &num = %v\n", num, &num)
 	//var number *int = &num
@@ -63,7 +61,9 @@ func main() {
 	//*number = 2
 	//fmt.Printf("num = %v, &num = %v\n", num, &num)
 	//fmt.Printf("number = %v, *number = %v \n", number, *number)
+}
 
+func testClass() {
 	//var sum float32
 	//for i := 1; i <= 3; i++ {
 	//	var score float32
@@ -77,10 +77,25 @@ func main() {
 	//	fmt.Printf("%d班 平均分:%v\n", i, score/5)
 	//}
 	//fmt.Printf("所有班级平均分:%v", sum/15)
+}
 
-	var num int = 10
+func main() {
+	//dome3()
 
-	aa := &num
-	fmt.Println(aa)
+	var soces []int
+	soces = append(soces, 100)
+	fmt.Println(soces)
+
+	var nameMap map[string]string = make(map[string]string, 2)
+	nameMap["CaiPeishen"] = "身高182，体重140"
+	nameMap["ferris"] = "身高182，体重140"
+	nameMap["ferris2"] = "身高182，体重140"
+	nameMap["ferris3"] = "身高182，体重140"
+
+	for k, _ := range nameMap {
+		fmt.Println(k)
+	}
+
+	fmt.Println(nameMap)
 
 }
