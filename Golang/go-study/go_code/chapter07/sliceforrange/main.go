@@ -50,4 +50,10 @@ func main() {
 	copy(slice5, slice4)
 	fmt.Println("slice4=", slice4) // 1, 2, 3, 4, 5
 	fmt.Println("slice5=", slice5) // 1, 2, 3, 4, 5, 0 , 0 ,0,0,0
+
+	// copy内置函数，如果切片固定了长度，那么只会复制长度内的数据
+	var slice6 = make([]int, 1)
+	copy(slice6, slice4)
+	fmt.Println("slice4=", slice4) // 1, 2, 3, 4, 5
+	fmt.Println("slice6=", slice6) // 1
 }
