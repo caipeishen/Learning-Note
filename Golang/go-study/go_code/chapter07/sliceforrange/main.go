@@ -23,6 +23,9 @@ func main() {
 	slice2 := slice[1:2] //  slice [ 20, 30, 40]    [30]
 	slice2[0] = 100      // 因为arr , slice 和slice2 指向的数据空间是同一个，因此slice2[0]=100，其它的都变化
 
+	// *** 这一行代码很重要，说明slice添加会影响arr，arr不会扩容而是覆盖
+	slice2 = append(slice2, 999)
+
 	fmt.Println("slice2=", slice2)
 	fmt.Println("slice=", slice)
 	fmt.Println("arr=", arr)
