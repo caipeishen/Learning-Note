@@ -23,6 +23,7 @@ func (hs HeroSlice) Len() int {
 //Less方法就是决定你使用什么标准进行排序
 //1. 按Hero的年龄从小到大排序!!
 func (hs HeroSlice) Less(i, j int) bool {
+	fmt.Printf("Less")
 	return hs[i].Age < hs[j].Age
 	//修改成对Name排序
 	//return hs[i].Name < hs[j].Name
@@ -35,6 +36,7 @@ func (hs HeroSlice) Swap(i, j int) {
 	// hs[j] = temp
 	//下面的一句话等价于三句话
 	hs[i], hs[j] = hs[j], hs[i]
+	fmt.Printf("Swap")
 }
 
 //1.声明Student结构体
