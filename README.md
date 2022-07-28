@@ -967,6 +967,7 @@ if (CollectionUtils.isEmpty(areaList)) {
 
 Map<String, List<SagAreaInfoVO>> sub = areaList.stream().filter(node -> !"-1".equals(node.getAreaPid())).collect(Collectors.groupingBy(node -> node.getAreaPid()));
 areaList.forEach(node -> node.setChildren(sub.get(node.getAreaId())));
+// setChildren为什么可以，是因为引用类型
 
 areaList = areaList.stream().filter(node -> "-1".equals(node.getAreaPid())).collect(Collectors.toList());
 ```
@@ -1862,9 +1863,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
@@ -1926,9 +1929,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 4. ```java
->   /**
->   ```
+> /**
+> ```
 >   * @Author: Cai Peishen
 >   * @Date: 2021/3/11 22:41
 >   * @Description: 配置cookie作用域和持久化
@@ -1973,7 +1978,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->     
+>      
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
