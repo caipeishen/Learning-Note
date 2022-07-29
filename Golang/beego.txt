@@ -1,8 +1,0 @@
-
-
-
-beego使用orm生成文件
-
-参考：https://blog.csdn.net/wdy_2099/article/details/100976499
-
-bee generate scaffold ana -fields="id:int64,user_id:int64,ana_title:string,ana_content:string"  -driver=mysql -conn="root:a9530.A.@tcp(127.0.0.1:3306)/cloud_wall"
