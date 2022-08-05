@@ -1,0 +1,54 @@
+
+
+UserSerive类--->无参的构造方法--->对象--->放入Map单例池--->Bean对象
+
+UserSerive类--->无参的构造方法--->对象--->依赖注入--->放入Map单例池--->Bean对象
+
+UserSerive类--->无参的构造方法--->对象--->依赖注入--->初始化前--->初始化--->初始化后--->放入Map单例池--->Bean对象
+
+UserSerive类--->无参的构造方法--->对象--->依赖注入--->初始化前(@PostConstruct)--->初始化--->初始化后--->放入Map单例池--->Bean对象
+
+UserSerive类--->无参的构造方法--->对象--->依赖注入--->初始化前(@PostConstruct)--->初始化(InitializingBean)--->初始化后--->放入Map单例池--->Bean对象
+
+UserSerive类--->无参的构造方法--->对象--->依赖注入--->初始化前(@PostConstruct)--->初始化(InitializingBean)--->初始化后(AOP)--->放入Map单例池--->Bean对象
+
+UserSerive类--->无参的构造方法--->普通对象--->依赖注入--->初始化前(@PostConstruct)--->初始化(InitializingBean)--->初始化后(AOP)--->代理对象--->放入Map单例池--->Bean对象
+
+UserSerive类--->推断的构造方法--->普通对象--->依赖注入--->初始化前(@PostConstruct)--->初始化(InitializingBean)--->初始化后(AOP)--->代理对象--->放入Map单例池--->Bean对象
+
+
+推断的构造方法：
+	1.没有无参，多个有参，需要使用@Autowired指定构造方法
+	2.有参构造方法的入参是对象时，spring会先根据byType找，如果找到多个再根据byName匹配，没有找到会自己创建一个，但这里就是循环依赖的起始
+
+
+依赖注入：
+	1.获取该对象中的所有属性，判断含有@Autowired的属性会注入，注入方式和上方有参构造方式一样
+
+
+代理对象（CJLIB）	
+
+	父子类
+
+		UserServiceProxy对象--->UserService代理对象--->Uservice代理对象.target=普通对象，放入Map单例池，也就是说代理对象之后没有再经过依赖注入，所以orderService属性是空的
+
+		UserService代理对象.test()
+
+		class UserServiceProxy extends UserService {
+
+			// 这里是空，因为代理对象没有经历过依赖注入
+			OrderService orderService;
+
+			// Uservice代理对象.target=普通对象
+			UserService target;
+
+			public void test() {
+				// @Before切面逻辑
+				// 是否含有@Transactional注解，有的话关闭自动提交
+				// conn.autocommit = false
+				// target.test(); // 普通对象.test() sql1 sql2 sql3
+				// conn.commit(); conn.rollback();
+			}
+
+
+		}
