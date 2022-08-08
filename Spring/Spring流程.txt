@@ -96,7 +96,7 @@ Cservice创建生命周期
 Spring解决循环依赖的理论依据其实是基于Java的引用传递，当我们获取到对象的引用时，对象的field或则属性是可以延后设置的(但是构造器必须是在获取引用之前)。
 
 
-1.单例池 		singletonobjects 						保存实例化、注入、初始化完成的bean实例
+1.第一级缓存 	singletonobjects 						单例池，保存实例化、注入、初始化完成的bean实例
 2.第二级缓存 	earlySingletonobjects 					保存实例化完成的bean实例，防止cService重复创建AService代理对象
 3.第三级缓存 	singletonFactories<aService, ambda>		保存bean创建工厂，以便于后面扩展有机会创建代理对象
 
