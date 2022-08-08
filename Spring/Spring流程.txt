@@ -65,15 +65,15 @@ AService创建生命周期
 2.填充cService属性--->去单例池中找CService对象--->创建CService的Bean对象
 3.填充其他属性
 4.其他操作
-5.初始化后（AOP）---> earlyProxyReferences 创建过AOP的对象
-5.5.earlySingletonobjects取出对象，singletonFactories移除对象(每个lambda取一次，执行一次就够了，单例情况)
+5.初始化后（AOP）---> earlyProxyReferences 判断是否创建过AOP的对象，创建过则不需要再创建
+5.5.earlySingletonobjects.getObject()，singletonFactories移除对象(每个lambda取一次，执行一次就够了，单例情况)
 6.放入单例池
 
 
 Bservice创建生命周期
 
 1.创建一个BService普通对象
-2.填充aService属性--->去单例池中找AService对象--->creatingSet-->出现循环依赖--->earlySingletonObjects是否存在--->singletonFactories--->执行lambda--->有AOP生成AServvice代理对象/无AOP普通对象--->放入earlySingletonObjects<aService, Aservice[代理/普通]对象>
+2.填充aService属性--->去单例池中找AService对象--->creatingSet-->出现循环依赖--->earlySingletonObjects是否存在--->singletonFactories--->执行lambda--->有AOP生成AServvice代理对象/无AOP普通对象--->放入earlySingletonObjects<aService, Aservice代理对象/普通对象>
 3.填充其他属性
 4.其他操作
 5.初始化后
@@ -93,6 +93,8 @@ Cservice创建生命周期
 
 建议参考下这篇文档：https://blog.csdn.net/wujun2412/article/details/123392678
 
+Spring解决循环依赖的理论依据其实是基于Java的引用传递，当我们获取到对象的引用时，对象的field或则属性是可以延后设置的(但是构造器必须是在获取引用之前)。
+
 
 1.单例池 		singletonobjects 						保存实例化、注入、初始化完成的bean实例
 2.第二级缓存 	earlySingletonobjects 					保存实例化完成的bean实例，防止cService重复创建AService代理对象
@@ -100,7 +102,6 @@ Cservice创建生命周期
 
 
 creatingSet("aService") 	帮助找到循环依赖的时机
-
 
 
 完整对象创建分两个步骤：实例化 + 初始化，只要初始化没进行完毕，就不完整
@@ -112,7 +113,4 @@ creatingSet("aService") 	帮助找到循环依赖的时机
 
 
 
-自己总结：巧妙在对象的引用，lambda调用的时候才得到具体的对象(是代理还是普通)
-
-Spring解决循环依赖的理论依据其实是基于Java的引用传递，当我们获取到对象的引用时，对象的field或则属性是可以延后设置的(但是构造器必须是在获取引用之前)。
 
