@@ -115,3 +115,7 @@ Aservice生命周期中创建的普通对象，第一步把AService普通对象�
 
 
 
+
+
+@Lazy
+private AService aService; 		初始化时创建一个代理对象，等到真正用的时候，调用代理对象，代理对象再去装载，调用方法，所以可以解决循环依赖问题
