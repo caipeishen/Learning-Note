@@ -65,15 +65,15 @@ AService创建生命周期
 2.填充cService属性--->去单例池中找CService对象--->创建CService的Bean对象
 3.填充其他属性
 4.其他操作
-5.初始化后（AOP）---> earlyProxyReferences 判断是否创建过AOP的对象，创建过则不需要再创建
-5.5.earlySingletonobjects从二级缓存取不完整的Bean，singletonFactories移除对象(每个lambda取一次，执行一次就够了，单例情况)
+5.初始化后（AOP）---> earlyProxyReferences 存储创建过AOP的对象，如果存在里面则不需要再创建
+5.5.根据key从earlySingletonobjects取出对象，singletonFactories移除对象(每个lambda取一次，执行一次就够了，单例情况)
 6.放入单例池
 
 
 Bservice创建生命周期
 
 1.创建一个BService普通对象
-2.填充aService属性--->去单例池中找AService对象--->creatingSet(循环依赖)--->先从二级取earlySingletonObjects--->没有再从三级取，这里一定会有，singletonFactories.getObject()执行lambda表达式(返回AService[代理/普通]对象)--->把这个lambda表达式结果放入earlySingletonObjects<aService, Aservice代理对象/普通对象>
+2.填充aService属性--->去单例池中找AService对象--->creatingSet(循环依赖)--->先从二级取earlySingletonObjects--->没有再从三级取，这里一定会有，singletonFactories.getObject()执行lambda表达式(是否提前AOP，返回AService[代理/普通]对象)--->把lambda表达式结果放入earlySingletonObjects<aService, Aservice代理对象/普通对象>
 3.填充其他属性
 4.其他操作
 5.初始化后
@@ -83,7 +83,7 @@ Bservice创建生命周期
 Cservice创建生命周期
 
 1.创建一个Bservice普通对象
-2.填充aService属性--->去单例池中找AService对象--->creatingSet-->出现循环依赖--->earlySingletonObjects(存在取出)--->AServvice代理对象
+2.填充aService属性--->去单例池中找AService对象--->creatingSet-->出现循环依赖--->earlySingletonObjects(存在取出)--->AService代理对象
 3.填充其他属性
 4.其他操作
 5.初始化
@@ -91,23 +91,24 @@ Cservice创建生命周期
 
 
 
-建议参考下这篇文档：https://blog.csdn.net/wujun2412/article/details/123392678
-
 Spring解决循环依赖的理论依据其实是基于Java的引用传递，当我们获取到对象的引用时，对象的field或则属性是可以延后设置的(但是构造器必须是在获取引用之前)。
+Aservice生命周期中创建的普通对象，第一步把AService普通对象放到singletonFactories中，第二步填充AService普通对象中的ABservice属性，进入BService生命周期，这个生命周期会用到singletonFactories，但这里是对象的引用，执行完BService生命周期，又回到AService生命周期，往下执行填充其他属性，因为对象在Java中是引用类型，所以在操作AService普通对象，会影响到singletonFactories的对象
 
 
-1.第一级缓存 	singletonobjects 						单例池，保存实例化、注入、初始化完成的bean实例
-2.第二级缓存 	earlySingletonobjects 					保存实例化完成的bean实例，防止cService重复创建AService代理对象
-3.第三级缓存 	singletonFactories<aService, lambda>	保存bean创建工厂，以便于后面扩展有机会创建代理对象
+
+1.第一级缓存 	singletonobjects 												单例池，保存实例化、注入、初始化完成的bean实例
+2.第二级缓存 	earlySingletonobjects<aService, Aservice代理对象/普通对象> 		保存实例化完成的bean实例，防止cService重复创建AService代理对象
+3.第三级缓存 	singletonFactories<aService, lambda>							保存bean创建工厂，以便于后面扩展有机会创建代理对象
 
 
 循环依赖条件：单例池中没有，creatingSet自己正在创建中
 
 
+
 完整对象创建分两个步骤：实例化 + 初始化，只要初始化没进行完毕，就不完整
 对象分三种类型：刚实例化的普通对象（放在三级缓存），提前进行AOP的不完整对象（放在二级缓存），完整对象（一级缓存/单例池）
 
-循坏依赖带来了什么问题？重复创建，如何解决？第三级缓存通过存储刚创建的实例化普通对象来打破循环，但循环依赖需要的是完成了AOP的代理对象，所以将三级缓存中的对象取出，提前进行AOP并放入二级缓存
+循坏依赖带来了什么问题？重复创建，如何解决？第三级缓存通过存储刚创建的实例化普通对象来打破循环，所以将三级缓存中的lambda取出代理对象/普通对象，并放入二级缓存
 
 那为什么要二级缓存？因为需要区分“已进行AOP的不完整对象”和“完整的代理对象”，并防止多次AOP（多个循环依赖叠加可导致）
 
