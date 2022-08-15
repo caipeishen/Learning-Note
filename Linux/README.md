@@ -237,7 +237,7 @@ nohup java -jar weChat.jar &
 #编辑etc/profile文件
 ---------------------------------
 #JAVA的JDK配置
-export JAVA_HOME=/usr/local/software/java/jdk1.8.0_251
+export JAVA_HOME=/usr/local/java/jdk1.8.0_251
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 #将JDK配置到环境变量中，如果还有其他变量 在其后面使用:隔开
 export PATH=$PATH:$JAVA_HOME/bin
