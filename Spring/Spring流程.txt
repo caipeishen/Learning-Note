@@ -34,6 +34,9 @@ UserSerive类--->推断的构造方法--->普通对象--->依赖注入--->初始
 
 		UserService代理对象.test()
 
+
+		sql1，sql2如果是普通对象发起两次连接，事务肯定不成功，所以把事务交给spring管理(代理对象)，代理对象开启事务，所以事务需要数据源
+
 		class UserServiceProxy extends UserService {
 
 			// 这里是空，因为代理对象没有经历过依赖注入
