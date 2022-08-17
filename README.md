@@ -198,6 +198,12 @@ private static object getFieldValueByName(String fieldName, object o) throws Exc
 
 参考：[Mysql为何使用可重复读(Repeatable read)为默认隔离级别?](https://blog.51cto.com/u_15485936/5202149)
 
++ 我们都知道事务的几种性质 :原子性、一致性、隔离性和持久性 (ACID)
+  为了维持一致性和隔离性,一般使用加锁这种方式来处理,但是加锁相对带来的是并发处理能力的降低
++ 可重复读(Repeated Read)：可重复读。基于锁机制并发控制的DBMS需要对选定对象的读锁(read locks)和写锁(write locks)一直保持到事务结束，但不要求“范围锁(range-locks)”，因此可能会发生“幻影读(phantom reads)” 在该事务级别下，保证同一个事务从开始到结束获取到的数据一致。是Mysql的默认事务级别。
++ 读已提交，binlog日志如果是statement模式，就可能会出现从库同步问题，需要加入间隙锁解决问题，或者使用5.1之后的row模式也可以解决
+
+
 
 ### SpringMVC与Struts2对比
 
