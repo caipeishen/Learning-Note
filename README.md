@@ -194,6 +194,9 @@ private static object getFieldValueByName(String fieldName, object o) throws Exc
 
 
 
+### Mysql为何使用可重复读?
+
+参考：[Mysql为何使用可重复读(Repeatable read)为默认隔离级别?](https://blog.51cto.com/u_15485936/5202149)
 
 
 ### SpringMVC与Struts2对比
@@ -1865,9 +1868,11 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > 2. ```yml
-> 
-> ```
+>    
+>    ```
 >
 > ```
 > 
@@ -1889,22 +1894,24 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
->
+> 
 > 3. ```java
->   // 开启redis 存储session
->   @EnableRedisHttpSession
->   public class Application {
->   public static void main(String[] args) {
->   SpringApplication.run(Application.class, args);
->   }
->   }
->   ```
+> // 开启redis 存储session
+> @EnableRedisHttpSession
+> public class Application {
+> public static void main(String[] args) {
+> SpringApplication.run(Application.class, args);
+> }
+> }
+> ```
 > ```
 > 
 > ```
@@ -1978,7 +1985,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 >
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->      
+>       
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
