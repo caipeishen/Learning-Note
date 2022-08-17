@@ -35,7 +35,7 @@ UserSerive类--->推断的构造方法--->普通对象--->依赖注入--->初始
 		UserService代理对象.test()
 
 
-		sql1，sql2如果是普通对象发起两次连接，事务肯定不成功，所以把事务交给spring管理(代理对象)，代理对象开启事务，所以事务需要数据源
+		sql1，sql2如果是普通对象发起两次连接，事务肯定不成功，所以把事务交给spring管理(代理对象)，代理对象开启事务(所以事务需要数据源)，关闭自动提交，再调用普通对象接口，如果普通对象接口含有多个jdbc请求，那么也是同一个事务管理，最后执行完普通对象接口，进行commit或者rollback
 
 		class UserServiceProxy extends UserService {
 
