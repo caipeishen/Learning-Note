@@ -42,6 +42,8 @@
 + 可重复读(Repeated Read)：可重复读。基于锁机制并发控制的DBMS需要对选定对象的读锁(read locks)和写锁(write locks)一直保持到事务结束，但不要求“范围锁(range-locks)”，因此可能会发生“幻影读(phantom reads)” 在该事务级别下，保证同一个事务从开始到结束获取到的数据一致。是Mysql的默认事务级别。
 + 读已提交，binlog如果是statement模式，就可能会出现从库同步问题(需要加入间隙锁)，或者5.1之后使用row模式同步
 
+
+
 ### 分页数据量大时，如何优化？
 
 + 自己理解的事，先缩小范围，再进行limit，例如【limit 200000,10】，MySQL需要排序前2000010记录，仅仅返回2000000-2000010条数据，查询排序的代价太大
@@ -61,6 +63,7 @@
 		) a
 	)
 ```
+
 
 
 ### MySQL 常用SQL
@@ -117,6 +120,10 @@ imp demo/demo@orcl file=d:\backup2.dmp tables=(teachers,students)
 ```
 
 详情：https://blog.csdn.net/yztezhl/article/details/80451046
+
+
+
+## 
 
 
 
