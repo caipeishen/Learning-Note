@@ -711,7 +711,9 @@ FROM
 
 ### MySQL动态数字生成
 
-参考：[MySQL动态数字生成](https://www.csdn.net/tags/MtjaQgysMDUzNTktYmxvZwO0O0OO0O0O.html)
+参考：[MySQL动态数字生成](https://blog.csdn.net/qiuli_liu/article/details/81707562)
+
+> 分析：from后边的 (SELECT @xi:=0) xc0 是定义@xi的初始值为0，另外的两个[union](https://so.csdn.net/so/search?q=union&spm=1001.2101.3001.7020)是为了计算多少个数据 
 
 ```sql
 SELECT @xi:=@xi+1 as xc from 
