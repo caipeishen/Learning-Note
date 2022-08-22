@@ -70,6 +70,20 @@
 
 参考：https://www.cnblogs.com/chanshuyi/p/mysql-table-lock-and-row-lock.html
 
++ innoDB的行锁是针对索引加的锁，不是针对记录加的锁，并且索引不能失效，否则行锁会升级为表锁
+
+
+
+### ACID一致性与CAP一致性浅谈
+
+参考：https://blog.csdn.net/qq_34924156/article/details/112525065
+
+
+
+### Redo和Undo事务日志
+
+参考：第14章_MySQL事务日志-尚硅谷.pdf
+
 
 
 ### -----
