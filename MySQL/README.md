@@ -12,6 +12,10 @@
 
 
 
+### 幻读的理解
+
+参考：https://www.cnblogs.com/shujiying/p/13100324.html
+
 
 
 ### 前缀索引
