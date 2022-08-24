@@ -36,7 +36,7 @@
 
   普通的SELECT语句在`READ COMMITTED`和`REPEATABLE READ`隔离级别下会使用到MVCC读取记录。 
 
-  + 在 `READ COMMITTED` 隔离级别下，一个事务在执行过程中每次执行SELECT操作时都会生成一 个ReadView，ReadView的存在本身就保证了 **事务不可以读取到未提交的事务所做的更改** ，也就是避免了脏读现象； 
+  + 在 `READ COMMITTED` 隔离级别下，一个事务在执行过程中 **每次执行SELECT操作** 时都会生成一 个ReadView，ReadView的存在本身就保证了 **事务不可以读取到未提交的事务所做的更改** ，也就是避免了脏读现象； 
   + 在 `REPEATABLE READ` 隔离级别下，一个事务在执行过程中只有 **第一次执行SELECT操作** 才会 生成一个ReadView，之后的SELECT操作都 **复用** 这个ReadView，这样也就避免了不可重复读 和幻读的问题。 
 
 + 方案二：读、写操作都采用 **加锁** 的方式。
