@@ -400,7 +400,7 @@ public static void main(String[] args) {
 
 为了**避免方法区出现 OOM**，在 JDK8 中将堆内的方法区（永久代）移动到了本地内存上，重新开辟了一块空间，叫做元空间，元空间存储类的元信息，**静态变量和字符串常量池等放入堆中**
 
-类元信息：在类编译期间放入方法区，存放了类的基本信息，包括类的方法、参数、接口以及常量池表
+**类元信息：在类编译期间放入方法区，存放了类的基本信息，包括类的方法、参数、接口以及常量池表**
 
 常量池表（Constant Pool Table）是 Class 文件的一部分，存储了**类在编译期间生成的字面量、符号引用**，JVM 为每个已加载的类维护一个常量池
 
@@ -415,7 +415,29 @@ public static void main(String[] args) {
 
 
 
-> StringTable
+##### StringTable特性
+
+> 运行时常量池，重要组成部分，串池StringTable
+
++ 常量池中的字符串仅是符号，第一次用到时才变为对象 
+
++ 利用串池的机制，来避免重复创建字符串对象 
+
++ 字符串变量拼接的原理是 StringBuilder （1.8） 
+
++ 字符串常量拼接的原理是编译期优化 
+
++ 可以使用 intern 方法，主动将串池中还没有的字符串对象放入串池 
+
+  + 1.8 将这个字符串对象尝试放入串池，如果有则并不会放入，如果没有则放入串池， 会把串 
+
+    池中的对象返回 
+
+  + 将这个字符串对象尝试放入串池，如果有则并不会放入，如果没有会把此对象复制一份， 
+
+    放入串池， 会把串池中的对象返回 
+
+
 
 ```JAVA
 // StringTable [ "a", "b" ,"ab" ]  hashtable 结构，不能扩容
@@ -428,11 +450,11 @@ public class Demo1_22 {
     public static void main(String[] args) {
         String s1 = "a"; // 懒惰的
         String s2 = "b";
-        String s3 = "ab";
+        String s3 = "ab"; // 在串池(StringTable)
         String s4 = s1 + s2; // new StringBuilder().append("a").append("b").toString()  new String("ab")
         String s5 = "a" + "b";  // javac 在编译期间的优化，结果已经在编译期确定为ab
 
-        // false，使用了new StringBuilder，而且重写了toString方法，也是new String()
+        // false，不在串池，在堆里，使用了new StringBuilder，而且重写了toString方法，也是new String()，而且s1是变量，需要动态的时候才能获取
         System.out.println(s3 == s4); 
         
         // true，javac 在编译期间的优化，结果已经在编译期确定为ab
