@@ -1,6 +1,6 @@
 # JVM
 
-参考： [视频教程](https://www.bilibili.com/video/BV1yE411Z7AP)   [JVM文档](https://github.com/Seazean/JavaNote) 
+参考： [视频教程](https://www.bilibili.com/video/BV1yE411Z7AP)   [JVM文档](https://github.com/Seazean/JavaNote)  [JVM视频文档](https://blog.csdn.net/weixin_50280576/article/details/113742011)
 
 
 
