@@ -1,6 +1,6 @@
 # JVM
 
-参考：https://github.com/Seazean/JavaNote
+参考： [视频教程](https://www.bilibili.com/video/BV1yE411Z7AP)   [JVM文档](https://github.com/Seazean/JavaNote) 
 
 
 
@@ -188,6 +188,7 @@ Java 虚拟机栈：Java Virtual Machine Stacks，**每个线程**运行时所�
 * 表的容量大小是在编译期确定的，保存在方法的 Code 属性的 maximum local variables 数据项中
 * 表中的变量只在当前方法调用中有效，方法结束栈帧销毁，局部变量表也会随之销毁
 * 表中的变量也是重要的垃圾回收根节点，只要被表中数据直接或间接引用的对象都不会被回收
+* 这里不包含String类型，比较特殊，1.8放入了堆中，参考StringTable
 
 局部变量表最基本的存储单元是 **slot（变量槽）**：
 
@@ -417,15 +418,32 @@ public static void main(String[] args) {
 
 ##### StringTable特性
 
-> 运行时常量池中重要组成部分是串池StringTable(常量的字符串池，变量那些存在了堆里面)
+> 运行时常量池中重要组成部分是串池StringTable(hashmap结构，存字符串的引用，1.8后对象放在了堆中
 
-+ 常量池中的字符串仅是符号，第一次用到时才变为对象 
+参考代码：cn.itcast.jvm.t1.stringtable
+
++ 常量池中的字符串仅是符号，第一次用到时才变为对象， 它的结构为hash表结构，相同的字符串只存在一份  
 + 利用串池的机制，来避免重复创建字符串对象 
 + 字符串变量拼接的原理是 StringBuilder （1.8） 
 + 字符串常量拼接的原理是编译期优化 
 + 可以使用 intern 方法，主动将串池中还没有的字符串对象放入串池 
   + 1.8 将这个字符串对象尝试放入串池，如果有则并不会放入，返回串池中的对象；如果没有则放入串池， 会把串池中的对象返回 
   + 1.6将这个字符串对象尝试放入串池，如果有则并不会放入，返回串池中的对象；如果没有会把此**对象复制一份**， 放入串池， 会把串池中的对象返回 
+
+
+
+参考：https://blog.csdn.net/xl_1803/article/details/114390731
+
+> JVM如何执行String s="abc"
+
++ String s="abc"会先从字符串常量池(下文简称常量池)中查找，如果常量池中已经存在"abc"，而"abc"必定指向堆区的某个String对象，那么直接将s指向这个String对象即可；如果常量池中不存在"abc"，则在堆区new一个String对象，然后将"abc"放到常量池中，并将"abc"指向刚new好的String对象。
+
+
+
+> JVM如何执行new String("abc")
+
++ new String("abc")相当于new String(String s1="abc")，即先要执行String s1="abc"(2.1已经讲过了)，然后再在堆区new一个String对象。
++ String s=new String("abc")创建了1或2个对象，String s="abc"创建了0或1个对象。
 
 
 
@@ -449,10 +467,23 @@ public class Demo1_22 {
         
         // true，javac 在编译期间的优化，结果已经在编译期确定为ab
         System.out.println(s3 == s5);
-
+		
+        // 使用new的
+        String ss1 = new String("abc");
+        ss1.intern();
+        String ss = "abc";
+        System.out.println(ss==ss1);// false
     }
 }
 ```
+
+
+
+##### 为什么移动StringTable位置?
+
+参考：https://zhuanlan.zhihu.com/p/268592967
+
++ JDK1.6，串池存在于常量池，那时候Method Area 方法区(概念)还是由老年代实现，老年代gc很不容易，需要老年代内存满了才会，而串池又会被很多方法声明创建使用，所以JDK1.7放到了堆中，而到了JDK1.8，方法区这个概念使用了元空间来实现，也是进一步优化性能(跟串池没关系了)
 
 
 
