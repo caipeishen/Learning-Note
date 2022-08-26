@@ -483,7 +483,7 @@ public class Demo1_22 {
 
 参考：https://zhuanlan.zhihu.com/p/268592967
 
-+ JDK1.6，串池存在于常量池，那时候Method Area 方法区(概念)还是由永久代实现，永久代full gc很不容易，需要老年代内存满了才会，而串池又会被很多方法声明创建使用，所以JDK1.7放到了堆中，而到了JDK1.8，方法区这个概念使用了元空间来实现，也是进一步优化性能(跟串池没关系了)
++ JDK1.6串池存在于常量池，那时候Method Area 方法区(概念)还是由永久代实现，永久代不会发生gc，而串池又会被很多方法声明创建使用，所以JDK1.7放到了堆中，表示可以被垃圾回收，而到了JDK1.8，方法区这个概念使用了元空间来实现，元空间不在虚拟机中，使用的本地内存，默认情况下，元空间的大小仅受本地内存限制(这个跟StringTable无关了)
 
 
 
@@ -1147,9 +1147,20 @@ Java 语言提供了对象终止（finalization）机制来允许开发人员提
    * 软引用通常用来实现内存敏感的缓存，比如高速缓存就有用到软引用；如果还有空闲内存，就可以暂时保留缓存，当内存不足时清理掉，这样就保证了使用缓存的同时不会耗尽内存
 
    ```java
-   Object obj = new Object();
-   SoftReference<Object> sf = new SoftReference<Object>(obj);
-   obj = null;  // 使对象只被软引用关联
+   // 演示 软引用
+   public static void method2() throws IOException {
+       ArrayList<SoftReference<byte[]>> list = new ArrayList<>();
+       for(int i = 0; i < 5; i++) {
+           SoftReference<byte[]> ref = new SoftReference<>(new byte[_4MB]);
+           System.out.println(ref.get());
+           list.add(ref);
+           System.out.println(list.size());
+       }
+       System.out.println("循环结束：" + list.size());
+       for(SoftReference<byte[]> ref : list) {
+           System.out.println(ref.get());
+       }
+   }
    ```
 
 3. 弱引用（WeakReference）：被弱引用关联的对象一定会被回收，只能存活到下一次垃圾回收发生之前
@@ -1159,10 +1170,19 @@ Java 语言提供了对象终止（finalization）机制来允许开发人员提
    * WeakHashMap 用来存储图片信息，可以在内存不足的时候及时回收，避免了 OOM
 
    ```java
-   Object obj = new Object();
-   WeakReference<Object> wf = new WeakReference<Object>(obj);
-   obj = null;
+   // 演示 弱引用
+   public static void method1() {
+       List<WeakReference<byte[]>> list = new ArrayList<>();
+       for(int i = 0; i < 10; i++) {
+           WeakReference<byte[]> weakReference = new WeakReference<>(new byte[_4MB]);
+           list.add(weakReference);
    
+           for(WeakReference<byte[]> wake : list) {
+               System.out.print(wake.get() + ",");
+           }
+           System.out.println();
+       }
+   }
    ```
 
 4. 虚引用（PhantomReference）：也称为幽灵引用或者幻影引用，是所有引用类型中最弱的一个
@@ -1179,6 +1199,8 @@ Java 语言提供了对象终止（finalization）机制来允许开发人员提
    ```
 
 5. 终结器引用（finalization）
+
+   + 无需手动编码，但其内部配合引用队列使用，在垃圾回收时，终结器引用入队（被引用对象暂时没有被回收），再由 Finalizer 线程通过终结器引用找到被引用对象并调用它的 finalize 方法，第二次 GC 时才能回收被引用对象。 
 
 
 
@@ -1266,12 +1288,14 @@ Java 语言提供了对象终止（finalization）机制来允许开发人员提
 
 - **标记**：Collector 从引用根节点开始遍历，标记所有被引用的对象，一般是在对象的 Header 中记录为可达对象，**标记的是引用的对象，不是垃圾**
 - **清除**：Collector 对堆内存从头到尾进行线性的遍历，如果发现某个对象在其 Header 中没有标记为可达对象，则将其回收，把分块连接到**空闲列表**的单向链表，判断回收后的分块与前一个空闲分块是否连续，若连续会合并这两个分块，之后进行分配时只需要遍历这个空闲列表，就可以找到分块
-
 - **分配阶段**：程序会搜索空闲链表寻找空间大于等于新对象大小 size 的块 block，如果找到的块等于 size，会直接返回这个分块；如果找到的块大于 size，会将块分割成大小为 size 与 block - size 的两部分，返回大小为 size 的分块，并把大小为 block - size 的块返回给空闲列表
+
+算法优点：
+
++ 速度快
 
 算法缺点：
 
-- 标记和清除过程效率都不高
 - 会产生大量不连续的内存碎片，导致无法给大对象分配内存，需要维护一个空闲链表
 
 <img src="https://seazean.oss-cn-beijing.aliyuncs.com/img/Java/JVM-标记清除算法.png" style="zoom: 67%;" />
