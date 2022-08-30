@@ -83,6 +83,18 @@ entity是实体类  vo展示类  to入参类
 
 
 
+### JAVA函数式编程
+
+| 函数式接口名称 | 方法名称 | 参数 | 返回值 |
+| :------------: | :------: | :--: | :----: |
+|    Runnable    |   run    |  0   |   0    |
+|    Function    |  apply   |  1   |   1    |
+|    Consumer    |  accept  |  1   |   0    |
+|    Supplier    |   get    |  0   |   1    |
+|   BiConsumer   |  accept  |  2   |   0    |
+
+
+
 ### JAVA静态资源什么时候加载和执行
 
 当类第一次被调用时加载（静态方法，静态属性的加载就是类加载）。 
@@ -1831,9 +1843,11 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > 2. ```yml
-> 
-> ```
+>    
+>    ```
 >
 > ```
 > 
@@ -1857,26 +1871,24 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
-> 
+>
 > 3. ```java
-> // 开启redis 存储session
-> @EnableRedisHttpSession
-> public class Application {
-> public static void main(String[] args) {
-> SpringApplication.run(Application.class, args);
-> }
-> }
-> ```
-> ```
-> 
-> ```
->
+>   // 开启redis 存储session
+>   @EnableRedisHttpSession
+>   public class Application {
+>   public static void main(String[] args) {
+>   SpringApplication.run(Application.class, args);
+>   }
+>   }
+>   ```
 > ```
 > 
 > ```
@@ -1899,8 +1911,15 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
+> ```
+> 
+> ```
+>
 > 4. ```java
-> /**
+>   /**
+>   ```
 > ```
 >   * @Author: Cai Peishen
 >   * @Date: 2021/3/11 22:41
@@ -1917,8 +1936,6 @@ public R policy() {
 > return cookieSerializer;
 > }
 > ```
-> 
-> ```
 >
 > ```
 > 
@@ -1926,6 +1943,8 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > /**
 >            * 自定义序列化机制
 >            * 这里方法名必须是：springSessionDefaultRedisSerializer
@@ -1936,22 +1955,24 @@ public R policy() {
 > }
 > }
 > ```
->
+> 
 > 5. 核心原理
->
+> 
 >    + @EnableRedisHttpSession导入RedisHttpSessionConfiguration配置
->
+> 
 >      1. 给容器中添加了一个组件
->
+> 
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
->
+> 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->        
+>     
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
 >         + wrappedRequest.getSession( ) -> SessionRepository中获取到的。
->
+> 
+> 
+> ```
 >
 > ```
 > 
