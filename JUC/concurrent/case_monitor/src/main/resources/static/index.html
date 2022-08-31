@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>监控程序</title>
+    <script type="text/javascript" src="/js/echarts.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+</head>
+<body style="height: 500px; margin: 0">
+<div id="container" style="height: 100%"></div>
+<div>
+    <input type="button" value="开始" id="start">
+    <input type="button" value="停止" id="stop">
+</div>
+<script type="text/javascript">
+    $("#start").click(function(){
+        $.get("start");
+    });
+    $("#stop").click(function(){
+        $.get("stop");
+    });
+
+    const dom = document.getElementById("container");
+    const myChart = echarts.init(dom);
+    option = null;
+    let data = [];
+    option = {
+        title: {
+            text: '动态数据 + 时间坐标轴'
+        },
+        xAxis: {
+            type: 'time',
+            splitLine: {
+                show: false
+            }
+        },
+        yAxis: {
+            type: 'value',
+            boundaryGap: [0, '100%'],
+            splitLine: {
+                show: false
+            }
+        },
+        series: [{
+            name: '总内存',
+            type: 'line',
+            showSymbol: true,
+            areaStyle: {color: 'rgba(0, 200, 40, 0.7)'},
+            hoverAnimation: true,
+            data: []
+        }, {
+            name: '已使用',
+            type: 'line',
+            showSymbol: true,
+            areaStyle: {color: 'rgba(0, 0, 200, 0.7)'},
+            hoverAnimation: true,
+            data: []
+        }]
+    };
+
+    setInterval(function () {
+        $.get("info").done(function (infos) {
+            while (data.length >= 10) {
+                data.shift();
+            }
+            data.push(...infos);
+            let max = data.map(d => [d.time, d.max]);
+            let total = data.map(d => [d.time, d.total]);
+            let used = data.map(d => [d.time, d.total - d.free]);
+            myChart.setOption({
+                series: [{
+                    data: total
+                }, {
+                    data: used
+                }]
+            });
+        });
+    }, 2000);
+
+    myChart.setOption(option, true);
+</script>
+</body>
+</html>
