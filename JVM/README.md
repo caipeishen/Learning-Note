@@ -422,7 +422,7 @@ public static void main(String[] args) {
 
 参考代码：cn.itcast.jvm.t1.stringtable
 
-+ 常量池中的字符串仅是符号，第一次用到时才变为对象， 它的结构为hash表结构，相同的字符串只存在一份  
++ 常量池中的存的是堆中的引用，即使是String a = "abc"，也会在堆中开辟空间，因为是对象
 + 利用串池的机制，来避免重复创建字符串对象 
 + 字符串变量拼接的原理是 StringBuilder （1.8） 
 + 字符串常量拼接的原理是编译期优化 
@@ -436,7 +436,7 @@ public static void main(String[] args) {
 
 > JVM如何执行String s="abc"
 
-+ String s="abc"会先从字符串常量池(下文简称常量池)中查找，如果常量池中已经存在"abc"，而"abc"必定指向堆区的某个String对象，那么直接将s指向这个String对象即可；如果常量池中不存在"abc"，则在堆区new一个String对象，然后将"abc"放到常量池中，并将"abc"指向刚new好的String对象。
++ String s="abc"会先从字符串常量池(下文简称常量池)中查找，**如果常量池中已经存在"abc"，而"abc"必定指向堆区的某个String对象，那么直接将s指向这个String对象即可**；如果常量池中不存在"abc"，则在堆区new一个String对象，然后将"abc"放到常量池中，并将"abc"指向刚new好的String对象。
 
 
 
