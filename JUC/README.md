@@ -16,46 +16,17 @@
 
 
 
-### 方法上的synchronized 
+### Monitor原理
 
-```java
-class Test{
-    public synchronized void test() {
-
-    }
-}
-等价于
-class Test{
-    public void test() {
-        synchronized(this) {
-
-        }
-    }
-}
-```
+参考：./并发编程_原理.pdf/Monitor原理
 
 
-
-```java
-class Test{
-    public synchronized static void test() {
-    }
-}
-等价于
-class Test{
-    public static void test() {
-        synchronized(Test.class) {
-
-        }
-    }
-}
-```
 
 
 
 ### 六种状态
 
-参考：./并发编程/3.13六种状态 
+参考：./并发编程.pdf/3.13六种状态 
 
 ```java
 @Slf4j(topic = "c.TestState")
