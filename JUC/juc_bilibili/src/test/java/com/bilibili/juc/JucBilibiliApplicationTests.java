@@ -10,6 +10,8 @@ class JucBilibiliApplicationTests
     @Test
     void contextLoads()
     {
+        int i = 0;
+        System.out.println(i++);
     }
 
 }

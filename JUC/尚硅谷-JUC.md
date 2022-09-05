@@ -94,6 +94,20 @@ new Thread(() -> {
 
 ![image-20210904000040589](images/1.JUC并发编程/image-20210904000040589.png)
 
+加锁的this，指针指向monitor对象（也成为冠城或监视器锁）的起始地址。每个对象都存在一个monitor与之关联，当一个monitor被某个线程持有后，它便处于锁定状态。在Java虚拟机中(HotSpot)中，monitor是由ObjectMonitor实现的，其主要数据结构如下(ObjectMpnitor.hpp文件，C++实现的)
+
+> Monitor流程-加锁
+
+![](./images/monitor流程-加锁.png)
+
+
+
+> Monitor流程-解锁
+
+![](./images/monitor流程-解锁.png)
+
+
+
 #### 5、线程状态？
 
 ```java
