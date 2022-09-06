@@ -1,6 +1,6 @@
 ## JUC
 
-> 推荐尚硅谷-周阳： https://www.bilibili.com/video/BV1ar4y1x727
+> 推荐黑马： https://www.bilibili.com/video/BV16J411h7Rd
 
 
 
