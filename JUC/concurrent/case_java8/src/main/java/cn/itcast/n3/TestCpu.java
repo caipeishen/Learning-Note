@@ -2,10 +2,14 @@ package cn.itcast.n3;
 
 public class TestCpu {
     public static void main(String[] args) {
-        final String  a = new String();
-
-        synchronized (a){
-
-        }
+        new Thread(() -> {
+            while(true) {
+                /*try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+            }
+        }).start();
     }
 }
