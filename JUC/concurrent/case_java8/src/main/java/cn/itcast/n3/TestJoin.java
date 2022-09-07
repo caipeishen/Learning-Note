@@ -41,6 +41,7 @@ public class TestJoin {
             sleep(2);
             r2 = 20;
         });
+
         t1.start();
         t2.start();
         long start = System.currentTimeMillis();
