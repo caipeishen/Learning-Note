@@ -1,3 +1,5 @@
+参考：https://www.bilibili.com/video/BV1Np4y1z7BU
+
 # 1，设计模式概述
 
 ## 1.1 软件设计模式的产生背景

@@ -1,3 +1,7 @@
+> 知其然，知其所以然
+
+
+
 ### 取模
 
 ```
@@ -1845,9 +1849,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 2. ```yml
->    
->    ```
+> 
+> ```
 >
 > ```
 > 
@@ -1917,9 +1923,11 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > 4. ```java
->   /**
->   ```
+> /**
+> ```
 > ```
 >   * @Author: Cai Peishen
 >   * @Date: 2021/3/11 22:41
@@ -1965,7 +1973,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->     
+>  
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2917,11 +2925,3 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 ![](./images/JetBrains破解.png)
 
 
-
-***
-
-技 术 无 他 ，唯 有 熟 尔。
-知 其 然		 ，也 知 其 所 以 然。
-踏 实 一 些 ，不 要 着 急， 你 想 要 的 岁 月 都 会 给 你。
-
-***
