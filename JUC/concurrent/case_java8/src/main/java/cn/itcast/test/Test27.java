@@ -37,7 +37,7 @@ class WaitNotify {
                     }
                 }
                 System.out.print(str);
-                flag = nextFlag;
+                flag = nextFlag; // 核心在这里，不能使用++waitFlag，使用nextFlag是让当前线程等待，让下一个线程执行
                 this.notifyAll();
             }
         }
