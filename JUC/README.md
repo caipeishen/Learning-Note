@@ -145,7 +145,7 @@
 
 
 
-### synchronized 不能防止指令重排序
+### synchronized不能防止指令重排序
 
 参考：https://blog.csdn.net/Hellowenpan/article/details/117750543
 
