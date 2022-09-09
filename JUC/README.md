@@ -137,8 +137,17 @@
 
 ### synchronized锁的理解
 
-参考：[synchronized锁的理解](https://blog.csdn.net/Ryanqy/article/details/105351282)   [加深理解](https://blog.dreamtobe.cn/2015/11/13/java_synchronized/)
+参考：[synchronized锁的理解](https://blog.csdn.net/Ryanqy/article/details/105351282)   [加深理解](https://blog.dreamtobe.cn/2015/11/13/java_synchronized/)  [偏向锁理解](https://blog.csdn.net/m0_37540696/article/details/113247587)
 
 + 在第一个线程要求获取对象监视器锁时，会被处于偏向锁状态。
 + 过了一会，第二个线程来请求锁时，偏向锁会被撤销，监视器锁会膨胀为轻量级锁。
 + 最后当有线程在自旋了指定次数后仍然未获取锁，该对象监视器锁就会膨胀为重量级锁。
+
+
+
+### volatile的理解
+
+参考：https://www.cnblogs.com/duanxz/p/4494831.html
+
++ volatile可以解决可见性和有序性，但不能解决写屏障前代码的指令交错，和读屏障后代码的指令交错
++ synchronized字节码加锁是 monitorenter 指令，它具有读屏障作用， monitorexit 解锁指令具有写屏障作用，也就是说synchronized也有可见性和有序性，此外还具有原子性(线程安全)
