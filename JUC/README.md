@@ -145,9 +145,42 @@
 
 
 
-### volatile的理解
+### synchronized 不能防止指令重排序
 
-参考：https://www.cnblogs.com/duanxz/p/4494831.html
+参考：https://blog.csdn.net/Hellowenpan/article/details/117750543
 
-+ volatile可以解决可见性和有序性，但不能解决写屏障前代码的指令交错，和读屏障后代码的指令交错
-+ synchronized字节码加锁是 monitorenter 指令，它具有读屏障作用， monitorexit 解锁指令具有写屏障作用，也就是说synchronized也有可见性和有序性，此外还具有原子性(线程安全)
++ `volatile`能保证内存可见性、**禁止指令重排序**但是不能保证[原子性](https://so.csdn.net/so/search?q=原子性&spm=1001.2101.3001.7020)。
+
+  `synchronized`能保证原子性、可见性和**有序性**。
+
++ synchronized保证顺序性是指的将并发执行变成了串行，但并不能保证内部指令重排序问题。
+
+
+
+### double-checked locking问题
+
++ t1线程可能会发生重排序，先把引用赋值给了静态变量（此时对象还没调用构造方法，该对象还不是一个完整的对象）
++ 此时t2线程开始运行了，当t2线程执行到`if (INSTANCE == null)`(第16行代码)语句的时候，t2线程发现`INSTANCE`不为空，此时t2线程直接返回INSTANCE对象。但是此时该对象还是一个不完整的对象，在t2线程使用该对象的时候就会出现问题，发现引用的对象为null。
++ DCL中如果不加volatile，t2返回的对象也是一个引用(值为null)，如果等待t1调用完构造方法，t2的对象是不是也是有值的(引用类型) ， 为了更保险起见(t1调用构造方法特别慢)，所以加了volatile 
+
+
+
+
+
+```java
+public final class Singleton {
+    private Singleton() { }
+    private static volatile Singleton INSTANCE = null;
+    public static Singleton getInstance() {
+        if (INSTANCE == null) { // t2
+            synchronized (Singleton.class) { 
+                if (INSTANCE == null) { 
+                    INSTANCE = new Singleton();// t1
+                }
+            }
+        }
+        return INSTANCE;
+    }
+}
+```
+
