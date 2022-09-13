@@ -202,3 +202,19 @@ public final class Singleton {
 }
 ```
 
+
+
+### LongAdder原理
+
++ LongAdder的基本思路就是分散热点，将value值分散到一个Cell数组中，不同线程会命中到数组的不同槽中，各个线程只对自己槽中的那个值进行CAS操作，这样热点就被分散了，冲突的概率就小很多。如果要获取真正的long值，只要将各个槽中的变量值累加返回。
+
++ sum()会将所有Cell数组中的value和base累加作为返回值，核心的思想就是将之前AtomicLong一个value的更新压力分散到多个value中去，
+  从而降级更新热点。
+
++ 内部有一个base变量，一个Cell[]数组。
+
+  base变量：非竞态条件下，直接累加到该变量上
+
+  Cell[]数组：竞态条件下，累加个各个线程自己的槽Cell[i]中
+
++ LongAdder在无竞争的情况，跟AtomicLong一样，对同一个base进行操作，当出现竞争关系时则是采用化整为零的做法，从空间换时间，用一个数组cells，将一个value拆分进这个数组cells。多个线程需要同时对value进行操作时候，可以对线程id进行hash得到hash值，再根据hash值映射到这个数组cells的某个下标，再对该下标所对应的值进行自增操作。当所有线程操作完毕，将数组cells的所有值和无竞争值base都加起来作为最终结果。
