@@ -87,13 +87,13 @@ entity是实体类  vo展示类  to入参类
 
 ### JAVA函数式编程
 
-| 函数式接口名称 | 方法名称 | 参数 | 返回值 |
-| :------------: | :------: | :--: | :----: |
-|    Runnable    |   run    |  0   |   0    |
-|    Function    |  apply   |  1   |   1    |
-|    Consumer    |  accept  |  1   |   0    |
-|    Supplier    |   get    |  0   |   1    |
-|   BiConsumer   |  accept  |  2   |   0    |
+| 函数式接口名称 | 方法名称 | 参数 | 返回值 | 通俗理解              |
+| :------------: | :------: | :--: | :----: | :-------------------- |
+|    Runnable    |   run    |  0   |   0    | () -> void            |
+|    Function    |  apply   |  1   |   1    | (参数) -> 结果        |
+|    Consumer    |  accept  |  1   |   0    | (参数) -> void        |
+|    Supplier    |   get    |  0   |   1    | () -> 结果            |
+|   BiConsumer   |  accept  |  2   |   0    | (参数1,参数2) -> void |
 
 
 
@@ -1806,9 +1806,11 @@ public R policy() {
 >
 > ```
 > 
+> ```
+>
 > 2. ```yml
-> 
-> ```
+>    
+>    ```
 >
 > ```
 > 
@@ -1834,22 +1836,24 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
 > ```
 > # spring-session整合
 > spring: 
 > session:
 > store-type: redis
 > ```
->
+> 
 > 3. ```java
->   // 开启redis 存储session
->   @EnableRedisHttpSession
->   public class Application {
->   public static void main(String[] args) {
->   SpringApplication.run(Application.class, args);
->   }
->   }
->   ```
+> // 开启redis 存储session
+> @EnableRedisHttpSession
+> public class Application {
+> public static void main(String[] args) {
+> SpringApplication.run(Application.class, args);
+> }
+> }
+> ```
 > ```
 > 
 > ```
@@ -1928,7 +1932,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->  
+> 
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
