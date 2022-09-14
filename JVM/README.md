@@ -422,7 +422,6 @@ public static void main(String[] args) {
 
 参考代码：cn.itcast.jvm.t1.stringtable
 
-+ 常量池中的存的是堆中的引用，即使是String a = "abc"，也会在堆中开辟空间，因为是对象
 + 利用串池的机制，来避免重复创建字符串对象 
 + 字符串变量拼接的原理是 StringBuilder （1.8） 
 + 字符串常量拼接的原理是编译期优化 
@@ -432,20 +431,7 @@ public static void main(String[] args) {
 
 
 
-参考：https://blog.csdn.net/xl_1803/article/details/114390731
-
-> JVM如何执行String s="abc"
-
-+ String s="abc"会先从字符串常量池(下文简称常量池)中查找，**如果常量池中已经存在"abc"，而"abc"必定指向堆区的某个String对象，那么直接将s指向这个String对象即可**；如果常量池中不存在"abc"，则在堆区new一个String对象，然后将"abc"放到常量池中，并将"abc"指向刚new好的String对象。
-
-
-
-> JVM如何执行new String("abc")
-
-+ new String("abc")相当于new String(String s1="abc")，即先要执行String s1="abc"(2.1已经讲过了)，然后再在堆区new一个String对象。
-+ String s=new String("abc")创建了1或2个对象，String s="abc"创建了0或1个对象。
-
-
+参考：https://blog.csdn.net/ShelleyLittlehero/article/details/81196418
 
 ```JAVA
 // StringTable [ "a", "b" ,"ab" ]  hashtable 结构，不能扩容，默认也是延迟加载
@@ -469,9 +455,9 @@ public class Demo1_22 {
         System.out.println(s3 == s5);
 		
         // 使用new的
-        String ss1 = new String("abc");
-        ss1.intern();
-        String ss = "abc";
+        String ss1 = new String("abc"); //堆中的对象
+        ss1.intern();// 没有放进去，因为new String("abc")，中括号里的"abc"，已经放进去了
+        String ss = "abc";// 常量池中的对象
         System.out.println(ss==ss1);// false
     }
 }
