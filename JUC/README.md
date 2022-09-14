@@ -137,7 +137,7 @@
 
 ### synchronized锁的理解
 
-参考：[synchronized锁的理解](https://blog.csdn.net/Ryanqy/article/details/105351282)   [加深理解](https://blog.dreamtobe.cn/2015/11/13/java_synchronized/)  [偏向锁理解](https://blog.csdn.net/m0_37540696/article/details/113247587)
+参考：[synchronized锁的理解](https://blog.csdn.net/Ryanqy/article/details/105351282)   [加深理解](https://blog.dreamtobe.cn/2015/11/13/java_synchronized/)  [偏向锁理解](https://blog.csdn.net/m0_37540696/article/details/113247587)  [通俗易懂](https://blog.csdn.net/chenzengnian123/article/details/122685382)
 
 + 在第一个线程要求获取对象监视器锁时，会被处于偏向锁状态。
 + 过了一会，第二个线程来请求锁时，偏向锁会被撤销，监视器锁会膨胀为轻量级锁。
@@ -253,4 +253,7 @@ public final class Singleton {
 
 ### ThreadLocal原理
 
-参考：./尚硅谷-JUC.md/6、为什么要用弱引用?不用如何？
+参考：[弱引用和内存泄漏](https://www.cnblogs.com/liaowenhui/p/16388542.html) 
+
++ 弱引用
++ get/set，如果key为null，会把设置value设置为null
