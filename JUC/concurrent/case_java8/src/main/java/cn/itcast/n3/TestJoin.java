@@ -13,7 +13,7 @@ public class TestJoin {
     static int r2 = 0;
 
     public static void main(String[] args) throws InterruptedException {
-        test3();
+        test2();
     }
 
     public static void test3() throws InterruptedException {
