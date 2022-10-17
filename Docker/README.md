@@ -674,11 +674,11 @@ docker run -d -p 8080:8080 --name mytomcat8 billygoo/tomcat8-jdk8
 > 新建mysql容器实例
 
 ```sh
-docker run -d -p 3306:3306 --privileged=true 
--v /data/mysql/log:/var/log/mysql 
--v /data/mysql/data:/var/lib/mysql 
--v /data/mysql/conf:/etc/mysql/conf.d 
--e MYSQL_ROOT_PASSWORD=123456  
+docker run -d -p 3306:3306 --privileged=true \
+-v /data/mysql/log:/var/log/mysql \
+-v /data/mysql/data:/var/lib/mysql \
+-v /data/mysql/conf:/etc/mysql/conf.d \
+-e MYSQL_ROOT_PASSWORD=123456 \
 --name mysql mysql:5.7
 ```
 
@@ -732,9 +732,9 @@ appendonly yes 
 >使用redis6.0.8镜像创建容器(也叫运行镜像)
 
 ```sh
- docker run  -p 6379:6379 --name myr3 --privileged=true 
- -v /app/redis/redis.conf:/etc/redis/redis.conf 
- -v /app/redis/data:/data 
+ docker run  -p 6379:6379 --name myr3 --privileged=true \
+ -v /app/redis/redis.conf:/etc/redis/redis.conf \
+ -v /app/redis/data:/data \
  -d redis:6.0.8 redis-server /etc/redis/redis.conf
 ```
 
