@@ -1742,13 +1742,13 @@ public R policy() {
 > 能解决父子域名session问题，不同域名需要使用token
 
 > 1. ```xml
->   <!-- spring-session  -->
->   <dependency>
->   <groupId>org.springframework.session</groupId>
->   <artifactId>spring-session-data-redis</artifactId>
->   </dependency>
+>     <!-- spring-session  -->
+>     <dependency>
+>     <groupId>org.springframework.session</groupId>
+>     <artifactId>spring-session-data-redis</artifactId>
+>     </dependency>
 >   ```
-> ```
+>   ```
 > 
 > ```
 >
@@ -1810,7 +1810,7 @@ public R policy() {
 >
 > 2. ```yml
 >    
->    ```
+> ```
 >
 > ```
 > 
@@ -2569,6 +2569,12 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 
 
+### 浅析一致性hash和hash槽
+
+> 参考：[浅析一致性hash和hash槽](https://blog.csdn.net/qq_44833552/article/details/123997903) 
+
+
+
 ### 分布式系统一致性Raft算法
 
 分布式系统中实现一致性的raft算法：[paxos](http://thesecretlivesofdata.com/raft/)
@@ -2713,10 +2719,10 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >
 >   ```java
 >   package com.myutil.id;
->   
+>     
 >   import cn.hutool.core.lang.Snowflake;
 >   import cn.hutool.core.util.IdUtil;
->   
+>     
 >   public class SnowFlakeUtil {
 >       private long machineId ;
 >       private long dataCenterId ;
@@ -2726,34 +2732,34 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >           this.machineId = machineId;
 >           this.dataCenterId = dataCenterId;
 >       }
->   
+>       
 >       /**
 >        * 成员类，SnowFlakeUtil的实例对象的保存域
 >        */
 >       private static class IdGenHolder {
 >           private static final SnowFlakeUtil instance = new SnowFlakeUtil();
 >       }
->   
+>       
 >       /**
 >        * 外部调用获取SnowFlakeUtil的实例对象，确保不可变
 >        */
 >       public static SnowFlakeUtil get() {
 >           return IdGenHolder.instance;
 >       }
->   
+>       
 >       /**
 >        * 初始化构造，无参构造有参函数，默认节点都是0
 >        */
 >       public SnowFlakeUtil() {
 >           this(0L, 0L);
 >       }
->   
+>       
 >       private Snowflake snowflake = IdUtil.createSnowflake(machineId,dataCenterId);
->   
+>       
 >       public synchronized long id(){
 >           return snowflake.nextId();
 >       }
->   
+>       
 >       public static Long getId() {
 >           return SnowFlakeUtil.get().id();
 >       }
@@ -2882,5 +2888,4 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 
 ![](./images/JetBrains破解.png)
-
 
