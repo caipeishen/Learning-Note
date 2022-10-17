@@ -660,3 +660,22 @@ docker-compose build
 docker-compose up -d --build
 ```
 
+
+
+
+
+### 为什么Docker容器这么小
+
+![](./images/bootfs和rootfs.png)
+
+> Docker镜像加载原理：
+
++ docker的镜像实际上由一层一层的文件系统组成，这种层级的文件系统UnionFS。
+  bootfs(boot file system)主要包含bootloader和kernel, bootloader主要是引导加载kernel, Linux刚启动时会加载bootfs文件系统，在Docker镜像的最底层是引导文件系统bootfs。这一层与我们典型的Linux/Unix系统是一样的，包含boot加载器和内核。当boot加载完成之后整个内核就都在内存中了，此时内存的使用权已由bootfs转交给内核，此时系统也会卸载bootfs。
++ rootfs (root file system) ，在bootfs之上。包含的就是典型 Linux 系统中的 /dev, /proc, /bin, /etc 等标准目录和文件。rootfs就是各种不同的操作系统发行版，比如Ubuntu，Centos等等。 
+
+
+
+>平时安装虚拟机的CentOS都是好几个G，为什么docker这里才200M？
+
++ 对于一个精简的OS，rootfs可以很小，只需要包括最基本的命令、工具和程序库就可以了，因为底层直接Host(宿主机)的kernel(内核)，自己需要提供rootfs就行了。由此可见对不同的linux发行版，bootfs基本是一致的，rootfs会有差别，因此不同的发行版可以共用bootfs。
