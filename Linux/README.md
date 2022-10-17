@@ -420,6 +420,8 @@ yum install -y gcc-c++
 
 ### Linux安装Docker
 
+> 安装步骤
+
 ```sh
 # yum安装gcc相关
 yum -y install gcc
@@ -448,6 +450,21 @@ systemctl stop docker
 yum remove docker-ce docker-ce-cli containerd.io
 rm -rf /var/lib/docker
 rm -rf /var/lib/containerd
+```
+
+
+
+> 阿里云镜像加速器-个人
+
+```sh
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://b193taez.mirror.aliyuncs.com"]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
 ```
 
 
