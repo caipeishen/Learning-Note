@@ -668,6 +668,15 @@ docker-compose up -d --build
 
 ![](./images/bootfs和rootfs.png)
 
+
+
+> UnionFS（联合文件系统）
+
++ Union文件系统（UnionFS）是一种分层、轻量级并且高性能的文件系统，它支持对文件系统的修改作为一次提交来一层层的叠加，同时可以将不同目录挂载到同一个虚拟文件系统下(unite several directories into a single virtual filesystem)。Union 文件系统是 Docker 镜像的基础。镜像可以通过分层来进行继承，基于基础镜像（没有父镜像），可以制作各种具体的应用镜像。
++ 特性：一次同时加载多个文件系统，但从外面看起来，只能看到一个文件系统，联合加载会把各层文件系统叠加起来，这样最终的文件系统会包含所有底层的文件和目录。
+
+
+
 > Docker镜像加载原理：
 
 + docker的镜像实际上由一层一层的文件系统组成，这种层级的文件系统UnionFS。
@@ -679,3 +688,10 @@ docker-compose up -d --build
 >平时安装虚拟机的CentOS都是好几个G，为什么docker这里才200M？
 
 + 对于一个精简的OS，rootfs可以很小，只需要包括最基本的命令、工具和程序库就可以了，因为底层直接Host(宿主机)的kernel(内核)，自己需要提供rootfs就行了。由此可见对不同的linux发行版，bootfs基本是一致的，rootfs会有差别，因此不同的发行版可以共用bootfs。
+
+
+
+> 为什么Docker镜像要采用这种分层机构？
+
++ 镜像分层最大的好处就是共享资源，方便复制迁移，为了复用。
++ 比如说有多个镜像都从相同的base镜像构建而来，那么Docker Host只需在磁盘保存一份base镜像；同时内存中也只需加载一份base镜像，就可以为所有容器服务了。而且镜像的每一层都可以被共享
