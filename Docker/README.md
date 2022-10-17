@@ -291,7 +291,6 @@ UnionFS（联合文件系统）：Union文件系统（UnionFS）是一种分层�
 > Docker镜像加载原理
 
 ```
- 
  Docker镜像加载原理：
 
 docker的镜像实际上由一层一层的文件系统组成，这种层级的文件系统UnionFS。
@@ -660,11 +659,96 @@ docker-compose build
 docker-compose up -d --build
 ```
 
+#### 
+
+#### Docker-Tomcat
+
+```sh
+docker run -d -p 8080:8080 --name mytomcat8 billygoo/tomcat8-jdk8
+```
 
 
 
+#### Docker-MySQL
 
-### 为什么Docker容器这么小
+> 新建mysql容器实例
+
+```sh
+docker run -d -p 3306:3306 --privileged=true 
+-v /data/mysql/log:/var/log/mysql 
+-v /data/mysql/data:/var/lib/mysql 
+-v /data/mysql/conf:/etc/mysql/conf.d 
+-e MYSQL_ROOT_PASSWORD=123456  
+--name mysql mysql:5.7
+```
+
+
+
+> `/data/mysql/conf` 下新建my.cnf
+
+```cnf
+[client]
+default_character_set=utf8
+
+[mysqld]
+collation_server = utf8_general_ci
+character_set_server = utf8
+```
+
+
+
+#### Docker-Redis
+
+> 在CentOS宿主机下新建目录/app/redis
+
+```sh
+mkdir -p /app/redis
+```
+
+
+
+> 将一个redis.conf文件模板拷贝进/app/redis目录下，参考 `./redis.conf` 文件
+
+
+
+> /app/redis目录下修改redis.conf文件
+
+```conf
+# 开启redis验证    可选
+requirepass 123
+
+# 允许redis外地连接，注释掉  必须
+注释掉 # bind 127.0.0.1
+
+# 将daemonize yes注释起来或者 daemonize no设置，因为该配置和docker run中-d参数冲突，会导致容器一直启动失败
+daemonize no
+
+# 开启redis数据持久化  可选
+appendonly yes  
+```
+
+
+
+>使用redis6.0.8镜像创建容器(也叫运行镜像)
+
+```sh
+ docker run  -p 6379:6379 --name myr3 --privileged=true 
+ -v /app/redis/redis.conf:/etc/redis/redis.conf 
+ -v /app/redis/data:/data 
+ -d redis:6.0.8 redis-server /etc/redis/redis.conf
+```
+
+
+
+>测试redis-cli连接上来
+
+```sh
+ docker exec -it 运行着Rediis服务的容器ID redis-cli
+```
+
+
+
+### 为什么Docker容器小
 
 ![](./images/bootfs和rootfs.png)
 
