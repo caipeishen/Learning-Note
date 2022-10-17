@@ -418,6 +418,40 @@ yum install -y gcc-c++
 
 
 
+### Linux安装Docker
+
+```sh
+# yum安装gcc相关
+yum -y install gcc
+yum -y install gcc-c++
+
+# 设置stable镜像仓库
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+# 更新yum软件包索引
+yum makecache fast
+
+# 安装DOCKER CE
+yum -y install docker-ce docker-ce-cli containerd.io
+
+# 启动docker
+systemctl start docker
+
+# 测试
+docker version
+docker run hello-world
+
+
+
+# 卸载
+systemctl stop docker 
+yum remove docker-ce docker-ce-cli containerd.io
+rm -rf /var/lib/docker
+rm -rf /var/lib/containerd
+```
+
+
+
 ### MySQL数据总显示 '' ? ''
 
 1. 编辑my.cnf文件 默认路径都在 `vi /etc/my.cnf`
