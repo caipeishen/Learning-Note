@@ -410,6 +410,12 @@ TCP/IP协议族中最重要的一点就是分层。按层次分别分为：应�
 
 
 
+### 集群和分布式
+
+参考：[集群和分布式](https://blog.csdn.net/weixin_42369687/article/details/89914131)
+
+
+
 ### 负载均衡
 
 [负载均衡分类](https://www.jianshu.com/p/c48af7936329)
@@ -2571,7 +2577,15 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 
 ### 浅析一致性hash和hash槽
 
-> 参考：[浅析一致性hash和hash槽](https://blog.csdn.net/qq_44833552/article/details/123997903) 
+>参考：[浅析一致性hash和hash槽](https://blog.csdn.net/qq_44833552/article/details/123997903)  [redis如何实现](https://www.cnblogs.com/lemon-flm/p/15205026.html)
+
+```
+通过上面的分析，不难发现两种都是解决数据与节点之间的映射，
+简而言之，就是致力于斩断数据与节点之间的联系，虽然两者都实现了，
+但在数据分布均匀方面，hash slot比一致性hash显得更加均匀，
+因为slot数的选择一方面依赖于CRC16校验的16bit key值对214求模的会将key在0-214-1之间分布得很均匀，
+同时一致性hash是根据hash函数计算的值，在hash环上随机；
+```
 
 
 

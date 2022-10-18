@@ -697,6 +697,10 @@ character_set_server = utf8
 
 
 
+> 重启MySQL
+
+
+
 #### Docker-Redis
 
 > 在CentOS宿主机下新建目录/app/redis
