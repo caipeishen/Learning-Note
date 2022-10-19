@@ -39,7 +39,11 @@ a % b = a - a / b * b
 
 ### 原码反码补码
 
-参考：https://www.bilibili.com/video/BV1Y7411t7Fj
+参考：[视频](https://www.bilibili.com/video/BV1Y7411t7Fj)  [文章](https://www.lishixinzhi.com/bb/446205.html)
+
++ 原码：最高位为符号位，0为正，1为负，非符号位是该数字二进制的绝对值
++ 反码：正数与原码相同；负数除符号位对原码取反
++ 补码：正数的补码与原码相同；负数的补码是该数字的反码+1
 
 
 
