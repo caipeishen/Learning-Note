@@ -162,7 +162,7 @@ POST _analyze
 >Type的概念已经逐渐弱化，5.X中可以有多个，6.X中只能包含一个，7.X中已经没有Type概念
 >Ps：根据版本不同，类型的创建也不同。
 
-![](C:\Users\peish\Desktop\Learning-Note\ElasticSearch\images\索引下的类型.png)
+![](images\索引下的类型.png)
 
 
 
