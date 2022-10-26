@@ -2672,7 +2672,7 @@ static class AutoConfiguration1 {
 
 
 
-## 其它
+## Other
 
 ### 43) FactoryBean
 
