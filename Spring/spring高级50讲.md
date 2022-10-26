@@ -4,6 +4,8 @@
 
 ### 1) 容器接口
 
+![](./images/ConfigurableApplicationContext.png)
+
 * BeanFactory 接口，典型功能有：
   * getBean
 
@@ -105,6 +107,8 @@ hi=你好
 
 ### 2) 容器实现
 
+![](./images/DefaultListableBeanFactory.png)
+
 Spring 的发展历史较为悠久，因此很多资料还在讲解它较旧的实现，这里出于怀旧的原因，把它们都列出来，供大家参考
 
 * DefaultListableBeanFactory，是 BeanFactory 最重要的实现，像**控制反转**和**依赖注入**功能，都是它来实现
@@ -131,9 +135,9 @@ Spring 的发展历史较为悠久，因此很多资料还在讲解它较旧的�
 * beanFactory 可以通过 registerBeanDefinition 注册一个 bean definition 对象
   * 我们平时使用的配置类、xml、组件扫描等方式都是生成 bean definition 对象注册到 beanFactory 当中
   * bean definition 描述了这个 bean 的创建蓝图：scope 是什么、用构造还是工厂创建、初始化销毁方法是什么，等等
-* beanFactory 需要手动调用 beanFactory 后处理器对它做增强
+* beanFactory 需要手动调用 **beanFactory后处理器** 对它做增强
   * 例如通过解析 @Bean、@ComponentScan 等注解，来补充一些 bean definition
-* beanFactory 需要手动添加 bean 后处理器，以便对后续 bean 的创建过程提供增强
+* beanFactory 需要手动添加 **bean后处理器**，以便对后续 bean 的创建过程提供增强
   * 例如 @Autowired，@Resource 等注解的解析都是 bean 后处理器完成的
   * bean 后处理的添加顺序会对解析结果有影响，见视频中同时加 @Autowired，@Resource 的例子
 * beanFactory 需要手动调用方法来初始化单例
@@ -2206,11 +2210,11 @@ curl https://start.spring.io
 
 步骤1：创建模块，区别在于打包方式选择 war
 
-<img src="img/image-20211021160145072.png" alt="image-20211021160145072" style="zoom: 50%;" />
+<img src="images/image-20211021160145072.png" alt="image-20211021160145072" style="zoom: 50%;" />
 
 接下来勾选 Spring Web 支持
 
-<img src="img/image-20211021162416525.png" alt="image-20211021162416525" style="zoom:50%;" />
+<img src="images/image-20211021162416525.png" alt="image-20211021162416525" style="zoom:50%;" />
 
 步骤2：编写控制器
 

@@ -1,4 +1,4 @@
-
+参考：https://www.bilibili.com/video/BV1Q44y1V7fi
 
 UserSerive类--->无参的构造方法--->对象--->放入Map单例池--->Bean对象
 
