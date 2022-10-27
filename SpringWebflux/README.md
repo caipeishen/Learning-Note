@@ -27,7 +27,7 @@
 >  1. 两个框架都可以使用注解方式，都运行在 Tomet 等容器中
 >  2. SpringMVC 采用命令式编程，Webflux 采用异步响应式编程
 >
-> ![](/images/SpringMVC和SpringWebFlux比较.png)
+> ![](./images/SpringMVC和SpringWebFlux比较.png)
 
 
 
