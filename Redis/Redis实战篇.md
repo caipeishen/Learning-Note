@@ -2209,7 +2209,7 @@ private void renewExpiration() {
 
 ### 5.5 分布式锁-redission锁的MutiLock原理
 
-> 为了解决主从复制中主机宕机，可能引发的死锁，添加了MutiLock连锁
+> 为了解决主从复制中主机宕机，可能引发锁失效，添加了MutiLock连锁
 >
 > 就是向多个独立的redis节点，必须所有节点都获取重入锁，才算获取锁成功
 
