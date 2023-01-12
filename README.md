@@ -1765,16 +1765,12 @@ public R policy() {
 > 能解决父子域名session问题，不同域名需要使用token
 
 > 1. ```xml
->     <!-- spring-session  -->
->     <dependency>
->     <groupId>org.springframework.session</groupId>
->     <artifactId>spring-session-data-redis</artifactId>
->     </dependency>
->   ```
->   ```
-> 
-> ```
->
+>  <!-- spring-session  -->
+>  <dependency>
+>  <groupId>org.springframework.session</groupId>
+>  <artifactId>spring-session-data-redis</artifactId>
+>  </dependency>
+>  ```
 > ```
 > 
 > ```
@@ -1831,8 +1827,14 @@ public R policy() {
 > 
 > ```
 >
+> ```
+> 
+> ```
+>
+> ```
+> 
 > 2. ```yml
->    
+> 
 > ```
 >
 > ```
@@ -2915,9 +2917,13 @@ lettuce的bug导致netty堆外内存溢出-Xmx300m; netty如果没有指定堆�
 
 ### JetBrains全家桶
 
-> 链接：[工具和破解码](https://jetbra.in/s)  [教程](https://www.jiweichengzhu.com/article/c9a9145dc905413ca6d4b4d02cdc6f07)
+> 链接：[工具和破解码](https://jetbra.in/s)  
 
-> 注意：请选择**安装路径**的exe文件打开，输入激活码，激活成功需要重启
+1. 打开 `https://3.jetbra.in/`
+2. 下载 `https://jetbra.zip/`工具包，找一个地方保存起来
+3. 双击 `jetbra\scripts\install-all-users.vbs`
+4. `https://3.jetbra.in/` 在上面找到对应软件，复制注册码
+5. 请选择**安装路径**的exe文件打开，输入激活码，激活成功需要重启
 
 ![](./images/JetBrains破解-2.png)
 
