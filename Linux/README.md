@@ -204,6 +204,9 @@ tail -99f text.txt
 cat sinochem-esp-service.log | grep -n -B100 -A100 '出现异常'
 cat sinochem-esp-service.log | sed -n '/2021-09-09 14:39/,/2021-09-09 14:41/p'
 
+#筛选关键字
+grep '请求saveBankAccountFlow的参数' -C50 crm-gateway-service.log 
+
 #查看所有的网络服务
 netstat -anp | more
 #window查看端口
