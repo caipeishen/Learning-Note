@@ -421,15 +421,24 @@ TCP/IP协议族中最重要的一点就是分层。按层次分别分为：应�
 
 
 
-### Spring事务捕获异常后依旧回滚
+### Spring事务不生效原因
 
-参考：[Spring事务捕获异常后依旧回滚](https://blog.csdn.net/weixin_64314555/article/details/122492760)
+参考：[Spring事务不生效原因](https://zhuanlan.zhihu.com/p/570997764)
 
 
 
-### Spring事务传播属性之REQUIRES_NEW用法
+### Spring事务传播属性之REQUIRES_NEW
 
 参考：[Spring事务传播属性之REQUIRES_NEW用法](https://www.jianshu.com/p/3e9267b025b2)
+
+
+
+### Spring事务传播属性之REQUIRES_NESTED
+
+参考：[PROPAGATION_NESTED的理解](https://blog.csdn.net/yanxin1213/article/details/100582643)  [NESTED需要try catch](https://blog.csdn.net/zmzmz_m/article/details/80198072)
+
++ requires_new 和nested 是事务独立，但是异常报给A方法后导致了A回滚，只有try_catch处理后才能体现requires_new 和nested的事务独立性
++ nested 作为事务嵌套，同时兼具了required，requires_new的特性。当外层事务回滚时，nested 与 required 同时内层全部进行回滚，当内层事务回滚时，nested 与 requires_new 不影响外层事务
 
 
 
@@ -1969,7 +1978,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->         
+>             
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2769,10 +2778,10 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >
 >   ```java
 >   package com.myutil.id;
->             
+>               
 >   import cn.hutool.core.lang.Snowflake;
 >   import cn.hutool.core.util.IdUtil;
->             
+>               
 >   public class SnowFlakeUtil {
 >       private long machineId ;
 >       private long dataCenterId ;
@@ -2782,34 +2791,34 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >           this.machineId = machineId;
 >           this.dataCenterId = dataCenterId;
 >       }
->                       
+>                           
 >       /**
 >        * 成员类，SnowFlakeUtil的实例对象的保存域
 >        */
 >       private static class IdGenHolder {
 >           private static final SnowFlakeUtil instance = new SnowFlakeUtil();
 >       }
->                       
+>                           
 >       /**
 >        * 外部调用获取SnowFlakeUtil的实例对象，确保不可变
 >        */
 >       public static SnowFlakeUtil get() {
 >           return IdGenHolder.instance;
 >       }
->                       
+>                           
 >       /**
 >        * 初始化构造，无参构造有参函数，默认节点都是0
 >        */
 >       public SnowFlakeUtil() {
 >           this(0L, 0L);
 >       }
->                       
+>                           
 >       private Snowflake snowflake = IdUtil.createSnowflake(machineId,dataCenterId);
->                       
+>                           
 >       public synchronized long id(){
 >           return snowflake.nextId();
 >       }
->                       
+>                           
 >       public static Long getId() {
 >           return SnowFlakeUtil.get().id();
 >       }
