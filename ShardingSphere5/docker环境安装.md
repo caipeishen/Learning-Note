@@ -101,6 +101,27 @@ systemctl daemon-reload
 
 
 
+> Docker中央仓库
+
+```sh
+Docker官方的中央仓库:这个仓库是镜像最全的，但是下载速度较慢。
+https://hub.docker.com/
+
+#阿里镜像云
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://b193taez.mirror.aliyuncs.com"]
+}
+EOF
+
+#重启两个服务
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+
+
 # 三、卸载
 
 ```
