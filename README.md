@@ -952,46 +952,10 @@ areaList = areaList.stream().filter(node -> "-1".equals(node.getAreaPid())).coll
 
 
 ```java
- 	/**
-     * 获取该节点的子节点
-     * @param nodeId
-     * @param data
-     * @return
-     */
-    public List<JSONObject> getChildren(String nodeId,List<JSONObject> data){
-        List<JSONObject> child = new ArrayList<JSONObject>();
-        for(JSONObject object : data){
-            if(nodeId.equals(object.getString("depParent"))){
-                child.add(object);
-            }
-        }
-        return child;
-    }
 
-    /**
-     * 部门树
-     * 递归处理   数据库树结构数据->树形json
-     * @param nodeId
-     * @param nodes
-     * @return
-     */
-    public JSONArray getNodeJson(String nodeId, List<JSONObject> nodes){
-
-        //当前层级当前点下的所有子节点（实战中不要慢慢去查,一次加载到集合然后慢慢处理）
-        List<JSONObject> childList = getChildren(nodeId,nodes);
-        JSONArray childTree = new JSONArray();
-        for (JSONObject node : childList) {
-            JSONObject o = new JSONObject();
-            o.put("key",node.getString("id"));
-            o.put("title",node.getString("depName"));
-            JSONArray child = getNodeJson(node.getString("id"),nodes);  //递归调用该方法
-            if(!child.isEmpty()) {
-                o.put("children",child);
-            }
-            childTree.fluentAdd(o);
-        }
-        return childTree;
-    }
+	/*
+		select depSerial, depNo, depName, depParent from dt_dep
+    */
 
     /**
      * 部门树
@@ -1004,9 +968,35 @@ areaList = areaList.stream().filter(node -> "-1".equals(node.getAreaPid())).coll
         return treeData;
     }
 
-	/*
-		select depSerial, depNo, depName, depParent from dt_dep
-    */
+
+    /**
+     * 部门树
+     * 递归处理   数据库树结构数据->树形json
+     * @param nodeId
+     * @param nodes
+     * @return
+     */
+    public JSONArray getNodeJson(String nodeId, List<JSONObject> nodes){
+
+        //当前层级当前点下的所有子节点（实战中不要慢慢去查,一次加载到集合然后慢慢处理）
+        List<JSONObject> childList = nodes.stream()
+            .filter(n -> nodeId.equals(object.getString("depParent"))
+            .collect(Collectors.toList());
+                    
+        JSONArray childTree = new JSONArray();
+        for (JSONObject node : childList) {
+            JSONObject o = new JSONObject();
+            o.put("key",node.getString("id"));
+            o.put("title",node.getString("depName"));
+            JSONArray child = getNodeJson(node.getString("id"),nodes);  //递归调用该方法
+            if(!child.isEmpty()) {
+                o.put("children",child);
+            }
+            childTree.fluentAdd(o);
+        }
+                    
+        return childTree;
+    }
 ```
 
 
@@ -1978,7 +1968,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->             
+>                 
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2778,10 +2768,10 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >
 >   ```java
 >   package com.myutil.id;
->               
+>                 
 >   import cn.hutool.core.lang.Snowflake;
 >   import cn.hutool.core.util.IdUtil;
->               
+>                 
 >   public class SnowFlakeUtil {
 >       private long machineId ;
 >       private long dataCenterId ;
@@ -2791,34 +2781,34 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >           this.machineId = machineId;
 >           this.dataCenterId = dataCenterId;
 >       }
->                           
+>                               
 >       /**
 >        * 成员类，SnowFlakeUtil的实例对象的保存域
 >        */
 >       private static class IdGenHolder {
 >           private static final SnowFlakeUtil instance = new SnowFlakeUtil();
 >       }
->                           
+>                               
 >       /**
 >        * 外部调用获取SnowFlakeUtil的实例对象，确保不可变
 >        */
 >       public static SnowFlakeUtil get() {
 >           return IdGenHolder.instance;
 >       }
->                           
+>                               
 >       /**
 >        * 初始化构造，无参构造有参函数，默认节点都是0
 >        */
 >       public SnowFlakeUtil() {
 >           this(0L, 0L);
 >       }
->                           
+>                               
 >       private Snowflake snowflake = IdUtil.createSnowflake(machineId,dataCenterId);
->                           
+>                               
 >       public synchronized long id(){
 >           return snowflake.nextId();
 >       }
->                           
+>                               
 >       public static Long getId() {
 >           return SnowFlakeUtil.get().id();
 >       }
