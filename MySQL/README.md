@@ -19,7 +19,7 @@
 
 
 
-## mysql中explain的type的解释
+### mysql中explain的type的解释
 
 参考：[mysql中explain的type的解释](https://blog.csdn.net/dennis211/article/details/78170079/)
 
