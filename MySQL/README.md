@@ -19,6 +19,12 @@
 
 
 
+## mysql中explain的type的解释
+
+参考：[mysql中explain的type的解释](https://blog.csdn.net/dennis211/article/details/78170079/)
+
+
+
 ### 为什么MySQL默认可重复读*
 
 > 为什么MySQL默认可重复读，而大多数数据库(Oracle、SQLServer)是读已提交？
