@@ -1066,6 +1066,126 @@ git push -f origin devpay
 
 
 
+### Gitlab搭建
+
+参考：[Gitlab搭建](https://blog.csdn.net/weixin_56270746/article/details/125427722)
+
+1. 安装依赖
+
+   ```bash
+   yum install -y curl policycoreutils openssh-server openssh-clients
+   ```
+
+2. 设置gitlab的yum源（使用清华镜像源安装GitLab）
+
+   ```bash
+   # 在 /etc/yum.repos.d/ 下新建 gitlab-ce.repo
+   vi /etc/yum.repos.d/gitlab-ce.repo
+   
+   # 写入如下内容：
+   [gitlab-ce]
+   name=gitlab-ce
+   baseurl=https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7/
+   gpgcheck=0
+   enabled=1
+   ```
+
+3. 安装Gitlab
+
+   ```bash
+   # 安装Gitlab
+   yum install -y gitlab-ce-15.4.0
+   ```
+
+   ![](./images/gitlab安装成功界面.png)
+
+4. 安装完gitlab需要修改配置文件，并加载
+
+   ```bash
+   vi /etc/gitlab/gitlab.rb
+   
+   # 修改访问地址，这里端口随意设置
+   external_url 'http://192.168.116.116:9090'
+   
+   #  修改好配置文件后，要使用 gitlab-ctl reconfigure 命令重载一下配置文件，否则不生效即可启动Gitlab。注意，启动过程较长，需要耐心等待。
+   gitlab-ctl reconfigure
+   ```
+
+5. 配置默认访问密码
+
+   ```bash
+   # 切换到命令运行的目录 
+   cd /opt/gitlab/bin/
+   # 执行以下命令，进行初始化密码
+   gitlab-rails console -e production  
+   
+   u=User.where(id:1).first
+   u.password='12345678'
+   u.password_confirmation='12345678'
+   u.save!
+   exit
+    
+   出现true说明设置成功！
+   此时就可以用root/12345678来登录页面
+   ```
+
+   ![](./images/gitlab设置修改密码.png)
+
+6. gitlab安装目录
+
+   ```bash
+   gitlab组件日志路径：/var/log/gitlab
+    
+   gitlab配置路径：/etc/gitlab/  路径下有gitlab.rb配置文件
+    
+   应用代码和组件依赖程序：/opt/gitlab
+    
+   各个组件存储路径： /var/opt/gitlab/
+    
+   仓库默认存储路径   /var/opt/gitlab/git-data/repositories
+    
+   版本文件备份路径：/var/opt/gitlab/backups/
+    
+   nginx安装路径：/var/opt/gitlab/nginx/
+    
+   redis安装路径：/var/opt/gitlab/redis
+   ```
+
+7. gitlab常用命令
+
+   ```bash
+   # 查看服务状态
+   gitlab-ctl status
+   # 查看所有的logs; 按 Ctrl-C 退出
+   gitlab-ctl tail
+   # 拉取/var/log/gitlab下子目录的日志
+   gitlab-ctl tail gitlab-rails
+   # 拉取某个指定的日志文件
+   gitlab-ctl tail nginx/gitlab_error.log
+   #启动关闭gitlab	
+   gitlab-ctl start      
+   gitlab-ctl stop                                #停止            
+   gitlab-ctl status                              #查看状态
+   gitlab-ctl restart                             #重启
+   gitlab-ctl reconfigure			   			   #更新配置文件
+   gitlab-ctl help                                #帮助
+   gitlab-rake gitlab:check SANITIZE=true --trace	#检查gitlab
+   # gitlab 默认的日志文件存放在/var/log/gitlab 目录下
+   gitlab-ctl tail                                #查看所有日志
+   # 禁止 Gitlab 开机自启动
+   systemctl disable gitlab-runsvdir.service 
+   # 启用 Gitlab 开机自启动
+   systemctl enable gitlab-runsvdir.service
+   ```
+
+   
+
+
+
+
+
+
+
 ### 时间转换多少分钟前、几天前
 
 ```js
@@ -1980,7 +2100,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->                     
+>                         
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2780,10 +2900,10 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >
 >   ```java
 >   package com.myutil.id;
->                   
+>                     
 >   import cn.hutool.core.lang.Snowflake;
 >   import cn.hutool.core.util.IdUtil;
->                   
+>                     
 >   public class SnowFlakeUtil {
 >       private long machineId ;
 >       private long dataCenterId ;
@@ -2793,34 +2913,34 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >           this.machineId = machineId;
 >           this.dataCenterId = dataCenterId;
 >       }
->                                   
+>                                       
 >       /**
 >        * 成员类，SnowFlakeUtil的实例对象的保存域
 >        */
 >       private static class IdGenHolder {
 >           private static final SnowFlakeUtil instance = new SnowFlakeUtil();
 >       }
->                                   
+>                                       
 >       /**
 >        * 外部调用获取SnowFlakeUtil的实例对象，确保不可变
 >        */
 >       public static SnowFlakeUtil get() {
 >           return IdGenHolder.instance;
 >       }
->                                   
+>                                       
 >       /**
 >        * 初始化构造，无参构造有参函数，默认节点都是0
 >        */
 >       public SnowFlakeUtil() {
 >           this(0L, 0L);
 >       }
->                                   
+>                                       
 >       private Snowflake snowflake = IdUtil.createSnowflake(machineId,dataCenterId);
->                                   
+>                                       
 >       public synchronized long id(){
 >           return snowflake.nextId();
 >       }
->                                   
+>                                       
 >       public static Long getId() {
 >           return SnowFlakeUtil.get().id();
 >       }
