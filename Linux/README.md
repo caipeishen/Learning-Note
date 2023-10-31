@@ -134,6 +134,12 @@ ln -s 源文件 目标文件
 
 
 
+### rpm、yum区别
+
+参考：https://blog.csdn.net/weixin_53946852/article/details/125720710
+
+
+
 ### Linux常用命令
 
 ```sh
