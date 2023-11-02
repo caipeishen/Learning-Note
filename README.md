@@ -1109,10 +1109,10 @@ git push -f origin devpay
    ```bash
    vi /etc/gitlab/gitlab.rb
    
-   # 修改访问地址，这里端口随意设置
-   external_url 'http://192.168.40.136:5000'
+   # 修改访问地址，如果你是虚拟机NAT模式，需要配置你宿主机的IP端口，这样别人在局域网内才能访问到
+   external_url 'http://192.168.1.250:5000'
    
-   #  修改好配置文件后，要使用 gitlab-ctl reconfigure 命令重载一下配置文件，否则不生效即可启动Gitlab。注意，启动过程较长，需要耐心等待。
+   #  修改好配置文件后，要使用 gitlab-ctl reconfigure 命令重载一下配置文件，否则不生效。注意，启动过程较长，需要耐心等待。
    gitlab-ctl reconfigure
    ```
 
@@ -1125,8 +1125,8 @@ git push -f origin devpay
    gitlab-rails console -e production  
    
    u=User.where(id:1).first
-   u.password='gitlab250!@#$1234'
-   u.password_confirmation='gitlab250!@#$1234'
+   u.password='12345678'
+   u.password_confirmation='12345678'
    u.save!
    exit
     
@@ -1183,7 +1183,19 @@ git push -f origin devpay
    systemctl enable gitlab-runsvdir.service
    ```
 
-   
+8. 如果你是虚拟机NAT模式搭建Gitlab，假设VM的宿主机配置端口(222)转发到Gitlab虚拟机上(22)。其他人本地电脑只能访问宿主机IP（同局域网192.168.1.250），无法访问到Gitlab虚拟机（不同网段192.168.116.116），我们本地获取代码的IP是宿主机，ssh默认是22端口，但真正的gitlab在虚拟机上，所以会出现拉取不到代码，这时需要其他人把本地电脑ssh端口改为222，222对应Gitlab虚拟机22
+
+   1. 找到本地电脑ssh配置
+
+      ![](./images/ssh配置端口映射.png)
+
+   2. 创建文件`config`，内容如下
+
+      ```
+      # helka gitlab
+      Host 192.168.1.250
+          Port 222
+      ```
 
 
 
@@ -2105,7 +2117,7 @@ public R policy() {
 > SessionRepository ->【RedisOperationsSessionRepository】-> redis操作session。 session的增删改查
 > 
 >      2. SessionRepositoryFilter -> Filter:session 存储过滤器;每个请求过来都必须经过filter
->                             
+>                                 
 >         + 创建的时候，就自动从容器中获取到了sessionRepository;
 >         + 原始的request，response都被包装。SessionRepositoryRequestwrapper，SessionRepositoryResponseWrapper
 >         + 以后获取session。request.getSession();
@@ -2905,10 +2917,10 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >
 >   ```java
 >   package com.myutil.id;
->                       
+>                         
 >   import cn.hutool.core.lang.Snowflake;
 >   import cn.hutool.core.util.IdUtil;
->                       
+>                         
 >   public class SnowFlakeUtil {
 >       private long machineId ;
 >       private long dataCenterId ;
@@ -2918,34 +2930,34 @@ WebSocket它的最大特点就是，服务器可以主动向客户端推送信�
 >           this.machineId = machineId;
 >           this.dataCenterId = dataCenterId;
 >       }
->                                           
+>                                               
 >       /**
 >        * 成员类，SnowFlakeUtil的实例对象的保存域
 >        */
 >       private static class IdGenHolder {
 >           private static final SnowFlakeUtil instance = new SnowFlakeUtil();
 >       }
->                                           
+>                                               
 >       /**
 >        * 外部调用获取SnowFlakeUtil的实例对象，确保不可变
 >        */
 >       public static SnowFlakeUtil get() {
 >           return IdGenHolder.instance;
 >       }
->                                           
+>                                               
 >       /**
 >        * 初始化构造，无参构造有参函数，默认节点都是0
 >        */
 >       public SnowFlakeUtil() {
 >           this(0L, 0L);
 >       }
->                                           
+>                                               
 >       private Snowflake snowflake = IdUtil.createSnowflake(machineId,dataCenterId);
->                                           
+>                                               
 >       public synchronized long id(){
 >           return snowflake.nextId();
 >       }
->                                           
+>                                               
 >       public static Long getId() {
 >           return SnowFlakeUtil.get().id();
 >       }
