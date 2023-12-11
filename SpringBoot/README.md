@@ -338,3 +338,10 @@ public class DemoApplication extends SpringBootServletInitializer {
 }
 ```
 
+
+
+
+
+### Springboot加载配置文件顺序
+
+参考：[Springboot加载配置文件顺序](https://blog.csdn.net/xhf852963/article/details/102564107)
