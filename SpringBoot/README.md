@@ -344,4 +344,4 @@ public class DemoApplication extends SpringBootServletInitializer {
 
 ### Springboot加载配置文件顺序
 
-参考：[Springboot加载配置文件顺序](https://blog.csdn.net/xhf852963/article/details/102564107)
+参考：[Springboot加载配置文件顺序](https://blog.csdn.net/xhf852963/article/details/102564107)  [详细补充](https://blog.csdn.net/ctwy291314/article/details/129294979)
