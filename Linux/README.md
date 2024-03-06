@@ -78,7 +78,25 @@ sudo yum-config-manager \ --add-repo \ https://download.docker.com/linux/centos/
 
 ### NAT和桥接模式
 
-参考：[NAT和桥接模式](https://www.cnblogs.com/huhuxixi/p/11527837.html )
+参考：[NAT和桥接模式](https://www.cnblogs.com/huhuxixi/p/11527837.html)
+
+
+
+### VMware出现网络异常
+
+参考：[Failed to start LSB: Bring up/down networking解决方案](https://cnblogs.com/zpzp/p/17113679.html)
+
+```
+1.禁用NetworkManager
+#关闭NetworkManager服务
+systemctl stop NetworkManager
+#永久关闭NetworkManager服务
+#systemctl disable NetworkManager
+
+2.重启服务器再尝试重启网络
+reboot
+systemctl restart network
+```
 
 
 
