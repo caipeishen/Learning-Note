@@ -90,8 +90,6 @@ sudo yum-config-manager \ --add-repo \ https://download.docker.com/linux/centos/
 1.禁用NetworkManager
 #关闭NetworkManager服务
 systemctl stop NetworkManager
-#永久关闭NetworkManager服务
-#systemctl disable NetworkManager
 
 2.重启服务器再尝试重启网络
 reboot
