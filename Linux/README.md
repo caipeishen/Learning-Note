@@ -288,7 +288,7 @@ source /etc/profile
 
 ### Linux安装MySQL
 
-参考：[MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)   [Windows安装MySQL8](https://www.cnblogs.com/tangyb/p/8971658.html)
+参考：[MySQL无法远程连接](https://www.cnblogs.com/zzqit/p/10095597.html)  [MySQL忘记密码](https://www.cnblogs.com/black-fact/p/11613361.html)   [Windows安装MySQL8](https://www.cnblogs.com/tangyb/p/8971658.html) [安装教程](https://blog.csdn.net/weixin_50367873/article/details/138484778)
 
 ```sh
 参考：https://blog.csdn.net/qq_41570658/article/details/107508998
