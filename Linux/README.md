@@ -494,6 +494,54 @@ sudo systemctl restart docker
 
 
 
+### Linux tomcat做系统服务
+
+> 找到目录 
+
+```
+cd /usr/lib/systemd/system
+```
+
+
+
+> 目录下创建文件 tomcat9001.service
+
+```
+##[unit]配置了服务的描述，规定了在network启动之后执行，
+##[service]配置服务的启动，停止，重启
+##[install]配置了在相关运行模式下
+[Unit]
+Description=Tomcat9015
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/root/java/tomcat9015/bin/startup.sh
+ExecReload=/bin/kill -s HUP $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+
+> 加入自启动
+
+```sh
+systemctl enable tomcat9015
+```
+
+
+
+> 启动服务
+
+```sh
+systemctl start tomcat9015
+```
+
+
+
 ### MySQL数据总显示 '' ? ''
 
 1. 编辑my.cnf文件 默认路径都在 `vi /etc/my.cnf`
