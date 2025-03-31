@@ -200,8 +200,9 @@ FROM ana
 CREATE TABLE ana_back 
 SELECT * FROM ana
 
--- 查询字段(strlist)中是否包含(str)的结果，返回结果为null或记录的位置
-SELECT FIND_IN_SET('b', 'a,b,c,d');
+-- 假如字符串str在由N个子链组成的字符串列表strlist 中, 则返回值的范围在 1 到 N 之间
+SELECT FIND_IN_SET('b', 'abcd'); // 0
+SELECT FIND_IN_SET('b', 'a,b,c,d'); // 2
 ```
 
 
