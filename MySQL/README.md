@@ -203,6 +203,12 @@ SELECT * FROM ana
 -- 假如字符串str在由N个子链组成的字符串列表strlist 中, 则返回值的范围在 1 到 N 之间
 SELECT FIND_IN_SET('b', 'abcd'); // 0
 SELECT FIND_IN_SET('b', 'a,b,c,d'); // 2
+
+
+-- ID从6000开始插入数据
+SELECT @xi:=6000
+insert into `pd_port` (`port_id`, `city_id`, `port_name``port_code`)
+SELECT @xi:=@xi+1, NULL, '1', '2' FROM `all_undigested_port_copy1` a 
 ```
 
 
