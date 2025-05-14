@@ -328,9 +328,11 @@ log-error = /usr/local/mysql/data/error.log
 lower-case-table-names = 1
 character-set-server = utf8
 
-
 初始化mysql获取临时密码：(/usr/local/mysql/bin下)
 ./mysqld --initialize --user=mysql --datadir=/usr/local/mysql/data --basedir=/usr/local/mysql
+
+查看密码
+cat /usr/local/mysql/data/error.log
 
 启动mysql服务：
 /usr/local/mysql/support-files/mysql.server start
