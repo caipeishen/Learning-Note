@@ -492,6 +492,43 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```
 
+### Linux jar做系统服务
+
+> 找到目录
+
+```
+/etc/systemd/system
+```
+
+
+
+> 创建文件 kintech-bo.service
+
+```
+[Unit]
+Description=My App Service
+After=network.target
+ 
+[Service]
+ExecStart=/usr/local/java/jdk-17.0.2/bin/java -jar --add-opens java.base/java.lang=ALL-UNNAMED  -Xms800m -Xmx800m  /java/kintech-bo.jar 
+WorkingDirectory=/java
+Restart=always
+User=root
+ 
+[Install]
+WantedBy=multi-user.target
+```
+
+
+
+> 重新加载系统并自启动
+
+```
+systemctl daemon-reload
+systemctl start kintech-bo
+systemctl enable kintech-bo
+```
+
 
 
 ### Linux tomcat做系统服务
