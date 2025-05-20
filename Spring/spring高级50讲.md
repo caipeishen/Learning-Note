@@ -282,6 +282,7 @@ public class TestMethodTemplate {
 1. 实现了 PriorityOrdered 接口的优先级最高
 2. 实现了 Ordered 接口与加了 @Order 注解的平级, 按数字升序
 3. 其它的排在最后
+4. 先解析CommonAnnotationBeanPostProcessor ，后解析AutowiredAnnotationBeanPostProcessor 
 
 
 
