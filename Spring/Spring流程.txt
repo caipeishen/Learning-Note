@@ -100,8 +100,8 @@ Aservice生命周期中创建的普通对象，第一步把AService普通对象�
 
 
 1.第一级缓存 	singletonobjects 												单例池，保存实例化、注入、初始化完成的bean实例
-2.第二级缓存 	earlySingletonobjects<aService, Aservice代理对象/普通对象> 		保存实例化完成的bean实例，防止cService重复创建AService代理对象
-3.第三级缓存 	singletonFactories<aService, lambda>							保存bean创建工厂，以便于后面扩展有机会创建代理对象
+2.第二级缓存 	earlySingletonobjects<aService, Aservice代理对象/普通对象> 		保存实例化完成的bean实例，防止cService重复创建AService代理对象，知道你是否aop过
+3.第三级缓存 	singletonFactories<aService, lambda>							保存bean创建工厂,一开始不知道是否需要代理对象（AOP），以便于后面扩展有机会创建代理对象，不需要AOP就返回普通对象
 
 
 循环依赖条件：单例池中没有，creatingSet自己正在创建中
