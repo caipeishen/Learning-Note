@@ -98,7 +98,7 @@ Spring解决循环依赖的理论依据其实是基于Java的引用传递，当�
 Aservice生命周期中创建的普通对象，第一步把AService普通对象放到singletonFactories中，第二步填充AService普通对象中的ABservice属性，进入BService生命周期，这个生命周期会用到singletonFactories，但这里是对象的引用，执行完BService生命周期，又回到AService生命周期，往下执行填充其他属性，因为对象在Java中是引用类型，所以在操作AService普通对象，会影响到singletonFactories的对象
 
 
-
+0.当前创建中		creatingSet 													当前创建中的bean名字，后续判断是否出现了循环依赖 
 1.第一级缓存 	singletonobjects 												单例池，保存实例化、注入、初始化完成的bean实例
 2.第二级缓存 	earlySingletonobjects<aService, Aservice代理对象/普通对象> 		保存实例化完成的bean实例，防止cService重复创建AService代理对象，知道你是否aop过
 3.第三级缓存 	singletonFactories<aService, lambda>							保存bean创建工厂,一开始不知道是否需要代理对象（AOP），以便于后面扩展有机会创建代理对象，不需要AOP就返回普通对象
@@ -120,9 +120,11 @@ Aservice生命周期中创建的普通对象，第一步把AService普通对象�
 
 
 
-@Lazy
-private AService aService; 		初始化时创建一个代理对象，等到真正用的时候，调用代理对象，代理对象再去装载，调用方法，所以可以解决循环依赖问题
-
-
-
 @Async引起的循环依赖报错： https://blog.csdn.net/qq_36448587/article/details/119180493
+
+@Async、@Aspect同时针对一个方法时，并且出现循环依赖，再初始化后，执行BeanPostProccessor，先执行Async对应BeanPostProccessor生成代理对象，在执行Aspect对应BeanPostProccessor再成代理对象，生成了两个代理，抛错
+
+如果非要@Async、@Aspect可以添加@Lazy注解解决
+@Lazy
+@Autowried
+private BService bService; 		初始化时创建一个代理对象，等到真正用的时候，调用代理对象，这个时候AService的生命周期已经执行完了，所以可以解决循环依赖问题
