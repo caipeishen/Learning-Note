@@ -68,8 +68,8 @@ AService创建生命周期
 2.填充cService属性--->去单例池中找CService对象--->创建CService的Bean对象
 3.填充其他属性
 4.其他操作
-5.初始化后（AOP）---> earlyProxyReferences 存储创建过AOP的对象，如果存在里面则不需要再创建
-5.5.根据key从earlySingletonobjects取出对象，singletonFactories移除对象(每个lambda取一次，执行一次就够了，单例情况)
+5.初始化后（AOP）---> 是否还需要AOP根据后面的判断，earlyProxyReferences 存储创建过AOP的对象，如果存在里面则不需要再创建，不存在才需要AOP
+5.5.根据key从earlySingletonobjects取出对象，singletonFactories移除对象(每个lambda取一次，执行一次就够了，单例情况) 
 6.放入单例池
 
 
@@ -102,7 +102,7 @@ Aservice生命周期中创建的普通对象，第一步把AService普通对象�
 1.第一级缓存 	singletonobjects 												单例池，保存实例化、注入、初始化完成的bean实例
 2.第二级缓存 	earlySingletonobjects<aService, Aservice代理对象/普通对象> 		保存实例化完成的bean实例，防止cService重复创建AService代理对象，知道你是否aop过
 3.第三级缓存 	singletonFactories<aService, lambda>							保存bean创建工厂,一开始不知道是否需要代理对象（AOP），以便于后面扩展有机会创建代理对象，不需要AOP就返回普通对象
-
+4.初始化后是否需要AOP,是根据后面的判断，earlyProxyReferences 存储创建过AOP的对象，如果存在里面则不需要再创建，不存在才需要AOP
 
 循环依赖条件：单例池中没有，creatingSet自己正在创建中
 
@@ -113,7 +113,7 @@ Aservice生命周期中创建的普通对象，第一步把AService普通对象�
 
 循坏依赖带来了什么问题？重复创建，如何解决？第三级缓存通过存储刚创建的实例化普通对象来打破循环，所以将三级缓存中的lambda取出代理对象/普通对象，并放入二级缓存
 
-那为什么要二级缓存？因为需要区分“已进行AOP的不完整对象”和“完整的代理对象”，并防止多次AOP（多个循环依赖叠加可导致）
+那为什么要二级缓存？因为需要区分“已进行AOP的不完整对象”和“完整的代理对象”，并防止多次AOP（多个循环依赖叠加可导致,CService）
 
 
 
