@@ -128,3 +128,24 @@ Aservice生命周期中创建的普通对象，第一步把AService普通对象�
 @Lazy
 @Autowried
 private BService bService; 		初始化时创建一个代理对象，等到真正用的时候，调用代理对象，这个时候AService的生命周期已经执行完了，所以可以解决循环依赖问题
+
+
+父子容器参考图片：./images/父子容器.png
+
+web.xml
+	<listener>
+
+	<context-param>
+
+	<servlet>
+	<servlet-mapping>
+
+	<servlet>
+	<servlet-mapping>
+
+
+1. Tomcat启动
+2. 解析web.xml ContextLoaderListener 创建Spring容器（父容器）servletContext
+3. DispatcherServlet实例化
+4. DispatcherServlet对象.init() 创建Spring容器（子容器）
+5. 接受请求
