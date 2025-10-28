@@ -31,9 +31,29 @@
 
 参考： [【原创】互联网项目中mysql应该选什么事务隔离级别](https://www.cnblogs.com/rjzheng/p/10510174.html) [间隙锁RC RR](https://cloud.tencent.com/developer/article/2118849)
 
-+ RR才会有间隙锁，RC没有，RC只锁行
++ RR才会有间隙锁，RC没有，RC只有行锁
 
 
+
+### 什么是脏读,不可重复读和幻读?
+
+1. 脏读: 读到别的事务未提交的数据
+2. 不可重复读: 在同⼀个事务中执⾏同⼀个读取操作,但是结果不⼀致。
+3. 幻读: 同样的事务操作,在前后两个时间段内执⾏对同⼀个数据项的读取,可能出现不⼀致的结果。
+
+> tip: 不可重复读和幻读两者有些相似。但不可重复读重点在于update和delete,而**幻读的重点在于insert**。
+
+> tip: select * from tb_user where id<=5 lock in share mode/for update 行锁的共享锁和排它锁只会锁住前五条记录,不会锁住>6的记录不会影响其他事务对其加行锁    
+
+在RC隔离级别,在通过mvcc解决了脏读的前提下可以通过select * from tb_user where id<=5 lock in share mode/for update(手动加锁)
+      来锁住这些查询的每行数据(加的是行锁,RC级别下间隙锁和邻键锁不生效,所以虽然锁住这些数据,
+      但是这些数据的间隙是无法锁住的也就是无法阻止别的事务insert数据,所以在RC级别是无法解决幻读的
+      如果是在没有索引的情况下行锁会升级为表锁,此时是可以阻止幻读,不过这也失去了意义
+      因为mvcc本来就是为了提高仅仅用悲观锁处理并发事务的效率,如果升级为表锁那就没效率可言了喔),
+      以防别的事务来update或者delete这些数据,从而产生不可重复读
+
+在RR级别下,在通过mvcc解决了脏读和不可重复读的前提下,通过select * from tb_user where id<=5 lock in share mode(手动加锁)
+      来锁住这些数据和"这些数据的间隙"(在RR级别下加的是邻键锁或者间隙锁),以防别的事务update,delete这些查询的数据或者insert新的数据从而产生幻读
 
 ### 幻读的理解*
 
