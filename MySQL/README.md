@@ -52,7 +52,7 @@
       因为mvcc本来就是为了提高仅仅用悲观锁处理并发事务的效率,如果升级为表锁那就没效率可言了喔),
       以防别的事务来update或者delete这些数据,从而产生不可重复读
 
-在RR级别下,在通过mvcc解决了脏读和不可重复读的前提下,通过select * from tb_user where id<=5 lock in share mode(手动加锁)
+在RR级别下,在通过mvcc解决了幻读和不可重复读的前提下,通过select * from tb_user where id<=5 lock in share mode(手动加锁)
       来锁住这些数据和"这些数据的间隙"(在RR级别下加的是邻键锁或者间隙锁),以防别的事务update,delete这些查询的数据或者insert新的数据从而产生幻读
 
 ### 幻读的理解*
