@@ -156,6 +156,75 @@ ln -s 源文件 目标文件
 
 
 
+### CentOS 8 停止维护
+
+1. **DNS解析失败**：`Could not resolve host: mirrorlist.centos.org` 表示系统无法解析该域名
+2. **CentOS 8已停止维护**：自2021年12月31日起，CentOS 8官方已终止支持（EOL），标准镜像源 `mirrorlist.centos.org` 已不可用
+
+------
+
+### 完整解决方案
+
+> 步骤1：修复DNS解析（临时方案）
+
+```
+# 添加Google公共DNS服务器
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+```
+
+> 步骤2：切换至归档仓库（关键步骤）
+
+```
+# 进入仓库配置目录
+cd /etc/yum.repos.d/
+
+# 禁用所有mirrorlist配置
+sudo sed -i 's/mirrorlist/#mirrorlist/g' *.repo
+
+# 将仓库源替换为归档站点
+sudo sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' *.repo
+```
+
+> 步骤3：清理缓存并重试安装
+
+```
+# 清除YUM缓存
+sudo yum clean all
+
+# 重新安装所需软件包
+sudo yum install make zlib-devel gcc-c++ libtool openssl openssl-devel
+```
+
+### 缺少字体库
+
+> sun.awt.FontConfiguration.head 
+
+```sh
+Caused by: java.lang.NullPointerException: Cannot load from short array because "sun.awt.FontConfiguration.head" is null
+        at java.desktop/sun.awt.FontConfiguration.getVersion(FontConfiguration.java:1262)
+        at java.desktop/sun.awt.FontConfiguration.readFontConfigFile(FontConfiguration.java:224)
+        at java.desktop/sun.awt.FontConfiguration.init(FontConfiguration.java:106)
+        at java.desktop/sun.awt.X11FontManager.createFontConfiguration(X11FontManager.java:706)
+        at java.desktop/sun.font.SunFontManager$2.run(SunFontManager.java:358)
+        at java.desktop/sun.font.SunFontManager$2.run(SunFontManager.java:315)
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:318)
+        at java.desktop/sun.font.SunFontManager.<init>(SunFontManager.java:315)
+        at java.desktop/sun.awt.FcFontManager.<init>(FcFontManager.java:35)
+        at java.desktop/sun.awt.X11FontManager.<init>(X11FontManager.java:56)
+        ... 118 common frames omitted
+```
+
+系统环境： Centos7 、 JDK17 
+
+原因分析：根据异常信息可以看出是系统中缺少相应的字体库。
+
+解决办法：安装 fontconfig 库即可解决，执行如下命令：
+
+1.  yum install -y fontconfig 
+2.  fc-cache --force 
+
+
+
 ### Linux常用命令
 
 ```sh
@@ -379,15 +448,15 @@ yum install -y gcc-c++
 ```sh
 1.获取redis资源
 
-　　wget http://download.redis.io/releases/redis-4.0.8.tar.gz
+　　wget https://download.redis.io/releases/redis-7.0.9.tar.gz
 
 2.解压
 
-　　tar xzvf redis-4.0.8.tar.gz
+　　tar xzvf redis-7.0.9.tar.gz
 
 3.安装
 
-　　cd redis-4.0.8
+　　cd redis-7.0.9
 
 　　make
 

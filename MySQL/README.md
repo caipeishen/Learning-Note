@@ -29,7 +29,7 @@
 
 > 为什么MySQL默认可重复读，而大多数数据库(Oracle、SQLServer)是读已提交？
 
-参考： [【原创】互联网项目中mysql应该选什么事务隔离级别](https://www.cnblogs.com/rjzheng/p/10510174.html)
+参考： [【原创】互联网项目中mysql应该选什么事务隔离级别](https://www.cnblogs.com/rjzheng/p/10510174.html) [间隙锁RC RR](https://cloud.tencent.com/developer/article/2118849)
 
 + RR才会有间隙锁，RC没有，RC只锁行
 
