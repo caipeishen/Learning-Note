@@ -331,7 +331,7 @@ nohup java -jar weChat.jar &
 #编辑etc/profile文件
 ---------------------------------
 #JAVA的JDK配置
-export JAVA_HOME=/usr/local/java/jdk1.8.0_251
+export JAVA_HOME=/usr/local/java/jdk-17.0.2
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 #将JDK配置到环境变量中，如果还有其他变量 在其后面使用:隔开
 export PATH=$PATH:$JAVA_HOME/bin
@@ -398,6 +398,7 @@ lower-case-table-names = 1
 character-set-server = utf8
 
 初始化mysql获取临时密码：(/usr/local/mysql/bin下)
+cd /usr/local/mysql/bin
 ./mysqld --initialize --user=mysql --datadir=/usr/local/mysql/data --basedir=/usr/local/mysql
 
 查看密码
@@ -414,6 +415,9 @@ ln -s /usr/local/mysql/bin/mysql /usr/bin/mysql
 mysql -u root -p
 *****
 ALTER USER 'root'@localhost IDENTIFIED WITH mysql_native_password BY 'a9530.A.';
+
+如果找不到mysql.sock
+mysql -u username -p --socket=/tmp/mysql.sock
 
 开放远程连接：
 use mysql;
@@ -474,7 +478,11 @@ yum install -y gcc-c++
 
  5.配置redis为后台启动
 
-　　vi /usr/local/redis/etc/redis.conf //将daemonize no 改成daemonize yes
+　　vi /usr/local/redis/etc/redis.conf 
+
+	#daemonize yes 守护进程
+	#protected-mode no 允许远程链接
+	#requirepass your_password 修改密码
 
 6.将redis加入到开机启动
 
@@ -840,4 +848,6 @@ crontab -e
 #编写定时任务
 0 2 * * * /usr/sbin/my-shell/back-up-db.sh
 ```
+
+
 
